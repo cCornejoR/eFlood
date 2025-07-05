@@ -1,0 +1,213 @@
+name: Continuous Integration
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  frontend-checks:
+    name: Frontend Quality Checks
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+        cache-dependency-path: frontend/package-lock.json
+
+    - name: Install frontend dependencies
+      run: |
+        cd frontend
+        npm ci
+
+    - name: Type checking
+      run: |
+        cd frontend
+        npm run type-check
+
+    - name: Lint code
+      run: |
+        cd frontend
+        npm run lint
+
+    - name: Check code formatting
+      run: |
+        cd frontend
+        npm run format:check
+
+    - name: Run frontend tests
+      run: |
+        cd frontend
+        npm run test -- --coverage --watchAll=false
+
+    - name: Build frontend
+      run: |
+        cd frontend
+        npm run build
+
+  backend-python-checks:
+    name: Python Backend Quality Checks
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+
+    - name: Install UV
+      run: |
+        curl -LsSf https://astral.sh/uv/install.sh | sh
+        echo "$HOME/.cargo/bin" >> $GITHUB_PATH
+
+    - name: Install Python dependencies
+      run: |
+        cd backend/src-python
+        uv sync --dev
+
+    - name: Lint Python code with flake8
+      run: |
+        cd backend/src-python
+        uv run flake8 .
+
+    - name: Check Python code formatting with black
+      run: |
+        cd backend/src-python
+        uv run black --check .
+
+    - name: Check import sorting with isort
+      run: |
+        cd backend/src-python
+        uv run isort --check-only .
+
+    - name: Type checking with mypy
+      run: |
+        cd backend/src-python
+        uv run mypy .
+
+    - name: Run Python tests
+      run: |
+        cd backend/src-python
+        uv run pytest --cov=. --cov-report=xml --cov-report=term-missing
+
+    - name: Upload Python coverage to Codecov
+      uses: codecov/codecov-action@v3
+      with:
+        file: backend/src-python/coverage.xml
+        flags: python
+        name: python-coverage
+
+  backend-rust-checks:
+    name: Rust Backend Quality Checks
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Rust
+      uses: dtolnay/rust-toolchain@stable
+      with:
+        components: rustfmt, clippy
+
+    - name: Cache Rust dependencies
+      uses: actions/cache@v3
+      with:
+        path: |
+          ~/.cargo/bin/
+          ~/.cargo/registry/index/
+          ~/.cargo/registry/cache/
+          ~/.cargo/git/db/
+          backend/src-tauri/target/
+        key: ${{ runner.os }}-cargo-${{ hashFiles('backend/src-tauri/Cargo.lock') }}
+
+    - name: Check Rust formatting
+      run: |
+        cd backend/src-tauri
+        cargo fmt --all -- --check
+
+    - name: Lint Rust code with Clippy
+      run: |
+        cd backend/src-tauri
+        cargo clippy --all-targets --all-features -- -D warnings
+
+    - name: Run Rust tests
+      run: |
+        cd backend/src-tauri
+        cargo test
+
+    - name: Build Rust code
+      run: |
+        cd backend/src-tauri
+        cargo build --release
+
+  security-audit:
+    name: Security Audit
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+
+    - name: Audit npm dependencies
+      run: |
+        cd frontend
+        npm audit --audit-level=moderate
+
+    - name: Setup Rust
+      uses: dtolnay/rust-toolchain@stable
+
+    - name: Install cargo-audit
+      run: cargo install cargo-audit
+
+    - name: Audit Rust dependencies
+      run: |
+        cd backend/src-tauri
+        cargo audit
+
+  integration-tests:
+    name: Integration Tests
+    runs-on: ubuntu-latest
+    needs: [frontend-checks, backend-python-checks, backend-rust-checks]
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+        cache-dependency-path: frontend/package-lock.json
+
+    - name: Setup Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+
+    - name: Install dependencies
+      run: |
+        cd frontend && npm ci
+        curl -LsSf https://astral.sh/uv/install.sh | sh
+        echo "$HOME/.cargo/bin" >> $GITHUB_PATH
+        cd ../backend/src-python && uv sync
+
+    - name: Run integration tests
+      run: |
+        python -m pytest tests/ -v

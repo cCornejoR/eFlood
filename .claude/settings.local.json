@@ -1,0 +1,22 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm run dev:*)",
+      "Bash(rm:*)",
+      "Bash(npm install)",
+      "Bash(mv:*)",
+      "Bash(npm run lint)",
+      "Bash(npm run lint:*)",
+      "Bash(npm run tauri:dev:*)",
+      "Bash(true)",
+      "Bash(ls:*)",
+      "Bash(uv sync:*)",
+      "Bash(find:*)",
+      "Bash(test:*)",
+      "Bash(npm run type-check:*)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "WebFetch(domain:psu-efd.github.io)"
+    ],
+    "deny": []
+  }
+}

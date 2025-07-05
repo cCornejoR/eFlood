@@ -1,0 +1,115 @@
+repos:
+  # Frontend hooks
+  - repo: local
+    hooks:
+      - id: frontend-type-check
+        name: TypeScript Type Check
+        entry: npm run type-check
+        language: system
+        files: ^src/.*\.(ts|tsx)$
+        pass_filenames: false
+
+      - id: frontend-lint
+        name: ESLint
+        entry: npm run lint
+        language: system
+        files: ^src/.*\.(ts|tsx|js|jsx)$
+        pass_filenames: false
+
+      - id: frontend-format-check
+        name: Prettier Format Check
+        entry: npm run format:check
+        language: system
+        files: ^src/.*\.(ts|tsx|js|jsx|json|css|md)$
+        pass_filenames: false
+
+      - id: frontend-build
+        name: Frontend Build Test
+        entry: npm run build
+        language: system
+        files: ^src/
+        pass_filenames: false
+
+  # Python hooks
+  - repo: local
+    hooks:
+      - id: python-black
+        name: Black Code Formatter
+        entry: bash -c 'cd src-python && uv run black --check .'
+        language: system
+        files: ^src-python/.*\.py$
+        pass_filenames: false
+
+      - id: python-isort
+        name: Import Sorting
+        entry: bash -c 'cd src-python && uv run isort --check-only .'
+        language: system
+        files: ^src-python/.*\.py$
+        pass_filenames: false
+
+      - id: python-flake8
+        name: Flake8 Linting
+        entry: bash -c 'cd src-python && uv run flake8 .'
+        language: system
+        files: ^src-python/.*\.py$
+        pass_filenames: false
+
+      - id: python-mypy
+        name: MyPy Type Checking
+        entry: bash -c 'cd src-python && uv run mypy .'
+        language: system
+        files: ^src-python/.*\.py$
+        pass_filenames: false
+
+      - id: python-tests
+        name: Python Tests
+        entry: bash -c 'cd src-python && uv run pytest'
+        language: system
+        files: ^src-python/
+        pass_filenames: false
+
+  # Rust hooks
+  - repo: local
+    hooks:
+      - id: rust-fmt
+        name: Rust Format Check
+        entry: bash -c 'cd src-tauri && cargo fmt --all -- --check'
+        language: system
+        files: ^src-tauri/.*\.rs$
+        pass_filenames: false
+
+      - id: rust-clippy
+        name: Rust Clippy
+        entry: bash -c 'cd src-tauri && cargo clippy --all-targets --all-features -- -D warnings'
+        language: system
+        files: ^src-tauri/
+        pass_filenames: false
+
+      - id: rust-test
+        name: Rust Tests
+        entry: bash -c 'cd src-tauri && cargo test'
+        language: system
+        files: ^src-tauri/
+        pass_filenames: false
+
+  # Security and general hooks
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.5.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-json
+      - id: check-toml
+      - id: check-merge-conflict
+      - id: check-added-large-files
+        args: ['--maxkb=1000']
+      - id: detect-private-key
+
+  # GitGuardian - commented out for initial setup
+  # - repo: https://github.com/gitguardian/ggshield
+  #   rev: v1.25.0
+  #   hooks:
+  #     - id: ggshield
+  #       language: python
+  #       stages: [commit]

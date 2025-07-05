@@ -1,0 +1,509 @@
+use serde::{Deserialize, Serialize};
+use std::path::PathBuf;
+use std::process::Command;
+use tauri::AppHandle;
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct PythonResult {
+    pub success: bool,
+    pub data: Option<String>,
+    pub error: Option<String>,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct HDFFileInfo {
+    pub name: String,
+    pub path: String,
+    pub size_mb: f64,
+    pub modified: f64,
+}
+
+// Python execution helper function
+fn execute_python_script(script_name: &str, args: Vec<String>) -> PythonResult {
+    // Get the project root directory (parent of src-tauri)
+    let current_dir = std::env::current_dir().unwrap_or_else(|_| PathBuf::from("."));
+
+    // Try to find the project root by looking for src-python directory
+    let backend_path = if current_dir.join("src-python").exists() {
+        // We're already in the project root
+        current_dir.join("src-python")
+    } else if current_dir.parent().is_some()
+        && current_dir.parent().unwrap().join("src-python").exists()
+    {
+        // We're in src-tauri, go up one level
+        current_dir.parent().unwrap().join("src-python")
+    } else {
+        // Fallback: try relative path from src-tauri
+        current_dir.join("../src-python")
+    };
+
+    let script_path = backend_path.join(script_name);
+
+    // Debug information
+    println!("Current dir: {:?}", current_dir);
+    println!("Backend path: {:?}", backend_path);
+    println!("Script path: {:?}", script_path);
+    println!("Script exists: {}", script_path.exists());
+
+    // Check if the backend directory exists
+    if !backend_path.exists() {
+        return PythonResult {
+            success: false,
+            data: None,
+            error: Some(format!(
+                "Python backend directory not found: {:?}",
+                backend_path
+            )),
+        };
+    }
+
+    // Check if the script exists
+    if !script_path.exists() {
+        return PythonResult {
+            success: false,
+            data: None,
+            error: Some(format!("Python script not found: {:?}", script_path)),
+        };
+    }
+
+    // Use UV to run Python scripts with the virtual environment
+    let mut cmd = Command::new("uv");
+    cmd.arg("run")
+        .arg("python")
+        .arg(&script_path)
+        .args(&args)
+        .current_dir(&backend_path);
+
+    match cmd.output() {
+        Ok(output) => {
+            if output.status.success() {
+                PythonResult {
+                    success: true,
+                    data: Some(String::from_utf8_lossy(&output.stdout).to_string()),
+                    error: None,
+                }
+            } else {
+                PythonResult {
+                    success: false,
+                    data: None,
+                    error: Some(String::from_utf8_lossy(&output.stderr).to_string()),
+                }
+            }
+        }
+        Err(e) => PythonResult {
+            success: false,
+            data: None,
+            error: Some(format!("Failed to execute Python script: {}", e)),
+        },
+    }
+}
+
+// Tauri commands for HDF file operations
+#[tauri::command]
+async fn read_hdf_file_info(file_path: String) -> Result<PythonResult, String> {
+    let result = execute_python_script("hdf_reader.py", vec![file_path, "info".to_string()]);
+    Ok(result)
+}
+
+#[tauri::command]
+async fn read_hdf_file_structure(file_path: String) -> Result<PythonResult, String> {
+    let result = execute_python_script("hdf_reader.py", vec![file_path, "structure".to_string()]);
+    Ok(result)
+}
+
+#[tauri::command]
+async fn find_hydraulic_datasets(file_path: String) -> Result<PythonResult, String> {
+    let result = execute_python_script("hdf_reader.py", vec![file_path, "hydraulic".to_string()]);
+    Ok(result)
+}
+
+// Tauri commands for raster operations
+#[tauri::command]
+async fn convert_to_raster(
+    input_data_path: String,
+    output_dir: String,
+) -> Result<PythonResult, String> {
+    let result = execute_python_script(
+        "raster_converter.py",
+        vec!["convert".to_string(), input_data_path, output_dir],
+    );
+    Ok(result)
+}
+
+#[tauri::command]
+async fn get_raster_info(raster_path: String) -> Result<PythonResult, String> {
+    let result =
+        execute_python_script("raster_converter.py", vec!["info".to_string(), raster_path]);
+    Ok(result)
+}
+
+// Tauri commands for geometry operations
+#[tauri::command]
+async fn create_spline_from_points(points_json: String) -> Result<PythonResult, String> {
+    // Save points to temporary file and call Python script
+    let temp_file = "temp_points.json";
+    std::fs::write(temp_file, points_json).map_err(|e| e.to_string())?;
+
+    let result = execute_python_script(
+        "geometry_tools.py",
+        vec!["spline".to_string(), temp_file.to_string()],
+    );
+
+    // Clean up temp file
+    let _ = std::fs::remove_file(temp_file);
+    Ok(result)
+}
+
+#[tauri::command]
+async fn generate_cross_sections(
+    axis_json: String,
+    spacing: f64,
+    width: f64,
+) -> Result<PythonResult, String> {
+    // Save axis data to temporary file and call Python script
+    let temp_file = "temp_axis.json";
+    std::fs::write(temp_file, axis_json).map_err(|e| e.to_string())?;
+
+    let result = execute_python_script(
+        "geometry_tools.py",
+        vec![
+            "sections".to_string(),
+            temp_file.to_string(),
+            spacing.to_string(),
+            width.to_string(),
+        ],
+    );
+
+    // Clean up temp file
+    let _ = std::fs::remove_file(temp_file);
+    Ok(result)
+}
+
+// Tauri commands for hydraulic calculations
+#[tauri::command]
+async fn calculate_normal_depth(
+    discharge: f64,
+    slope: f64,
+    manning_n: f64,
+    width: f64,
+) -> Result<PythonResult, String> {
+    let args = vec![
+        "normal".to_string(),
+        discharge.to_string(),
+        slope.to_string(),
+        manning_n.to_string(),
+        width.to_string(),
+    ];
+    let result = execute_python_script("hydraulic_calc.py", args);
+    Ok(result)
+}
+
+#[tauri::command]
+async fn calculate_critical_depth(discharge: f64, width: f64) -> Result<PythonResult, String> {
+    let args = vec![
+        "critical".to_string(),
+        discharge.to_string(),
+        width.to_string(),
+    ];
+    let result = execute_python_script("hydraulic_calc.py", args);
+    Ok(result)
+}
+
+#[tauri::command]
+async fn analyze_flow_conditions(
+    discharge: f64,
+    depth: f64,
+    velocity: f64,
+    slope: f64,
+    manning_n: f64,
+    width: f64,
+) -> Result<PythonResult, String> {
+    let args = vec![
+        "analyze".to_string(),
+        discharge.to_string(),
+        depth.to_string(),
+        velocity.to_string(),
+        slope.to_string(),
+        manning_n.to_string(),
+        width.to_string(),
+    ];
+    let result = execute_python_script("hydraulic_calc.py", args);
+    Ok(result)
+}
+
+#[tauri::command]
+async fn calculate_scour_depth(
+    velocity: f64,
+    depth: f64,
+    d50: f64,
+) -> Result<PythonResult, String> {
+    let args = vec![
+        "scour".to_string(),
+        velocity.to_string(),
+        depth.to_string(),
+        d50.to_string(),
+    ];
+    let result = execute_python_script("hydraulic_calc.py", args);
+    Ok(result)
+}
+
+#[tauri::command]
+async fn calculate_froude_number(velocity: f64, depth: f64) -> Result<PythonResult, String> {
+    let args = vec![
+        "froude".to_string(),
+        velocity.to_string(),
+        depth.to_string(),
+    ];
+    let result = execute_python_script("hydraulic_calc.py", args);
+    Ok(result)
+}
+
+// New Tauri commands for HDF data extraction and visualization
+#[tauri::command]
+async fn extract_hdf_dataset(
+    file_path: String,
+    dataset_path: String,
+) -> Result<PythonResult, String> {
+    let result = execute_python_script(
+        "hdf_data_extractor.py",
+        vec![file_path, "extract".to_string(), dataset_path],
+    );
+    Ok(result)
+}
+
+#[tauri::command]
+async fn create_time_series_plot(
+    file_path: String,
+    dataset_path: String,
+) -> Result<PythonResult, String> {
+    let result = execute_python_script(
+        "hdf_data_extractor.py",
+        vec![file_path, "plot".to_string(), dataset_path],
+    );
+    Ok(result)
+}
+
+#[tauri::command]
+async fn create_hydrograph(
+    file_path: String,
+    dataset_path: String,
+) -> Result<PythonResult, String> {
+    let result = execute_python_script(
+        "hdf_data_extractor.py",
+        vec![file_path, "hydrograph".to_string(), dataset_path],
+    );
+    Ok(result)
+}
+
+#[tauri::command]
+async fn export_hdf_to_csv(
+    app: AppHandle,
+    file_path: String,
+    dataset_path: String,
+) -> Result<PythonResult, String> {
+    use tauri_plugin_dialog::DialogExt;
+
+    // Crear nombre de archivo sugerido
+    let safe_dataset_name = dataset_path.replace('/', "_").replace(' ', "_");
+    let suggested_name = format!("hdf_export_{}.csv", safe_dataset_name);
+
+    // Abrir diálogo de guardado
+    let save_path = app
+        .dialog()
+        .file()
+        .set_title("Guardar archivo CSV")
+        .set_file_name(&suggested_name)
+        .add_filter("Archivos CSV", &["csv"])
+        .blocking_save_file();
+
+    match save_path {
+        Some(path) => {
+            let path_str = path.to_string();
+            let result = execute_python_script(
+                "hdf_data_extractor.py",
+                vec![file_path, "export_csv".to_string(), dataset_path, path_str],
+            );
+            Ok(result)
+        }
+        None => {
+            // Usuario canceló el diálogo
+            Ok(PythonResult {
+                success: false,
+                data: None,
+                error: Some("Exportación cancelada por el usuario".to_string()),
+            })
+        }
+    }
+}
+
+#[tauri::command]
+async fn export_hdf_to_json(
+    app: AppHandle,
+    file_path: String,
+    dataset_path: String,
+) -> Result<PythonResult, String> {
+    use tauri_plugin_dialog::DialogExt;
+
+    // Crear nombre de archivo sugerido
+    let safe_dataset_name = dataset_path.replace('/', "_").replace(' ', "_");
+    let suggested_name = format!("hdf_export_{}.json", safe_dataset_name);
+
+    // Abrir diálogo de guardado
+    let save_path = app
+        .dialog()
+        .file()
+        .set_title("Guardar archivo JSON")
+        .set_file_name(&suggested_name)
+        .add_filter("Archivos JSON", &["json"])
+        .blocking_save_file();
+
+    match save_path {
+        Some(path) => {
+            let path_str = path.to_string();
+            let result = execute_python_script(
+                "hdf_data_extractor.py",
+                vec![file_path, "export_json".to_string(), dataset_path, path_str],
+            );
+            Ok(result)
+        }
+        None => {
+            // Usuario canceló el diálogo
+            Ok(PythonResult {
+                success: false,
+                data: None,
+                error: Some("Exportación cancelada por el usuario".to_string()),
+            })
+        }
+    }
+}
+
+// pyHMT2D integration commands
+#[tauri::command]
+async fn process_hec_ras_data(
+    hdf_file_path: String,
+    terrain_file_path: Option<String>,
+) -> Result<PythonResult, String> {
+    let terrain_arg = terrain_file_path.unwrap_or_else(|| "null".to_string());
+    let result = execute_python_script(
+        "pyHMT2D_processor.py",
+        vec!["process".to_string(), hdf_file_path, terrain_arg],
+    );
+    Ok(result)
+}
+
+#[tauri::command]
+async fn create_hydrograph_pyHMT2D(
+    hdf_file_path: String,
+    cell_id: Option<i32>,
+    terrain_file_path: Option<String>,
+) -> Result<PythonResult, String> {
+    let cell_id_str = cell_id.unwrap_or(0).to_string();
+    let terrain_arg = terrain_file_path.unwrap_or_else(|| "null".to_string());
+    let result = execute_python_script(
+        "pyHMT2D_processor.py",
+        vec!["hydrograph".to_string(), hdf_file_path, cell_id_str, terrain_arg],
+    );
+    Ok(result)
+}
+
+#[tauri::command]
+async fn create_depth_map_pyHMT2D(
+    hdf_file_path: String,
+    terrain_file_path: Option<String>,
+) -> Result<PythonResult, String> {
+    let terrain_arg = terrain_file_path.unwrap_or_else(|| "null".to_string());
+    let result = execute_python_script(
+        "pyHMT2D_processor.py",
+        vec!["depth_map".to_string(), hdf_file_path, terrain_arg],
+    );
+    Ok(result)
+}
+
+#[tauri::command]
+async fn create_profile_pyHMT2D(
+    hdf_file_path: String,
+    terrain_file_path: Option<String>,
+) -> Result<PythonResult, String> {
+    let terrain_arg = terrain_file_path.unwrap_or_else(|| "null".to_string());
+    let result = execute_python_script(
+        "pyHMT2D_processor.py",
+        vec!["profile".to_string(), hdf_file_path, terrain_arg],
+    );
+    Ok(result)
+}
+
+#[tauri::command]
+async fn export_to_vtk_pyHMT2D(
+    app: AppHandle,
+    hdf_file_path: String,
+    terrain_file_path: Option<String>,
+) -> Result<PythonResult, String> {
+    use tauri_plugin_dialog::DialogExt;
+
+    // Open folder selection dialog
+    let output_path = app.dialog()
+        .file()
+        .set_title("Seleccionar carpeta para exportar archivos VTK")
+        .set_directory("/")
+        .blocking_pick_folder();
+
+    match output_path {
+        Some(path) => {
+            let path_str = path.to_string();
+            let terrain_arg = terrain_file_path.unwrap_or_else(|| "null".to_string());
+            let result = execute_python_script(
+                "pyHMT2D_processor.py",
+                vec!["export_vtk".to_string(), hdf_file_path, path_str, terrain_arg],
+            );
+            Ok(result)
+        }
+        None => {
+            // User cancelled the dialog
+            Ok(PythonResult {
+                success: false,
+                data: None,
+                error: Some("Exportación cancelada por el usuario".to_string()),
+            })
+        }
+    }
+}
+
+// Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
+#[tauri::command]
+fn greet(name: &str) -> String {
+    format!("Hello, {}! You've been greeted from Rust!", name)
+}
+
+#[cfg_attr(mobile, tauri::mobile_entry_point)]
+pub fn run() {
+    tauri::Builder::default()
+        .plugin(tauri_plugin_opener::init())
+        .plugin(tauri_plugin_dialog::init())
+        .invoke_handler(tauri::generate_handler![
+            greet,
+            read_hdf_file_info,
+            read_hdf_file_structure,
+            find_hydraulic_datasets,
+            convert_to_raster,
+            get_raster_info,
+            create_spline_from_points,
+            generate_cross_sections,
+            calculate_normal_depth,
+            calculate_critical_depth,
+            calculate_scour_depth,
+            calculate_froude_number,
+            analyze_flow_conditions,
+            extract_hdf_dataset,
+            create_time_series_plot,
+            create_hydrograph,
+            export_hdf_to_csv,
+            export_hdf_to_json,
+            process_hec_ras_data,
+            create_hydrograph_pyHMT2D,
+            create_depth_map_pyHMT2D,
+            create_profile_pyHMT2D,
+            export_to_vtk_pyHMT2D
+        ])
+        .run(tauri::generate_context!())
+        .expect("error while running tauri application");
+}

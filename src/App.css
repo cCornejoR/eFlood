@@ -1,0 +1,140 @@
+@import 'tailwindcss';
+
+/* Font declarations */
+@font-face {
+  font-family: 'Allenoire';
+  src:
+    url('/src/assets/ttf/allenoire-allenoire-regular-400.ttf')
+      format('truetype'),
+    url('/src/assets/otf/allenoire-allenoire-regular-400.otf')
+      format('opentype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Custom styles for eFlow application */
+
+/* Set Allenoire as default font family */
+body {
+  font-family:
+    'Allenoire',
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    'Segoe UI',
+    Roboto,
+    sans-serif;
+  background-color: #131414; /* Fondo principal de la aplicación */
+  color: #ffffff;
+}
+
+/* eFlow branding - use Allenoire font for app name */
+.eflow-brand {
+  font-family: 'Allenoire', serif;
+  font-weight: 400;
+  letter-spacing: -0.02em;
+}
+
+/* Main titles - use Allenoire with semibold */
+.main-title {
+  font-family: 'Inter', sans-serif;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+/* Primary headings with Inter */
+h1.primary {
+  font-family: 'Inter', sans-serif;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.container {
+  @apply max-w-7xl mx-auto px-4;
+}
+
+/* Custom input styles */
+input[type='number'],
+input[type='text'],
+input[type='file'] {
+  @apply block w-full rounded-md border-white/20 backdrop-blur-sm shadow-sm focus:border-blue-400 focus:ring-blue-400 text-sm text-white placeholder-white/60;
+  background-color: rgba(
+    19,
+    20,
+    20,
+    0.8
+  ); /* Basado en #131414 con transparencia */
+}
+
+/* Custom button styles */
+.btn-primary {
+  @apply inline-flex items-center px-4 py-2 border border-blue-400/30 text-sm font-medium rounded-md shadow-sm text-white bg-blue-600/80 backdrop-blur-sm hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-400;
+}
+
+.btn-secondary {
+  @apply inline-flex items-center px-4 py-2 border border-white/30 text-sm font-medium rounded-md shadow-sm text-white backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-400;
+  background-color: rgba(
+    19,
+    20,
+    20,
+    0.8
+  ); /* Basado en #131414 con transparencia */
+}
+
+.btn-secondary:hover {
+  background-color: rgba(
+    25,
+    26,
+    26,
+    0.9
+  ); /* Versión ligeramente más clara de #131414 */
+}
+
+/* Loading spinner */
+.spinner {
+  @apply animate-spin rounded-full h-4 w-4 border-b-2 border-blue-300;
+}
+
+/* Scrollbar personalizado para el tema oscuro */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(19, 20, 20, 0.5); /* Basado en #131414 */
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.5);
+}
+
+/* Estilos adicionales para el nuevo tema */
+.container {
+  @apply max-w-7xl mx-auto px-4;
+}
+
+/* Mejoras tipográficas con Inter */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: 'Inter', sans-serif;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+p,
+span,
+div {
+  font-family: 'Inter', sans-serif;
+  font-weight: 400;
+}
