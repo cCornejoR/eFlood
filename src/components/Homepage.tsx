@@ -3,9 +3,10 @@ import Threads from './ui/Threads';
 import BounceCards from './ui/BounceCards';
 import { HighlightMultiline } from './ui/highlight-multiline';
 import AnimatedSocialLinks from './ui/socials';
-import { Button } from './ui/Button';
-import { Play } from 'lucide-react';
+import { FlowButton } from './ui/FlowButton';
+// import { Play } from 'lucide-react';
 import logoImage from '@/assets/logo.svg';
+// import footerBackground from '@/assets/footer-background.webp';
 
 // 🖼️ Importar sistema de gestión de imágenes
 import getImages from '@/assets/images';
@@ -49,9 +50,9 @@ const transformStyles = [
 
 export default function Homepage({ onNavigate }: HomepageProps) {
   return (
-    <div className='homepage-container relative bg-[#131414] w-full h-full'>
-      {/* CAPA DE FONDO - Ancho completo SIN márgenes */}
-      <div className='background-layer'>
+    <div className='relative w-full h-full bg-[#131414] flex flex-col'>
+      {/* FONDO THREADS - Posición absoluta para cubrir toda la pantalla */}
+      <div className='absolute inset-0 w-full h-full'>
         <Threads
           amplitude={1}
           distance={0}
@@ -60,27 +61,30 @@ export default function Homepage({ onNavigate }: HomepageProps) {
         />
       </div>
 
-      {/* CAPA DE CONTENIDO - CON márgenes apropiados */}
-      <div className='content-layer homepage-content'>
-        {/* Hero Section - Centrado automático */}
-        <div className='homepage-hero'>
+      {/* CONTENIDO PRINCIPAL - Flex-1 para ocupar espacio disponible */}
+      <div className='relative z-10 flex-1 flex flex-col justify-center px-4 sm:px-6 md:px-8 py-8 overflow-y-auto overflow-x-hidden scrollbar-custom'>
+        {/* CONTENIDO PRINCIPAL - Centrado perfecto */}
+        <div className='flex flex-col items-center justify-center space-y-8 sm:space-y-12 md:space-y-16'>
           <div className='text-center w-full max-w-6xl mx-auto'>
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8 }}
             >
-              <div className='flex items-center justify-center mb-6 sm:mb-8 lg:mb-10'>
+              {/* LOGO Y TÍTULO - Perfectamente alineados */}
+              <div className='flex items-center justify-center mb-4 sm:mb-6 md:mb-8'>
                 <img
                   src={logoImage}
                   alt='eFlood² Logo'
-                  className='h-12 sm:h-16 md:h-20 lg:h-24 w-12 sm:w-16 md:w-20 lg:w-24 object-contain'
+                  className='h-8 sm:h-12 md:h-16 lg:h-20 w-8 sm:w-12 md:w-16 lg:w-20 object-contain flex-shrink-0'
                 />
-                <h1 className='text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-bold text-white eflow-brand'>
+                <h1 className='text-2xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold text-white eflow-brand ml-1 sm:ml-2 leading-none'>
                   eFlood²
                 </h1>
               </div>
-              <div className='text-lg sm:text-xl md:text-2xl lg:text-3xl text-white/90 mb-6 sm:mb-8 lg:mb-10 max-w-4xl mx-auto leading-relaxed'>
+
+              {/* SUBTÍTULO - Responsive y centrado */}
+              <div className='text-sm sm:text-lg md:text-xl lg:text-2xl text-white/90 mb-4 sm:mb-6 md:mb-8 max-w-4xl mx-auto leading-relaxed'>
                 <div className='text-center'>
                   <HighlightMultiline
                     text='Explora , Analiza y Comprende'
@@ -90,7 +94,7 @@ export default function Homepage({ onNavigate }: HomepageProps) {
                     words={['Explora', 'Analiza', 'Comprende']}
                   />
                 </div>
-                <div className='text-center mt-2'>
+                <div className='text-center mt-1 sm:mt-2'>
                   <HighlightMultiline
                     text='tus modelos hidráulicos 2D a detalle.'
                     inView={true}
@@ -101,14 +105,19 @@ export default function Homepage({ onNavigate }: HomepageProps) {
                 </div>
               </div>
 
-              {/* BounceCards - Responsive */}
-              <div className='flex justify-center mb-8 sm:mb-10 lg:mb-12 w-full'>
-                <div className='w-full max-w-xs sm:max-w-md md:max-w-lg lg:max-w-2xl'>
+              {/* BOUNCE CARDS - Responsive y centrado */}
+              <div className='flex justify-center mb-4 sm:mb-6 md:mb-8 w-full'>
+                <div className='w-full max-w-xs sm:max-w-sm md:max-w-md lg:max-w-xl'>
                   <BounceCards
                     className='custom-bounceCards w-full'
                     images={images}
-                    containerWidth={Math.min(600, typeof window !== 'undefined' ? window.innerWidth - 64 : 600)}
-                    containerHeight={200}
+                    containerWidth={Math.min(
+                      500,
+                      typeof window !== 'undefined'
+                        ? window.innerWidth - 80
+                        : 500
+                    )}
+                    containerHeight={150}
                     animationDelay={0.3}
                     animationStagger={0.3}
                     easeType='elastic.out(1, 0.5)'
@@ -118,6 +127,7 @@ export default function Homepage({ onNavigate }: HomepageProps) {
                 </div>
               </div>
 
+              {/* BOTÓN PRINCIPAL - Centrado */}
               <div className='flex justify-center'>
                 <motion.div
                   whileHover={{ scale: 1.05 }}
@@ -126,47 +136,43 @@ export default function Homepage({ onNavigate }: HomepageProps) {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.6, delay: 0.3 }}
                 >
-                  <Button
+                  <FlowButton
+                    text="Analizar"
                     onClick={() => onNavigate?.('hecras')}
-                    variant='default'
-                    size='lg'
-                    className='text-lg font-semibold'
-                  >
-                    <Play className='w-5 h-5' />
-                    Analizar
-                  </Button>
+                  />
                 </motion.div>
               </div>
             </motion.div>
           </div>
+
         </div>
-
-        {/* Footer - Con espaciado correcto y márgenes apropiados */}
-        <footer className='homepage-footer mt-12 py-8 bg-[#131414]/90 backdrop-blur-sm border-t border-white/10'>
-          <div className='text-center text-white/60 space-y-6 max-w-6xl mx-auto'>
-            {/* Redes Sociales */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 1.5 }}
-              className='flex justify-center'
-            >
-              <AnimatedSocialLinks socials={socialLinks} />
-            </motion.div>
-
-            {/* Copyright */}
-            <motion.p
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.8, delay: 1.8 }}
-              className='text-sm text-white/50 pb-4'
-            >
-              &copy; 2025 <span className='eflow-brand'>eFlood²</span> -
-              Herramienta de Análisis Hidráulico.
-            </motion.p>
-          </div>
-        </footer>
       </div>
+
+      {/* FOOTER - Siempre al final de la página */}
+      <footer className='relative z-20 mt-auto'>
+        <div className='text-center text-white/60 space-y-3 sm:space-y-4 max-w-4xl mx-auto px-4 sm:px-6 md:px-8 py-6'>
+          {/* Redes Sociales */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 1.5 }}
+            className='flex justify-center'
+          >
+            <AnimatedSocialLinks socials={socialLinks} />
+          </motion.div>
+
+          {/* Copyright */}
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.8, delay: 1.8 }}
+            className='text-xs sm:text-sm text-white/50'
+          >
+            &copy; 2025 <span className='eflow-brand'>eFlood²</span> -
+            Herramienta de Análisis Hidráulico.
+          </motion.p>
+        </div>
+      </footer>
     </div>
   );
 }

@@ -24,6 +24,8 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { HecRasState } from '@/components/HecRas/index';
+// import { invoke } from '@tauri-apps/api/core';
+// import { save } from '@tauri-apps/plugin-dialog';
 
 interface HydrographViewerProps {
   state: HecRasState;
@@ -38,7 +40,6 @@ interface HydrographViewerProps {
  */
 export const HydrographViewer: React.FC<HydrographViewerProps> = ({
   state,
-  _updateState,
 }) => {
   const [selectedBoundaries, setSelectedBoundaries] = useState<string[]>([]);
   const [viewMode, setViewMode] = useState<'flow' | 'stage' | 'both'>('both');
@@ -46,7 +47,7 @@ export const HydrographViewer: React.FC<HydrographViewerProps> = ({
 
   // Inicializar condiciones de contorno seleccionadas
   useEffect(() => {
-    if (state.hydrographData?.data?.boundaries) {
+    if (state.hydrographData?.data?.boundaries && typeof state.hydrographData.data.boundaries === 'object') {
       const boundaryNames = Object.keys(state.hydrographData.data.boundaries);
       setSelectedBoundaries(boundaryNames);
     }
@@ -67,11 +68,22 @@ export const HydrographViewer: React.FC<HydrographViewerProps> = ({
    * 📊 Exportar datos de hidrograma
    */
   const handleExportHydrograph = async () => {
+    if (!state.hydrographData?.data || !state.selectedHDFFile) {
+      console.error('No hay datos de hidrograma para exportar');
+      return;
+    }
+
     setIsExporting(true);
     try {
-      // Simular exportación
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      console.log('Hidrograma exportado');
+      // TODO: Implementar exportación real usando Tauri
+      // await invoke('export_hydrograph_data', {
+      //   hdfFilePath: state.selectedHDFFile,
+      //   boundaryConditions: selectedBoundaries,
+      //   format: 'csv'
+      // });
+
+      console.log('Exportación de hidrograma preparada para:', selectedBoundaries);
+      await new Promise(resolve => setTimeout(resolve, 1000));
     } catch (error) {
       console.error('Error exportando hidrograma:', error);
     } finally {
@@ -93,7 +105,7 @@ export const HydrographViewer: React.FC<HydrographViewerProps> = ({
     return colors[index % colors.length];
   };
 
-  if (!state.hydrographData?.data) {
+  if (!state.hydrographData?.data || !state.hydrographData.data.boundaries) {
     return (
       <div className='text-center py-12'>
         <TrendingUp className='h-12 w-12 text-white/40 mx-auto mb-4' />
@@ -107,10 +119,10 @@ export const HydrographViewer: React.FC<HydrographViewerProps> = ({
     );
   }
 
-  const boundaries = Object.keys(state.hydrographData.data.boundaries);
+  const boundaries = Object.keys(state.hydrographData.data.boundaries || {});
 
   return (
-    <div className='space-y-6'>
+    <div className='space-y-4'>
       {/* 📋 Título y descripción */}
       <div className='text-center'>
         <h2 className='text-2xl font-bold text-white mb-2'>
@@ -220,7 +232,7 @@ export const HydrographViewer: React.FC<HydrographViewerProps> = ({
                 <ul className='text-white/60 text-sm mt-2 space-y-1'>
                   <li>• {boundaries.length} condiciones de contorno</li>
                   <li>
-                    • {state.hydrographData.data.timePoints?.length || 145}{' '}
+                    • {state.hydrographData?.data?.timePoints?.length || 145}{' '}
                     puntos temporales
                   </li>
                   <li>• Datos de caudal y nivel</li>

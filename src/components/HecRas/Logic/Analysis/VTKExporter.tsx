@@ -112,26 +112,38 @@ export const VTKExporter: React.FC<VTKExporterProps> = ({
       setExportStep('Exportando series temporales...');
       setExportProgress(50);
 
-      // Simular exportación con pyHMT2D
-      const exportParams = {
-        hdf_file: state.selectedHDFFile,
-        terrain_file: state.selectedTerrainFile,
-        output_dir: exportOptions.outputDirectory,
-        export_depth: exportOptions.exportDepth,
-        export_velocity: exportOptions.exportVelocity,
-        export_wse: exportOptions.exportWSE,
-        export_max_values: exportOptions.exportMaxValues,
-        time_step_interval: exportOptions.timeStepInterval,
-      };
+      // Exportar usando pyHMT2D real
 
       try {
-        // Intentar exportación real
-        const result = await invoke('export_to_vtk', exportParams);
-        setExportResults(result);
+        // Exportación real usando pyHMT2D
+        const result = await invoke('export_to_vtk_py_hmt2_d', {
+          hdfFilePath: state.selectedHDFFile,
+          outputDirectory: exportOptions.outputDirectory,
+          terrainFilePath: state.selectedTerrainFile,
+        });
+
+        if ((result as any).success) {
+          const resultData = JSON.parse((result as any).output);
+          setExportResults(resultData);
+
+          // Actualizar estado con archivos reales exportados
+          if (resultData.files_created && Array.isArray(resultData.files_created)) {
+            updateState({
+              exportedVTKFiles: [
+                ...state.exportedVTKFiles,
+                ...resultData.files_created.map((fileName: string) =>
+                  `${exportOptions.outputDirectory}/${fileName}`
+                ),
+              ],
+            });
+          }
+        } else {
+          throw new Error((result as any).error || 'Error en la exportación VTK');
+        }
       } catch (error) {
-        console.warn('Error en exportación real, usando simulación:', error);
-        // Simulación de exportación exitosa
-        await simulateExport();
+        console.error('Error en exportación VTK:', error);
+        setExportError(`Error al exportar archivos VTK: ${error instanceof Error ? error.message : 'Error desconocido'}`);
+        return;
       }
 
       setExportStep('Exportación completada');
@@ -144,47 +156,7 @@ export const VTKExporter: React.FC<VTKExporterProps> = ({
     }
   };
 
-  /**
-   * 🎭 Simular exportación para desarrollo
-   */
-  const simulateExport = async () => {
-    const steps = [
-      { progress: 60, step: 'Generando malla VTK...' },
-      { progress: 75, step: 'Escribiendo datos de profundidad...' },
-      { progress: 85, step: 'Escribiendo datos de velocidad...' },
-      { progress: 95, step: 'Finalizando archivos...' },
-    ];
 
-    for (const { progress, step } of steps) {
-      setExportProgress(progress);
-      setExportStep(step);
-      await new Promise(resolve => setTimeout(resolve, 1000));
-    }
-
-    // Simular resultados
-    const mockResults = {
-      success: true,
-      files_created: [
-        'depth_max.vtk',
-        'velocity_max.vtk',
-        'wse_max.vtk',
-        'depth_series_001.vtk',
-        'depth_series_002.vtk',
-        'velocity_series_001.vtk',
-        'velocity_series_002.vtk',
-      ],
-      total_files: 7,
-      output_directory: exportOptions.outputDirectory,
-    };
-
-    setExportResults(mockResults);
-    updateState({
-      exportedVTKFiles: [
-        ...state.exportedVTKFiles,
-        ...mockResults.files_created,
-      ],
-    });
-  };
 
   /**
    * 🔧 Actualizar opción de exportación
@@ -204,7 +176,7 @@ export const VTKExporter: React.FC<VTKExporterProps> = ({
       exportOptions.exportWSE);
 
   return (
-    <div className='space-y-6'>
+    <div className='space-y-4'>
       {/* 📋 Título y descripción */}
       <div className='text-center'>
         <h2 className='text-2xl font-bold text-white mb-2'>Exportación VTK</h2>

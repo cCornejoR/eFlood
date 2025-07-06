@@ -14,7 +14,7 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { AlertCircle, Play } from 'lucide-react';
-import { invoke } from '@tauri-apps/api/core';
+// import { invoke } from '@tauri-apps/api/core';
 import { HecRasState } from '../../index';
 import { FileUpload } from '../../UI/FileUpload';
 import { Button } from '@/components/ui/Button';
@@ -50,71 +50,9 @@ export const DataLoader: React.FC<DataLoaderProps> = ({
 
       updateState({ selectedHDFFile: filePath });
 
-      // Validar archivo HDF y obtener información completa
-      try {
-        // Obtener información básica del archivo
-        const fileInfo = await invoke('read_hdf_file_info', {
-          filePath: filePath,
-        });
-
-        // Obtener información adicional para validación
-        const fileStructure = await invoke('read_hdf_file_structure', {
-          filePath: filePath,
-        });
-
-        // Validar que es un archivo HEC-RAS válido
-        if (fileStructure.success) {
-          const structureData = JSON.parse(fileStructure.data);
-          const hasHecRasData = Object.keys(structureData).some(
-            key =>
-              key.includes('Results') ||
-              key.includes('Geometry') ||
-              key.includes('Event Conditions')
-          );
-
-          if (!hasHecRasData) {
-            throw new Error(
-              'El archivo no parece ser un archivo HEC-RAS válido'
-            );
-          }
-        }
-
-        updateState({ fileMetadata: fileInfo });
-        console.log('Archivo HDF validado y cargado:', filePath);
-      } catch (error) {
-        console.warn('Error al validar archivo HDF:', error);
-
-        // Intentar al menos obtener información básica
-        try {
-          const basicInfo = await invoke('read_hdf_file_info', {
-            filePath: filePath,
-          });
-
-          updateState({ fileMetadata: basicInfo });
-          console.log('Archivo HDF cargado con información básica:', filePath);
-        } catch (basicError) {
-          console.warn(
-            'Error al leer información básica, usando datos mock:',
-            basicError
-          );
-
-          // Fallback con datos mock para desarrollo
-          updateState({
-            fileMetadata: {
-              success: true,
-              data: JSON.stringify({
-                name: filePath.split('/').pop() || filePath.split('\\').pop(),
-                path: filePath,
-                size_mb: 125.5,
-                modified: Date.now() / 1000,
-                created: Date.now() / 1000 - 86400,
-                warning:
-                  'Información limitada - archivo no validado completamente',
-              }),
-            },
-          });
-        }
-      }
+      // NO leer automáticamente el archivo - solo guardar la ruta
+      // La lectura se hará cuando el usuario inicie el análisis
+      console.log('Archivo HDF seleccionado (sin leer contenido):', filePath);
     } catch (error) {
       console.error('Error procesando archivo HDF:', error);
       setLoadError('Error al procesar el archivo HDF');
@@ -145,7 +83,13 @@ export const DataLoader: React.FC<DataLoaderProps> = ({
    * 🗑️ Remover archivo HDF
    */
   const handleRemoveHDFFile = () => {
-    updateState({ selectedHDFFile: null, fileMetadata: null });
+    updateState({
+      selectedHDFFile: null,
+      fileMetadata: null,
+      hdfData: null,
+      hydrographData: null,
+      analysisResults: null,
+    });
     setLoadError(null);
   };
 
@@ -168,7 +112,7 @@ export const DataLoader: React.FC<DataLoaderProps> = ({
   };
 
   return (
-    <div className='space-y-6'>
+    <div className='space-y-4'>
       {/* 📋 Título y descripción */}
       <div className='text-center'>
         <h2 className='text-2xl font-bold text-white mb-2'>Cargar Datos</h2>
@@ -214,6 +158,8 @@ export const DataLoader: React.FC<DataLoaderProps> = ({
           size='md'
         />
       </div>
+
+
 
       {/* ▶️ Botón de continuar */}
       {state.selectedHDFFile && (

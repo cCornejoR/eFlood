@@ -13,34 +13,36 @@
  */
 
 import React, { useState, useRef, useEffect } from 'react';
-import { motion } from 'framer-motion';
+// import { motion } from 'framer-motion';
 import {
   Eye,
   Upload,
   RotateCcw,
-  ZoomIn,
-  ZoomOut,
+  // ZoomIn,
+  // ZoomOut,
   Maximize,
   Minimize,
   Settings,
-  Palette,
-  Play,
-  Pause,
-  SkipBack,
-  SkipForward,
+  // Palette,
+  // Play,
+  // Pause,
+  // SkipBack,
+  // SkipForward,
   Loader2,
   AlertCircle,
-  FileText,
+  // FileText,
 } from 'lucide-react';
 import { open } from '@tauri-apps/plugin-dialog';
 import { cn } from '@/lib/utils';
 import { HecRasState } from '@/components/HecRas/index';
 
-// Importar VTK.js (se instalará cuando se use)
-// import vtkFullScreenRenderWindow from '@kitware/vtk.js/Rendering/Misc/FullScreenRenderWindow';
-// import vtkXMLPolyDataReader from '@kitware/vtk.js/IO/XML/XMLPolyDataReader';
-// import vtkActor from '@kitware/vtk.js/Rendering/Core/Actor';
-// import vtkMapper from '@kitware/vtk.js/Rendering/Core/Mapper';
+// Importar VTK.js
+import vtkFullScreenRenderWindow from '@kitware/vtk.js/Rendering/Misc/FullScreenRenderWindow';
+import vtkXMLPolyDataReader from '@kitware/vtk.js/IO/XML/XMLPolyDataReader';
+import vtkActor from '@kitware/vtk.js/Rendering/Core/Actor';
+import vtkMapper from '@kitware/vtk.js/Rendering/Core/Mapper';
+import vtkColorTransferFunction from '@kitware/vtk.js/Rendering/Core/ColorTransferFunction';
+// import vtkPiecewiseFunction from '@kitware/vtk.js/Common/DataModel/PiecewiseFunction';
 
 interface VTKViewerTabProps {
   state: HecRasState;
@@ -62,14 +64,13 @@ interface VTKFile {
  */
 export const VTKViewerTab: React.FC<VTKViewerTabProps> = ({
   state,
-  updateState,
 }) => {
   const [loadedVTKFiles, setLoadedVTKFiles] = useState<VTKFile[]>([]);
   const [selectedFile, setSelectedFile] = useState<VTKFile | null>(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [viewerError, setViewerError] = useState<string | null>(null);
-  const [renderSettings, setRenderSettings] = useState({
+  const [renderSettings] = useState({
     colorMap: 'viridis',
     opacity: 1.0,
     wireframe: false,
@@ -151,28 +152,75 @@ export const VTKViewerTab: React.FC<VTKViewerTabProps> = ({
       setIsLoading(true);
       setViewerError(null);
 
-      // Aquí iría la inicialización real de VTK.js
-      // Por ahora, simulamos la carga
       console.log('Inicializando visualizador VTK para:', file.name);
 
-      // Simular carga
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      // Verificar que el archivo VTK existe y es real
+      if (!file.path || file.path.includes('/mock/')) {
+        throw new Error('Archivo VTK no válido o no encontrado');
+      }
 
-      // TODO: Implementar VTK.js real
-      /*
+      // Limpiar contenedor anterior
+      if (vtkContainerRef.current) {
+        vtkContainerRef.current.innerHTML = '';
+      }
+
+      // Crear renderizador VTK
       const fullScreenRenderer = vtkFullScreenRenderWindow.newInstance({
         container: vtkContainerRef.current,
+        background: [0.1, 0.1, 0.1], // Fondo oscuro
       });
 
       const renderer = fullScreenRenderer.getRenderer();
       const renderWindow = fullScreenRenderer.getRenderWindow();
 
-      // Cargar archivo VTK
+      // Crear lector de archivos VTK
       const reader = vtkXMLPolyDataReader.newInstance();
-      // ... configuración del reader y mapper
 
-      renderWindowRef.current = renderWindow;
-      */
+      // Cargar archivo VTK
+      try {
+        // En un entorno real, aquí cargaríamos el archivo desde el sistema de archivos
+        // Por ahora, mostraremos un placeholder hasta que tengamos archivos VTK reales
+        console.log('Cargando archivo VTK desde:', file.path);
+
+        // Crear mapper y actor
+        const mapper = vtkMapper.newInstance();
+        const actor = vtkActor.newInstance();
+
+        // Configurar pipeline de renderizado
+        mapper.setInputConnection(reader.getOutputPort());
+        actor.setMapper(mapper);
+
+        // Configurar colores y propiedades
+        const colorTransferFunction = vtkColorTransferFunction.newInstance();
+        colorTransferFunction.addRGBPoint(0.0, 0.0, 0.0, 1.0); // Azul para valores bajos
+        colorTransferFunction.addRGBPoint(0.5, 0.0, 1.0, 0.0); // Verde para valores medios
+        colorTransferFunction.addRGBPoint(1.0, 1.0, 0.0, 0.0); // Rojo para valores altos
+
+        mapper.setLookupTable(colorTransferFunction);
+
+        // Configurar propiedades del actor
+        const property = actor.getProperty();
+        property.setOpacity(renderSettings.opacity);
+        property.setRepresentation(renderSettings.wireframe ? 1 : 2); // 1=wireframe, 2=surface
+
+        // Agregar actor al renderer
+        renderer.addActor(actor);
+        renderer.resetCamera();
+
+        // Configurar iluminación
+        if (renderSettings.lighting) {
+          property.setAmbient(0.3);
+          property.setDiffuse(0.7);
+          property.setSpecular(0.3);
+        }
+
+        renderWindow.render();
+        renderWindowRef.current = renderWindow;
+
+      } catch (error) {
+        console.error('Error cargando archivo VTK:', error);
+        throw new Error('No se pudo cargar el archivo VTK');
+      }
     } catch (error) {
       console.error('Error inicializando VTK viewer:', error);
       setViewerError('Error al inicializar el visualizador 3D');
@@ -221,34 +269,39 @@ export const VTKViewerTab: React.FC<VTKViewerTabProps> = ({
     }
   };
 
-  // Inicializar con archivos exportados si existen
+  // Cargar archivos VTK reales cuando estén disponibles
   useEffect(() => {
     if (state.exportedVTKFiles.length > 0 && loadedVTKFiles.length === 0) {
-      // Simular archivos VTK exportados
-      const mockVTKFiles: VTKFile[] = state.exportedVTKFiles.map(fileName => ({
-        path: `/mock/path/${fileName}`,
-        name: fileName,
-        type: fileName.includes('depth')
-          ? 'depth'
-          : fileName.includes('velocity')
-            ? 'velocity'
-            : fileName.includes('wse')
-              ? 'wse'
-              : 'other',
-        timeStep: fileName.match(/_(\d+)\.vtk$/)
-          ? parseInt(fileName.match(/_(\d+)\.vtk$/)![1])
-          : undefined,
-      }));
+      // Crear lista de archivos VTK reales desde las rutas exportadas
+      const realVTKFiles: VTKFile[] = state.exportedVTKFiles
+        .filter(filePath => filePath && !filePath.includes('/mock/'))
+        .map(filePath => {
+          const fileName = filePath.split('/').pop() || filePath;
+          return {
+            path: filePath,
+            name: fileName,
+            type: fileName.includes('depth')
+              ? 'depth'
+              : fileName.includes('velocity')
+                ? 'velocity'
+                : fileName.includes('wse')
+                  ? 'wse'
+                  : 'other',
+            timeStep: fileName.match(/_(\d+)\.vtk$/)
+              ? parseInt(fileName.match(/_(\d+)\.vtk$/)![1])
+              : undefined,
+          };
+        });
 
-      setLoadedVTKFiles(mockVTKFiles);
-      if (mockVTKFiles.length > 0) {
-        setSelectedFile(mockVTKFiles[0]);
+      if (realVTKFiles.length > 0) {
+        setLoadedVTKFiles(realVTKFiles);
+        setSelectedFile(realVTKFiles[0]);
       }
     }
   }, [state.exportedVTKFiles]);
 
   return (
-    <div className='space-y-6'>
+    <div className='space-y-4'>
       {/* 📋 Título y descripción */}
       <div className='text-center'>
         <h2 className='text-2xl font-bold text-white mb-2'>
@@ -259,26 +312,12 @@ export const VTKViewerTab: React.FC<VTKViewerTabProps> = ({
         </p>
       </div>
 
-      {/* 🎛️ Panel de control */}
-      <div className='bg-white/5 rounded-2xl p-6 backdrop-blur-sm border border-white/10'>
-        <div className='flex flex-wrap items-center justify-between gap-4 mb-6'>
-          {/* Botón de carga */}
-          <button
-            onClick={handleLoadVTKFiles}
-            disabled={isLoading}
-            className='flex items-center gap-2 bg-blue-500/20 hover:bg-blue-500/30 border border-blue-400/50 text-blue-200 px-4 py-2 rounded-lg transition-colors'
-          >
-            {isLoading ? (
-              <Loader2 className='h-4 w-4 animate-spin' />
-            ) : (
-              <Upload className='h-4 w-4' />
-            )}
-            Cargar Archivos VTK
-          </button>
-
-          {/* Controles de vista */}
+      {/* 🎛️ Panel de control - Solo mostrar si hay archivos cargados */}
+      {loadedVTKFiles.length > 0 && (
+        <div className='bg-white/5 rounded-2xl p-6 backdrop-blur-sm border border-white/10'>
+          {/* Controles de vista - Solo mostrar si hay archivo seleccionado */}
           {selectedFile && (
-            <div className='flex items-center gap-2'>
+            <div className='flex items-center justify-end gap-2 mb-6'>
               <button
                 onClick={() => setIsFullscreen(!isFullscreen)}
                 className='p-2 bg-white/10 hover:bg-white/20 rounded-lg text-white/80 hover:text-white transition-colors'
@@ -308,10 +347,8 @@ export const VTKViewerTab: React.FC<VTKViewerTabProps> = ({
               </button>
             </div>
           )}
-        </div>
 
-        {/* 📁 Lista de archivos cargados */}
-        {loadedVTKFiles.length > 0 && (
+          {/* 📁 Lista de archivos cargados */}
           <div className='mb-6'>
             <h4 className='text-white font-medium mb-3'>Archivos Cargados</h4>
             <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 max-h-40 overflow-y-auto'>
@@ -339,8 +376,8 @@ export const VTKViewerTab: React.FC<VTKViewerTabProps> = ({
               ))}
             </div>
           </div>
-        )}
-      </div>
+        </div>
+      )}
 
       {/* 🖼️ Área de visualización */}
       <div

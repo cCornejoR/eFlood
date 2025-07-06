@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { User, Mail, Shield, Sparkles, Zap, Settings } from 'lucide-react';
 import Stepper, { Step } from './ui/Stepper';
@@ -30,10 +30,10 @@ export default function OnboardingModal({
     email: '',
     licenseKey: '',
   });
-  const [currentStep, setCurrentStep] = useState(1);
+  // const [currentStep, setCurrentStep] = useState(1);
 
-  const handleStepChange = (step: number) => {
-    setCurrentStep(step);
+  const handleStepChange = (_step: number) => {
+    // setCurrentStep(step);
   };
 
   const handleComplete = () => {

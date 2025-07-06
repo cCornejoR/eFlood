@@ -8,6 +8,7 @@ import {
   AlertCircle,
   CheckCircle,
   Loader2,
+  FolderOpen,
 } from 'lucide-react';
 import { invoke } from '@tauri-apps/api/core';
 
@@ -87,7 +88,7 @@ export const VTKExportModal: React.FC<VTKExportModalProps> = ({
     setExportResult(null);
 
     try {
-      const result = await invoke<ExportResult>('export_to_vtk_pyHMT2D', {
+      const result = await invoke<ExportResult>('export_to_vtk_py_hmt2_d', {
         hdfFilePath,
         terrainFilePath: terrainFilePath || null,
         exportType,
@@ -97,8 +98,15 @@ export const VTKExportModal: React.FC<VTKExportModalProps> = ({
 
       if (result.success) {
         setProgress(
-          `Exportación completada: ${result.num_files} archivos creados`
+          `Exportación completada: ${result.num_files} archivos creados en ${result.output_directory}`
         );
+
+        // Mostrar información adicional sobre la exportación
+        console.log('Exportación VTK exitosa:', {
+          archivos: result.num_files,
+          directorio: result.output_directory,
+          archivos_creados: result.files_created
+        });
       } else {
         setProgress(`Error en la exportación: ${result.error}`);
       }
@@ -332,16 +340,32 @@ export const VTKExportModal: React.FC<VTKExportModalProps> = ({
                 </div>
 
                 {exportResult.success ? (
-                  <div className='mt-2 space-y-2'>
+                  <div className='mt-2 space-y-3'>
                     <p
                       className={`text-sm ${exportResult.success ? 'text-green-300' : 'text-red-300'}`}
                     >
                       Se crearon {exportResult.num_files} archivos VTK
                       exitosamente
                     </p>
-                    <p className='text-xs text-gray-400'>
-                      Ubicación: {exportResult.output_directory}
-                    </p>
+                    <div className='flex items-center justify-between bg-gray-800/50 rounded-lg p-3'>
+                      <div>
+                        <p className='text-xs text-gray-400'>Ubicación:</p>
+                        <p className='text-xs text-white font-mono truncate max-w-[300px]'>
+                          {exportResult.output_directory}
+                        </p>
+                      </div>
+                      <button
+                        onClick={() => {
+                          // Abrir directorio en el explorador
+                          invoke('open_directory', { path: exportResult.output_directory })
+                            .catch(err => console.error('Error abriendo directorio:', err));
+                        }}
+                        className='flex items-center gap-2 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs rounded transition-colors'
+                      >
+                        <FolderOpen className='w-3 h-3' />
+                        Abrir
+                      </button>
+                    </div>
                   </div>
                 ) : (
                   <p className='text-red-300 text-sm mt-2'>

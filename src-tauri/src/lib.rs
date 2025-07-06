@@ -3,6 +3,36 @@ use std::path::PathBuf;
 use std::process::Command;
 use tauri::AppHandle;
 
+// Constants for better maintainability
+const HECRAS_PROCESSOR_SCRIPT: &str = "HECRAS-HDF/hecras_processor.py";
+const NULL_ARG: &str = "null";
+
+/// Helper function to convert optional terrain file path to string argument
+///
+/// # Arguments
+/// * `terrain_file_path` - Optional path to terrain file
+///
+/// # Returns
+/// * String - Either the provided path or "null" if None
+fn terrain_arg_or_null(terrain_file_path: Option<String>) -> String {
+    terrain_file_path.unwrap_or_else(|| NULL_ARG.to_string())
+}
+
+/// Helper function to create a consistent error result
+///
+/// # Arguments
+/// * `error_message` - The error message to include
+///
+/// # Returns
+/// * PythonResult - A failed result with the error message
+fn create_error_result(error_message: &str) -> PythonResult {
+    PythonResult {
+        success: false,
+        data: None,
+        error: Some(error_message.to_string()),
+    }
+}
+
 #[derive(Debug, Serialize, Deserialize)]
 pub struct PythonResult {
     pub success: bool,
@@ -114,6 +144,12 @@ async fn read_hdf_file_structure(file_path: String) -> Result<PythonResult, Stri
 #[tauri::command]
 async fn find_hydraulic_datasets(file_path: String) -> Result<PythonResult, String> {
     let result = execute_python_script("hdf_reader.py", vec![file_path, "hydraulic".to_string()]);
+    Ok(result)
+}
+
+#[tauri::command]
+async fn get_detailed_hdf_metadata(file_path: String) -> Result<PythonResult, String> {
+    let result = execute_python_script("hdf_reader.py", vec![file_path, "metadata".to_string()]);
     Ok(result)
 }
 
@@ -381,14 +417,10 @@ async fn export_hdf_to_json(
 #[tauri::command]
 async fn process_pyhmt2d(
     operation: String,
-    #[allow(non_snake_case)]
-    hdfFile: String,
-    #[allow(non_snake_case)]
-    cellId: Option<i32>,
-    #[allow(non_snake_case)]
-    outputDirectory: Option<String>,
-    #[allow(non_snake_case)]
-    terrainFile: Option<String>,
+    #[allow(non_snake_case)] hdfFile: String,
+    #[allow(non_snake_case)] cellId: Option<i32>,
+    #[allow(non_snake_case)] outputDirectory: Option<String>,
+    #[allow(non_snake_case)] terrainFile: Option<String>,
 ) -> Result<PythonResult, String> {
     let mut args = vec![operation.clone(), hdfFile];
 
@@ -401,7 +433,7 @@ async fn process_pyhmt2d(
             } else {
                 args.push("null".to_string());
             }
-        },
+        }
         "hydrograph" => {
             // hydrograph operation: python script.py hydrograph <hdf_file> <cell_id> <terrain_file>
             if let Some(cell) = cellId {
@@ -414,7 +446,7 @@ async fn process_pyhmt2d(
             } else {
                 args.push("null".to_string());
             }
-        },
+        }
         "depth_map" | "profile" => {
             // depth_map/profile operation: python script.py <operation> <hdf_file> <terrain_file>
             if let Some(terrain) = terrainFile {
@@ -422,7 +454,7 @@ async fn process_pyhmt2d(
             } else {
                 args.push("null".to_string());
             }
-        },
+        }
         "export_vtk" => {
             // export_vtk operation: python script.py export_vtk <hdf_file> <output_dir> <terrain_file>
             if let Some(output_dir) = outputDirectory {
@@ -435,7 +467,7 @@ async fn process_pyhmt2d(
             } else {
                 args.push("null".to_string());
             }
-        },
+        }
         _ => {
             // Default case - add terrain file
             if let Some(terrain) = terrainFile {
@@ -455,57 +487,62 @@ async fn process_hec_ras_data(
     hdf_file_path: String,
     terrain_file_path: Option<String>,
 ) -> Result<PythonResult, String> {
-    let terrain_arg = terrain_file_path.unwrap_or_else(|| "null".to_string());
+    let terrain_arg = terrain_arg_or_null(terrain_file_path);
     let result = execute_python_script(
-        "HECRAS-HDF/hecras_processor.py",
+        HECRAS_PROCESSOR_SCRIPT,
         vec!["process".to_string(), hdf_file_path, terrain_arg],
     );
     Ok(result)
 }
 
 #[tauri::command]
-async fn create_hydrograph_pyHMT2D(
+async fn create_hydrograph_py_hmt2_d(
     hdf_file_path: String,
     cell_id: Option<i32>,
     terrain_file_path: Option<String>,
 ) -> Result<PythonResult, String> {
     let cell_id_str = cell_id.unwrap_or(0).to_string();
-    let terrain_arg = terrain_file_path.unwrap_or_else(|| "null".to_string());
+    let terrain_arg = terrain_arg_or_null(terrain_file_path);
     let result = execute_python_script(
-        "HECRAS-HDF/hecras_processor.py",
-        vec!["hydrograph".to_string(), hdf_file_path, cell_id_str, terrain_arg],
+        HECRAS_PROCESSOR_SCRIPT,
+        vec![
+            "hydrograph".to_string(),
+            hdf_file_path,
+            cell_id_str,
+            terrain_arg,
+        ],
     );
     Ok(result)
 }
 
 #[tauri::command]
-async fn create_depth_map_pyHMT2D(
+async fn create_depth_map_py_hmt2_d(
     hdf_file_path: String,
     terrain_file_path: Option<String>,
 ) -> Result<PythonResult, String> {
-    let terrain_arg = terrain_file_path.unwrap_or_else(|| "null".to_string());
+    let terrain_arg = terrain_arg_or_null(terrain_file_path);
     let result = execute_python_script(
-        "HECRAS-HDF/hecras_processor.py",
+        HECRAS_PROCESSOR_SCRIPT,
         vec!["depth_map".to_string(), hdf_file_path, terrain_arg],
     );
     Ok(result)
 }
 
 #[tauri::command]
-async fn create_profile_pyHMT2D(
+async fn create_profile_py_hmt2_d(
     hdf_file_path: String,
     terrain_file_path: Option<String>,
 ) -> Result<PythonResult, String> {
-    let terrain_arg = terrain_file_path.unwrap_or_else(|| "null".to_string());
+    let terrain_arg = terrain_arg_or_null(terrain_file_path);
     let result = execute_python_script(
-        "HECRAS-HDF/hecras_processor.py",
+        HECRAS_PROCESSOR_SCRIPT,
         vec!["profile".to_string(), hdf_file_path, terrain_arg],
     );
     Ok(result)
 }
 
 #[tauri::command]
-async fn export_to_vtk_pyHMT2D(
+async fn export_to_vtk_py_hmt2_d(
     app: AppHandle,
     hdf_file_path: String,
     terrain_file_path: Option<String>,
@@ -514,7 +551,8 @@ async fn export_to_vtk_pyHMT2D(
     use tauri_plugin_dialog::DialogExt;
 
     // Open folder selection dialog
-    let output_path = app.dialog()
+    let output_path = app
+        .dialog()
         .file()
         .set_title("Seleccionar carpeta para exportar archivos VTK")
         .set_directory("/")
@@ -523,21 +561,23 @@ async fn export_to_vtk_pyHMT2D(
     match output_path {
         Some(path) => {
             let path_str = path.to_string();
-            let terrain_arg = terrain_file_path.unwrap_or_else(|| "null".to_string());
+            let terrain_arg = terrain_arg_or_null(terrain_file_path);
             let export_type_arg = export_type.unwrap_or_else(|| "all_timesteps".to_string());
             let result = execute_python_script(
-                "HECRAS-HDF/hecras_processor.py",
-                vec!["export_vtk".to_string(), hdf_file_path, path_str, terrain_arg, export_type_arg],
+                HECRAS_PROCESSOR_SCRIPT,
+                vec![
+                    "export_vtk".to_string(),
+                    hdf_file_path,
+                    path_str,
+                    terrain_arg,
+                    export_type_arg,
+                ],
             );
             Ok(result)
         }
         None => {
             // User cancelled the dialog
-            Ok(PythonResult {
-                success: false,
-                data: None,
-                error: Some("Exportación cancelada por el usuario".to_string()),
-            })
+            Ok(create_error_result("Exportación cancelada por el usuario"))
         }
     }
 }
@@ -547,12 +587,75 @@ async fn get_vtk_export_info(
     hdf_file_path: String,
     terrain_file_path: Option<String>,
 ) -> Result<PythonResult, String> {
-    let terrain_arg = terrain_file_path.unwrap_or_else(|| "null".to_string());
+    let terrain_arg = terrain_arg_or_null(terrain_file_path);
     let result = execute_python_script(
-        "HECRAS-HDF/hecras_processor.py",
+        HECRAS_PROCESSOR_SCRIPT,
         vec!["vtk_info".to_string(), hdf_file_path, terrain_arg],
     );
     Ok(result)
+}
+
+// Boundary conditions extraction command
+#[tauri::command]
+async fn extract_boundary_conditions(hdf_file_path: String) -> Result<PythonResult, String> {
+    let result = execute_python_script("boundary_conditions_reader.py", vec![hdf_file_path]);
+    Ok(result)
+}
+
+// Export hydrograph data to CSV/Excel
+#[tauri::command]
+async fn export_hydrograph_data(
+    hdf_file_path: String,
+    boundary_conditions: Vec<String>,
+    output_path: String,
+    format: String,
+) -> Result<PythonResult, String> {
+    let mut args = vec![
+        "export_hydrograph".to_string(),
+        hdf_file_path,
+        output_path,
+        format,
+    ];
+
+    // Agregar condiciones de contorno como argumentos
+    for bc in boundary_conditions {
+        args.push(bc);
+    }
+
+    let result = execute_python_script("hydrograph_exporter.py", args);
+    Ok(result)
+}
+
+// Open directory in file explorer
+#[tauri::command]
+async fn open_directory(path: String) -> Result<(), String> {
+    use std::process::Command;
+
+    #[cfg(target_os = "windows")]
+    {
+        Command::new("explorer")
+            .arg(&path)
+            .spawn()
+            .map_err(|e| format!("Failed to open directory: {}", e))?;
+    }
+
+    #[cfg(target_os = "macos")]
+    {
+        Command::new("open")
+            .arg(&path)
+            .spawn()
+            .map_err(|e| format!("Failed to open directory: {}", e))?;
+    }
+
+    #[cfg(target_os = "linux")]
+    {
+        Command::new("xdg-open")
+            .arg(&path)
+            .spawn()
+            .map_err(|e| format!("Failed to open directory: {}", e))?;
+    }
+
+    Ok(())
 }
 
 // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
@@ -571,6 +674,7 @@ pub fn run() {
             read_hdf_file_info,
             read_hdf_file_structure,
             find_hydraulic_datasets,
+            get_detailed_hdf_metadata,
             convert_to_raster,
             get_raster_info,
             create_spline_from_points,
@@ -587,11 +691,14 @@ pub fn run() {
             export_hdf_to_json,
             process_pyhmt2d,
             process_hec_ras_data,
-            create_hydrograph_pyHMT2D,
-            create_depth_map_pyHMT2D,
-            create_profile_pyHMT2D,
-            export_to_vtk_pyHMT2D,
-            get_vtk_export_info
+            create_hydrograph_py_hmt2_d,
+            create_depth_map_py_hmt2_d,
+            create_profile_py_hmt2_d,
+            export_to_vtk_py_hmt2_d,
+            get_vtk_export_info,
+            extract_boundary_conditions,
+            export_hydrograph_data,
+            open_directory
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

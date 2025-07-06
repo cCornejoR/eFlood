@@ -22,6 +22,7 @@ try:
     import numpy as np
     import matplotlib.pyplot as plt
     import matplotlib
+    from tabulate import tabulate
     # Use non-interactive backend for server environment
     matplotlib.use('Agg')
 
@@ -53,6 +54,117 @@ def encode_plot_to_base64(fig):
     return image_base64
 
 
+def extract_manning_values(ras_data):
+    """
+    Extract Manning's n values from RAS_2D object
+
+    Args:
+        ras_data: RAS_2D object with Manning data
+
+    Returns:
+        Dict with Manning values and formatted table
+    """
+    try:
+        manning_data = {
+            "success": True,
+            "manning_zones": {},
+            "total_zones": 0,
+            "table_data": [],
+            "formatted_table": ""
+        }
+
+        # Extract Manning zones from RAS_2D object
+        if hasattr(ras_data, 'ManningNZones') and ras_data.ManningNZones:
+            manning_zones = ras_data.ManningNZones
+
+            # Process Manning zones
+            table_rows = []
+            for zone_id, zone_data in manning_zones.items():
+                if len(zone_data) >= 2:
+                    zone_name = zone_data[0]
+                    manning_value = zone_data[1]
+
+                    # Decode bytes if necessary
+                    if isinstance(zone_name, bytes):
+                        zone_name = zone_name.decode('utf-8', errors='ignore')
+
+                    # Skip NoData zones and invalid values
+                    if manning_value != -9999.0 and np.isfinite(manning_value) and manning_value > 0:
+                        clean_manning_value = float(manning_value)
+                        table_rows.append([
+                            int(zone_id),
+                            str(zone_name),
+                            f"{clean_manning_value:.4f}",
+                            get_manning_description(clean_manning_value)
+                        ])
+
+                        manning_data["manning_zones"][str(zone_id)] = {
+                            "name": str(zone_name),
+                            "value": clean_manning_value,
+                            "description": get_manning_description(clean_manning_value)
+                        }
+
+            # Sort by Manning value for better visualization
+            table_rows.sort(key=lambda x: float(x[2]))
+
+            # Create formatted table
+            headers = ["ID", "Tipo de Cobertura", "Manning n", "Descripción"]
+            manning_data["formatted_table"] = tabulate(
+                table_rows,
+                headers=headers,
+                tablefmt="grid",
+                stralign="left"
+            )
+
+            manning_data["table_data"] = table_rows
+            manning_data["total_zones"] = len(table_rows)
+
+            logger.info(f"Extracted {len(table_rows)} Manning zones")
+
+        else:
+            manning_data["success"] = False
+            manning_data["error"] = "No Manning zones found in RAS data"
+
+    except Exception as e:
+        logger.error(f"Error extracting Manning values: {str(e)}")
+        manning_data = {
+            "success": False,
+            "error": str(e),
+            "manning_zones": {},
+            "total_zones": 0,
+            "table_data": [],
+            "formatted_table": ""
+        }
+
+    return manning_data
+
+
+def get_manning_description(manning_value):
+    """
+    Get description for Manning's n value based on typical ranges
+
+    Args:
+        manning_value: Manning's n coefficient
+
+    Returns:
+        String description of the surface type
+    """
+    if manning_value < 0.020:
+        return "Superficie muy lisa (concreto, asfalto)"
+    elif manning_value < 0.030:
+        return "Superficie lisa (canales revestidos)"
+    elif manning_value < 0.040:
+        return "Superficie moderada (suelo natural)"
+    elif manning_value < 0.050:
+        return "Superficie rugosa (cultivos, pastos)"
+    elif manning_value < 0.070:
+        return "Superficie muy rugosa (vegetación densa)"
+    elif manning_value < 0.100:
+        return "Superficie extremadamente rugosa (bosques)"
+    else:
+        return "Superficie con alta resistencia (urbano denso)"
+
+
 def get_basic_hdf_metadata(hdf_file):
     """Get basic metadata from HDF file"""
     try:
@@ -72,25 +184,63 @@ def get_basic_hdf_metadata(hdf_file):
                 "processor": "HECRAS-HDF Integrated"
             }
 
-            # Try to get more detailed info if available
+            # Try to get comprehensive detailed info
             try:
+                # Initialize counters
+                total_datasets = 0
+                max_time_steps = 0
+                max_cells = 0
+
+                # Analyze geometry
                 if 'Geometry' in hf and '2D Flow Areas' in hf['Geometry']:
                     flow_areas = list(hf['Geometry']['2D Flow Areas'].keys())
                     metadata["flow_areas"] = flow_areas
+                    metadata["num_flow_areas"] = len(flow_areas)
 
                     if flow_areas:
                         first_area = flow_areas[0]
                         area_path = f"Geometry/2D Flow Areas/{first_area}"
                         if 'Cells Center Coordinate' in hf[area_path]:
-                            metadata["num_cells"] = len(hf[f"{area_path}/Cells Center Coordinate"])
+                            num_cells = len(hf[f"{area_path}/Cells Center Coordinate"])
+                            metadata["num_cells"] = num_cells
+                            max_cells = num_cells
                         if 'Faces Center Coordinate' in hf[area_path]:
                             metadata["num_faces"] = len(hf[f"{area_path}/Faces Center Coordinate"])
+                else:
+                    metadata["flow_areas"] = []
+                    metadata["num_flow_areas"] = 0
 
+                # Analyze results and count datasets
+                def count_datasets(name, obj):
+                    nonlocal total_datasets, max_time_steps, max_cells
+                    if isinstance(obj, h5py.Dataset):
+                        total_datasets += 1
+                        if len(obj.shape) >= 2:
+                            time_steps = obj.shape[0]
+                            cells = obj.shape[1] if len(obj.shape) > 1 else obj.shape[0]
+                            max_time_steps = max(max_time_steps, time_steps)
+                            max_cells = max(max_cells, cells)
+
+                hf.visititems(count_datasets)
+
+                # Update metadata with real values
+                metadata["total_datasets"] = total_datasets
+                metadata["max_time_steps"] = max_time_steps
+                metadata["max_cells"] = max_cells
+
+                # Check for results
                 if 'Results' in hf and 'Unsteady' in hf['Results']:
                     if 'Output' in hf['Results']['Unsteady']:
                         metadata["has_results"] = True
+                        # Try to get time step info from results
+                        output_path = 'Results/Unsteady/Output'
+                        if 'Output Blocks' in hf[output_path]:
+                            blocks = list(hf[f"{output_path}/Output Blocks"].keys())
+                            metadata["output_blocks"] = len(blocks)
                     else:
                         metadata["has_results"] = False
+                else:
+                    metadata["has_results"] = False
 
             except Exception as detail_error:
                 metadata["detail_error"] = str(detail_error)
@@ -152,6 +302,11 @@ def process_hec_ras_data(hdf_file, terrain_file=None):
                 "velocity_data": len(ras_data.TwoDAreaPointVx) > 0 if hasattr(ras_data, 'TwoDAreaPointVx') else False
             }
         }
+
+        # Extract Manning values
+        manning_data = extract_manning_values(ras_data)
+        if manning_data["success"]:
+            metadata["manning_values"] = manning_data
 
         return {
             "success": True,
@@ -753,6 +908,62 @@ def add_max_data_to_vtk(ugrid, max_data):
         raise Exception(f"Error adding data to VTK: {str(e)}")
 
 
+def extract_manning_table(hdf_file, terrain_file=None):
+    """
+    Extract Manning values and return formatted table
+
+    Args:
+        hdf_file: Path to HDF file
+        terrain_file: Optional path to terrain file
+
+    Returns:
+        Dict with Manning table data and formatted output
+    """
+    try:
+        if not HECRAS_HDF_AVAILABLE:
+            return {"success": False, "error": "HECRAS-HDF modules not available"}
+
+        logger.info("Extracting Manning values table")
+
+        # Initialize RAS_2D object
+        if terrain_file and os.path.exists(terrain_file):
+            ras_data = RAS_2D.RAS_2D_Data(hdf_file, terrain_file)
+        else:
+            dummy_terrain = os.path.join(os.path.dirname(hdf_file), "dummy_terrain.tif")
+            ras_data = RAS_2D.RAS_2D_Data(hdf_file, dummy_terrain)
+
+        # Extract Manning values
+        manning_data = extract_manning_values(ras_data)
+
+        if manning_data["success"]:
+            # Print table to console
+            print("\n" + "="*80)
+            print("🌿 VALORES DE MANNING CALIBRADOS EN EL MODELO HEC-RAS")
+            print("="*80)
+            print(manning_data["formatted_table"])
+            print("="*80)
+            print(f"📊 Total de zonas de Manning: {manning_data['total_zones']}")
+            print("="*80)
+
+            return {
+                "success": True,
+                "manning_data": manning_data,
+                "table_printed": True
+            }
+        else:
+            return {
+                "success": False,
+                "error": manning_data.get("error", "No Manning data found")
+            }
+
+    except Exception as e:
+        logger.error(f"Error extracting Manning table: {str(e)}")
+        return {
+            "success": False,
+            "error": f"Error extracting Manning table: {str(e)}"
+        }
+
+
 def main():
     """Main function to handle command line arguments"""
     if len(sys.argv) < 3:
@@ -800,6 +1011,10 @@ def main():
         elif operation == "vtk_info":
             terrain_file = sys.argv[3] if len(sys.argv) > 3 and sys.argv[3] != "null" else None
             result = get_vtk_export_info(hdf_file, terrain_file)
+
+        elif operation == "manning":
+            terrain_file = sys.argv[3] if len(sys.argv) > 3 and sys.argv[3] != "null" else None
+            result = extract_manning_table(hdf_file, terrain_file)
 
         else:
             result = {

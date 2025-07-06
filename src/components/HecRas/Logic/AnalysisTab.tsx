@@ -10,7 +10,7 @@
  * Incluye sub-navegación con tabs específicos para cada función
  */
 
-import React, { useState } from 'react';
+import React, { useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Upload,
@@ -85,7 +85,17 @@ export const AnalysisTab: React.FC<AnalysisTabProps> = ({
   state,
   updateState,
 }) => {
-  const [activeSubTab, setActiveSubTab] = useState<AnalysisSubTab>('load');
+  // 🎯 Usar el estado del sub-tab desde el componente padre
+  const activeSubTab = state.analysisSubTab;
+  const setActiveSubTab = (subTab: AnalysisSubTab) => {
+    updateState({ analysisSubTab: subTab });
+  };
+
+  // 🔄 Mantener el sub-tab correcto basado en los datos disponibles
+  useEffect(() => {
+    // NO auto-navegar automáticamente - dejar que el usuario controle la navegación
+    // El análisis se iniciará solo cuando el usuario haga clic en "Continuar al Análisis"
+  }, [state.selectedHDFFile, state.hdfData, activeSubTab]);
 
   /**
    * 🎯 Renderizar contenido del sub-tab activo
@@ -118,10 +128,10 @@ export const AnalysisTab: React.FC<AnalysisTabProps> = ({
   };
 
   return (
-    <div className='space-y-6'>
-      {/* 🎛️ Sub-navegación de análisis */}
-      <div className='flex justify-center'>
-        <nav className='flex h-10 items-center space-x-1 rounded-2xl border border-white/20 bg-white/5 backdrop-blur-sm p-1'>
+    <div className='space-y-2'>
+      {/* 🎛️ Sub-navegación de análisis - centrado */}
+      <div className='w-full flex justify-center'>
+        <nav className='flex h-10 items-center space-x-1 rounded-2xl border border-white/20 bg-white/5 backdrop-blur-sm p-1 w-fit'>
           {analysisSubTabs.map(subTab => {
             const Icon = subTab.icon;
             const isActive = subTab.id === activeSubTab;

@@ -10,9 +10,10 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { BarChart3, Eye, Calculator } from 'lucide-react';
+import { BarChart3, Eye, Calculator, Home } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { HecRasTab } from '@/components/HecRas/index';
+import { IconButton } from '@/components/ui/IconButton';
 
 // 🎨 Definición de items del menu principal
 interface MenuItem {
@@ -58,6 +59,7 @@ const menuItems: MenuItem[] = [
 interface HecRasMenuProps {
   activeTab: HecRasTab;
   onTabChange: (tab: HecRasTab) => void;
+  onNavigateHome: () => void;
 }
 
 // 🎨 Variantes de animación del código original
@@ -101,11 +103,12 @@ const sharedTransition = {
 export const HecRasMenu: React.FC<HecRasMenuProps> = ({
   activeTab,
   onTabChange,
+  onNavigateHome,
 }) => {
   return (
-    <div className='flex justify-center w-full'>
+    <div className='flex justify-center w-full px-4'>
       <motion.nav
-        className='p-1.5 sm:p-2 rounded-xl sm:rounded-2xl bg-gradient-to-b from-background/80 to-background/40 backdrop-blur-lg border border-border/40 shadow-lg relative overflow-hidden w-full max-w-2xl'
+        className='p-1.5 sm:p-2 rounded-xl sm:rounded-2xl bg-gradient-to-b from-background/80 to-background/40 backdrop-blur-lg border border-[#3a3a3c] shadow-lg relative overflow-hidden inline-flex'
         initial='initial'
         whileHover='hover'
       >
@@ -113,7 +116,22 @@ export const HecRasMenu: React.FC<HecRasMenuProps> = ({
           className='absolute -inset-2 bg-gradient-radial from-transparent via-blue-400/20 via-30% via-cyan-400/20 via-60% via-blue-500/20 via-90% to-transparent rounded-3xl z-0 pointer-events-none'
           variants={navGlowVariants}
         />
-        <ul className='flex items-center gap-1 sm:gap-2 relative z-10 justify-center'>
+        <div className='flex items-center gap-1 sm:gap-2 relative z-10 w-fit mx-auto'>
+          {/* Botón de navegación al inicio */}
+          <IconButton
+            onClick={onNavigateHome}
+            variant='ghost'
+            size='default'
+            icon={<Home className='h-4 w-4' />}
+            tooltip='Volver al Inicio'
+            animate={false}
+          />
+
+          {/* Separador visual */}
+          <div className='w-px h-6 bg-white/20'></div>
+
+          {/* Menu principal */}
+          <ul className='flex items-center gap-0.5 sm:gap-1'>
           {menuItems.map(item => {
             const Icon = item.icon;
             const isActive = item.id === activeTab;
@@ -143,7 +161,7 @@ export const HecRasMenu: React.FC<HecRasMenuProps> = ({
                     />
                     <motion.div
                       className={cn(
-                        'flex items-center gap-1 sm:gap-2 px-2 sm:px-3 md:px-4 py-1.5 sm:py-2 relative z-10 bg-transparent transition-colors rounded-xl',
+                        'flex items-center gap-1 sm:gap-1.5 px-2 sm:px-2.5 md:px-3 py-1.5 sm:py-2 relative z-10 bg-transparent transition-colors rounded-xl',
                         isActive
                           ? 'text-foreground'
                           : 'text-muted-foreground group-hover:text-foreground'
@@ -164,11 +182,13 @@ export const HecRasMenu: React.FC<HecRasMenuProps> = ({
                       >
                         <Icon className='h-4 w-4 sm:h-5 sm:w-5' />
                       </span>
-                      <span className='text-sm sm:text-base font-medium'>{item.label}</span>
+                      <span className='text-sm sm:text-base font-medium'>
+                        {item.label}
+                      </span>
                     </motion.div>
                     <motion.div
                       className={cn(
-                        'flex items-center gap-2 px-4 py-2 absolute inset-0 z-10 bg-transparent transition-colors rounded-xl',
+                        'flex items-center gap-1 sm:gap-1.5 px-2 sm:px-2.5 md:px-3 py-1.5 sm:py-2 absolute inset-0 z-0 bg-transparent transition-colors rounded-xl pointer-events-none',
                         isActive
                           ? 'text-foreground'
                           : 'text-muted-foreground group-hover:text-foreground'
@@ -188,16 +208,20 @@ export const HecRasMenu: React.FC<HecRasMenuProps> = ({
                           `group-hover:${item.iconColor}`
                         )}
                       >
-                        <Icon className='h-5 w-5' />
+                        <Icon className='h-4 w-4 sm:h-5 sm:w-5' />
                       </span>
-                      <span>{item.label}</span>
+                      <span className='text-sm sm:text-base font-medium'>{item.label}</span>
                     </motion.div>
                   </motion.div>
                 </button>
               </motion.li>
             );
           })}
-        </ul>
+          </ul>
+
+          {/* Espacio para balance visual - reducido */}
+          <div className='w-6'></div>
+        </div>
       </motion.nav>
     </div>
   );

@@ -17,6 +17,7 @@ import { invoke } from '@tauri-apps/api/core';
 interface DataViewerModalProps {
   isOpen: boolean;
   onClose: () => void;
+  hdfFilePath: string | null;
   data: {
     name: string;
     type: 'group' | 'dataset';
@@ -34,6 +35,7 @@ interface DataViewerModalProps {
 export const DataViewerModal: React.FC<DataViewerModalProps> = ({
   isOpen,
   onClose,
+  hdfFilePath,
   data,
 }) => {
   const modalRef = useRef<HTMLDivElement>(null);
@@ -73,7 +75,6 @@ export const DataViewerModal: React.FC<DataViewerModalProps> = ({
   const loadDatasetData = async () => {
     try {
       setIsLoading(true);
-      const hdfFilePath = (window as any).currentHdfFile || '';
 
       if (!hdfFilePath || !data.path) {
         showToast(
@@ -110,8 +111,6 @@ export const DataViewerModal: React.FC<DataViewerModalProps> = ({
 
   const generateHydrographAutomatically = async () => {
     try {
-      const hdfFilePath = (window as any).currentHdfFile || '';
-
       if (!hdfFilePath || !data.path) {
         return; // Silently fail for auto-generation
       }
@@ -135,7 +134,6 @@ export const DataViewerModal: React.FC<DataViewerModalProps> = ({
   const createPlot = async () => {
     try {
       setIsLoading(true);
-      const hdfFilePath = (window as any).currentHdfFile || '';
 
       if (!hdfFilePath || !data.path) {
         showToast(
@@ -168,7 +166,6 @@ export const DataViewerModal: React.FC<DataViewerModalProps> = ({
   const createHydrograph = async () => {
     try {
       setIsLoading(true);
-      const hdfFilePath = (window as any).currentHdfFile || '';
 
       if (!hdfFilePath || !data.path) {
         showToast(
@@ -214,8 +211,6 @@ export const DataViewerModal: React.FC<DataViewerModalProps> = ({
 
   const handleExport = async (format: 'csv' | 'json') => {
     try {
-      const hdfFilePath = (window as any).currentHdfFile || '';
-
       if (!hdfFilePath || !data.path) {
         showToast('No se pudo exportar: archivo o ruta no válida', 'error');
         return;

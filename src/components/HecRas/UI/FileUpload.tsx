@@ -5,9 +5,9 @@
  * y diseño elegante, adaptado para Tauri y tipos de archivo HEC-RAS
  */
 
-import React, { useState, useRef, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { UploadCloud, File as FileIcon, CheckCircle, X } from 'lucide-react';
+import { UploadCloud, CheckCircle, X } from 'lucide-react';
 import { open } from '@tauri-apps/plugin-dialog';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/Button';
@@ -18,10 +18,10 @@ export type FileType = 'hdf' | 'terrain' | 'vtk' | 'custom';
 
 type FileStatus = 'idle' | 'dragging' | 'uploading' | 'error';
 
-interface FileError {
-  message: string;
-  code: string;
-}
+// interface FileError {
+//   message: string;
+//   code: string;
+// }
 
 // 🎨 Configuración de tipos de archivo
 const fileTypeConfig = {
@@ -190,24 +190,24 @@ export const FileUpload: React.FC<FileUploadProps> = ({
   onFileSelect,
   onFileRemove,
   isLoading = false,
-  required = true,
+  required: _required = true,
   label,
   description,
   customExtensions,
-  size = 'md',
+  size: _size = 'md',
   variant = 'default',
   className,
 }) => {
   const [status, setStatus] = useState<FileStatus>('idle');
-  const [error, setError] = useState<FileError | null>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  // const [error, setError] = useState<FileError | null>(null);
+  // const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Configuración del tipo de archivo
   const config = fileTypeConfig[fileType];
   const extensions = customExtensions || config.extensions;
   const displayLabel = label || config.name;
   const displayDescription = description || config.description;
-  const acceptedFileTypes = config.acceptedTypes;
+  // const acceptedFileTypes = config.acceptedTypes;
 
   useEffect(() => {
     return () => {
@@ -479,7 +479,7 @@ export const FileUpload: React.FC<FileUploadProps> = ({
                   className='absolute bottom-4 left-1/2 transform -translate-x-1/2 px-4 py-2 bg-red-500/10 border border-red-500/20 rounded-lg'
                 >
                   <p className='text-sm text-red-500 dark:text-red-400'>
-                    {error?.message || 'Error al cargar el archivo'}
+                    {'Error al cargar el archivo'}
                   </p>
                 </motion.div>
               )}

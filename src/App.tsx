@@ -74,48 +74,47 @@ function App() {
   };
 
   return (
-    <div className='min-h-screen bg-[#131414]'>
-      {/* Custom Titlebar - Fixed at top */}
-      <CustomTitlebar
-        userData={userData}
-        isLicenseValid={isLicenseValid}
-        isLicenseCollapsed={isLicensePanelCollapsed}
-        onToggleLicenseCollapse={() => setIsLicensePanelCollapsed(!isLicensePanelCollapsed)}
-        enableDoubleClickMaximize={true}
-      />
-
-      {/* Content Container - Adjusted for fixed titlebar */}
-      <div className='pt-12 min-h-screen'>
-        {/* License Titlebar */}
-        <LicenseTitlebar
+    <div className='app-container'>
+      {/* Native Titlebar - Fixed at top */}
+      <div className='app-titlebar'>
+        <CustomTitlebar
           userData={userData}
           isLicenseValid={isLicenseValid}
-          isCollapsed={isLicensePanelCollapsed}
-          onToggleCollapse={() =>
+          isLicenseCollapsed={isLicensePanelCollapsed}
+          onToggleLicenseCollapse={() =>
             setIsLicensePanelCollapsed(!isLicensePanelCollapsed)
           }
+          enableDoubleClickMaximize={true}
+          className='titlebar-native'
+          isAnalyzerMode={activeTab === 'hecras'}
         />
+      </div>
 
-        {/* Main Content - Layout responsive al panel de licencias */}
-        <div
-          className='w-full h-full relative'
-          style={{
-            width: '100vw',
-            maxWidth: '100vw',
-            height: isLicensePanelCollapsed
-              ? 'calc(100vh - 48px)' // Solo CustomTitlebar (48px)
-              : 'calc(100vh - 208px)', // CustomTitlebar (48px) + LicenseTitlebar (160px)
-            overflow: 'hidden',
-            position: 'relative',
-          }}
-        >
-        {activeTab === 'home' && <Homepage onNavigate={handleNavigation} />}
-
-        {activeTab === 'hecras' && (
-          <HecRas
-            onNavigateHome={() => setActiveTab('home')}
+      {/* Main Content Area */}
+      <div className='app-content'>
+        {/* License Panel */}
+        {!isLicensePanelCollapsed && (
+          <LicenseTitlebar
+            userData={userData}
+            isLicenseValid={isLicenseValid}
+            isCollapsed={isLicensePanelCollapsed}
+            onToggleCollapse={() =>
+              setIsLicensePanelCollapsed(!isLicensePanelCollapsed)
+            }
           />
         )}
+
+        {/* Page Content */}
+        <div className='desktop-container'>
+          <div className='desktop-content scrollbar-hidden'>
+            {activeTab === 'home' && <Homepage onNavigate={handleNavigation} />}
+            {activeTab === 'hecras' && (
+              <HecRas
+                onNavigateHome={() => setActiveTab('home')}
+                isLicensePanelCollapsed={isLicensePanelCollapsed}
+              />
+            )}
+          </div>
         </div>
       </div>
 

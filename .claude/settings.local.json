@@ -23,7 +23,19 @@
       "WebFetch(domain:v2.tauri.app)",
       "WebFetch(domain:github.com)",
       "WebFetch(domain:ellie.wtf)",
-      "WebFetch(domain:blog.elijahlopez.ca)"
+      "WebFetch(domain:blog.elijahlopez.ca)",
+      "Bash(grep:*)",
+      "Bash(sed:*)",
+      "Bash(npx tsc:*)",
+      "Bash(npx eslint:*)",
+      "Bash(python:*)",
+      "Bash(cat:*)",
+      "Bash(source:*)",
+      "Bash(pip install:*)",
+      "Bash(npm run build:*)",
+      "Bash(cargo check:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)"
     ],
     "deny": []
   }

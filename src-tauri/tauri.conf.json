@@ -15,7 +15,7 @@
         "label": "main",
         "title": "eFlood²",
         "width": 1200,
-        "height": 950,
+        "height": 1000,
         "minWidth": 1000,
         "minHeight": 800,
         "resizable": true,

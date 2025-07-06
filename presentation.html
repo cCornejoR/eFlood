@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>eFlood² - Herramienta Avanzada de Análisis Hidráulico</title>
+    
+    <!-- Google Fonts - Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+    <style>
+        /* Font declarations - Allenoire */
+        @font-face {
+            font-family: 'Allenoire';
+            src: url('./src/assets/ttf/allenoire-allenoire-regular-400.ttf') format('truetype'),
+                 url('./src/assets/otf/allenoire-allenoire-regular-400.otf') format('opentype');
+            font-weight: 400;
+            font-style: normal;
+            font-display: swap;
+        }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', monospace;
+            background-color: #131414;
+            color: #ffffff;
+            line-height: 1.6;
+            overflow-x: hidden;
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            border: 2px solid #3a3a3c;
+            background-color: #131414;
+        }
+        
+        .header {
+            padding: 40px 40px 30px 40px;
+            border-bottom: 1px solid #3a3a3c;
+            display: flex;
+            align-items: flex-start;
+            gap: 20px;
+        }
+
+        .logo-icon {
+            width: 48px;
+            height: 48px;
+            flex-shrink: 0;
+            margin-top: 8px;
+        }
+
+        .header-content {
+            flex: 1;
+        }
+
+        .logo-text {
+            font-size: 48px;
+            font-weight: 400;
+            color: #ffffff;
+            letter-spacing: -2px;
+            margin-bottom: 12px;
+            font-family: 'Allenoire', serif;
+            line-height: 0.9;
+        }
+
+        .tagline {
+            font-size: 16px;
+            color: #ffffff;
+            font-weight: 400;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-family: 'Inter', monospace;
+            line-height: 1.2;
+        }
+        
+        .nav-bar {
+            display: flex;
+            border-bottom: 1px solid #3a3a3c;
+        }
+
+        .nav-item {
+            flex: 1;
+            padding: 18px 20px;
+            text-align: center;
+            border-right: 1px solid #3a3a3c;
+            background: transparent;
+            color: #ffffff;
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 500;
+            font-family: 'Inter', monospace;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            transition: background-color 0.2s;
+        }
+
+        .nav-item:last-child {
+            border-right: none;
+        }
+
+        .nav-item:hover {
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+
+        .install-command {
+            background-color: transparent;
+            border-bottom: 1px solid #3a3a3c;
+            padding: 18px 40px;
+            font-family: 'Inter', monospace;
+            font-size: 14px;
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .copy-btn {
+            background: transparent;
+            border: 1px solid #3a3a3c;
+            color: #ffffff;
+            padding: 5px 10px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        
+        .copy-btn:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        
+        .features {
+            padding: 40px;
+            border-bottom: 1px solid #3a3a3c;
+        }
+
+        .feature {
+            margin-bottom: 20px;
+            font-size: 14px;
+            line-height: 1.8;
+            font-family: 'Inter', monospace;
+        }
+
+        .feature-title {
+            color: #ffffff;
+            font-weight: 600;
+            display: inline;
+        }
+
+        .feature-desc {
+            color: #cccccc;
+            display: inline;
+            margin-left: 8px;
+        }
+        
+        .screenshot {
+            text-align: center;
+            padding: 40px;
+            background-color: transparent;
+            border-bottom: 1px solid #3a3a3c;
+        }
+
+        .screenshot-title {
+            color: #666666;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 30px;
+            font-family: 'Inter', monospace;
+        }
+
+        .screenshot img {
+            max-width: 100%;
+            height: auto;
+            border: 1px solid #3a3a3c;
+            border-radius: 8px;
+        }
+
+        .footer {
+            display: flex;
+        }
+        
+        .footer-item {
+            flex: 1;
+            padding: 25px 40px;
+            text-align: left;
+            border-right: 1px solid #3a3a3c;
+            font-size: 14px;
+            font-family: 'Inter', monospace;
+        }
+
+        .footer-item:last-child {
+            border-right: none;
+        }
+
+        .footer-label {
+            color: #666666;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-size: 12px;
+        }
+
+        .footer-value {
+            color: #ffffff;
+            margin-top: 8px;
+            font-size: 14px;
+        }
+
+        .footer-value a {
+            color: #ffffff;
+            text-decoration: underline;
+        }
+        
+        .highlight {
+            color: #4a9eff;
+        }
+        
+        .green {
+            color: #4ade80;
+        }
+        
+        .yellow {
+            color: #fbbf24;
+        }
+        
+        .purple {
+            color: #a855f7;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <img src="./src/assets/logo.svg" alt="eFlood² Logo" class="logo-icon">
+            <div class="header-content">
+                <div class="logo-text">eFlood²</div>
+                <div class="tagline">HERRAMIENTA AVANZADA DE ANÁLISIS HIDRÁULICO PARA HEC-RAS 2D.</div>
+            </div>
+        </div>
+        
+        <!-- Navigation -->
+        <div class="nav-bar">
+            <a href="#docs" class="nav-item">DOCS</a>
+            <div class="nav-item">
+                <span style="color: #666;">Descargar desde </span>
+                <span class="highlight">GitHub Releases</span>
+                <span style="color: #666;"> | </span>
+                <span style="color: #666;">Tauri</span>
+            </div>
+            <a href="https://github.com/cCornejoR/eFlow" class="nav-item">GITHUB</a>
+        </div>
+        
+        <!-- Install Command -->
+        <div class="install-command">
+            <span>git clone https://github.com/cCornejoR/eFlow.git</span>
+            <button class="copy-btn" onclick="copyToClipboard()">📋</button>
+        </div>
+        
+        <!-- Features -->
+        <div class="features">
+            <div class="feature">
+                <span class="feature-title">• ANÁLISIS HDF5:</span>
+                <span class="feature-desc">Procesamiento completo de archivos HEC-RAS 2D con extracción automática de metadatos.</span>
+            </div>
+
+            <div class="feature">
+                <span class="feature-title">• VISUALIZACIÓN AVANZADA:</span>
+                <span class="feature-desc">Hidrogramas interactivos y visualización de condiciones de contorno en tiempo real.</span>
+            </div>
+
+            <div class="feature">
+                <span class="feature-title">• EXPORTACIÓN VTK:</span>
+                <span class="feature-desc">Exporta resultados a formato VTK para visualización en ParaView y otras herramientas.</span>
+            </div>
+
+            <div class="feature">
+                <span class="feature-title">• INTERFAZ MODERNA:</span>
+                <span class="feature-desc">Construido con <span class="highlight">Tauri</span>, <span class="green">React</span> y <span class="yellow">Python</span> para máximo rendimiento.</span>
+            </div>
+
+            <div class="feature">
+                <span class="feature-title">• MULTIPLATAFORMA:</span>
+                <span class="feature-desc">Compatible con Windows, macOS y Linux. Instalación nativa sin dependencias externas.</span>
+            </div>
+
+            <div class="feature">
+                <span class="feature-title">• CÓDIGO ABIERTO:</span>
+                <span class="feature-desc">Licencia MIT. Contribuye al desarrollo en <span class="highlight">GitHub</span>.</span>
+            </div>
+        </div>
+        
+        <!-- Screenshot -->
+        <div class="screenshot">
+            <div class="screenshot-title">eFlood² con tema oscuro</div>
+            <img src="src/assets/Program.png" alt="eFlood² Interface Screenshot" />
+        </div>
+        
+        <!-- Footer -->
+        <div class="footer">
+            <div class="footer-item">
+                <div class="footer-label">Versión</div>
+                <div class="footer-value">Alpha 0.1.0</div>
+            </div>
+            <div class="footer-item">
+                <div class="footer-label">Autor</div>
+                <div class="footer-value">
+                    <a href="https://github.com/cCornejoR">Crhistian Cornejo</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        function copyToClipboard() {
+            const command = 'git clone https://github.com/cCornejoR/eFlow.git';
+            navigator.clipboard.writeText(command).then(() => {
+                const btn = document.querySelector('.copy-btn');
+                const originalText = btn.textContent;
+                btn.textContent = '✓';
+                setTimeout(() => {
+                    btn.textContent = originalText;
+                }, 2000);
+            });
+        }
+    </script>
+</body>
+</html>

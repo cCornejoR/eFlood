@@ -39,12 +39,14 @@ interface FilesystemItemProps {
   node: Node;
   animated?: boolean;
   path?: string;
+  hdfFilePath?: string | null;
 }
 
 export function FilesystemItem({
   node,
   animated = false,
   path = '',
+  hdfFilePath = null,
 }: FilesystemItemProps) {
   let [isOpen, setIsOpen] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -59,9 +61,6 @@ export function FilesystemItem({
 
   const handleExportData = async (format: 'csv' | 'json') => {
     try {
-      // Get the current HDF file path from context or props
-      const hdfFilePath = (window as any).currentHdfFile || '';
-
       if (!hdfFilePath) {
         console.error('No HDF file selected');
         return;
@@ -168,6 +167,7 @@ export function FilesystemItem({
         key={childNode.name}
         animated={animated}
         path={fullPath}
+        hdfFilePath={hdfFilePath}
       />
     ));
 
@@ -286,6 +286,7 @@ export function FilesystemItem({
       <DataViewerModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
+        hdfFilePath={hdfFilePath}
         data={{
           name: node.name,
           type: node.type || 'dataset',

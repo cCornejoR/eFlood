@@ -59,235 +59,99 @@ Built with Tauri + React + TypeScript + Python, eFlood2 provides comprehensive h
 - **Multiple Sections**: Generate and analyze multiple cross-sections simultaneously
 - **Terrain Interpolation**: Mock terrain generation for demonstration purposes
 
-## 🛠️ Technology Stack
+## 🛠️ Tecnologías
 
 ### Frontend
-- **Framework**: React 19.1.0 with TypeScript
-- **Styling**: Tailwind CSS v4 with custom font integration
-- **Animations**: Framer Motion for smooth transitions
-- **Icons**: Heroicons for consistent iconography
-- **UI Components**: Headless UI for accessible components
-- **Build Tool**: Vite for fast development and building
+- **React 19** con TypeScript
+- **Tailwind CSS v4** para estilos
+- **Framer Motion** para animaciones
+- **Lucide React** para iconos
+- **Vite** como build tool
 
 ### Backend
-- **Runtime**: Tauri 2.6.0 for desktop application framework
-- **Language**: Rust for system-level operations
-- **Python Integration**: Python backend for hydraulic calculations
-- **Data Processing**: NumPy, SciPy, and Pandas for numerical computations
-- **File Handling**: H5py for HDF file processing
-- **Spatial Analysis**: Rasterio, PyProj, and Shapely for geospatial operations
+- **Tauri 2.6** para aplicación de escritorio
+- **Rust** para operaciones del sistema
+- **Python** con pyHMT2D para análisis hidráulico
+- **H5py** para procesamiento de archivos HDF5
 
-### Python Dependencies
-- **Core Libraries**: h5py, numpy, scipy, pandas
-- **Visualization**: matplotlib for advanced plotting
-- **Export Tools**: xlsxwriter, reportlab for document generation
-- **Geospatial**: rasterio, pyproj, shapely for spatial analysis
-- **Development**: pytest, black, isort, mypy for code quality
+### Librerías Python
+- **pyHMT2D**: Procesamiento de modelos HEC-RAS 2D
+- **h5py, numpy, pandas**: Manipulación de datos
+- **VTK**: Exportación para visualización 3D
 
-## 🎨 Design System
+## � Inicio Rápido
 
-### Fonts
-- **Allenoire**: Used exclusively for the eFlow brand name and main titles
-- **Coolvetica**: Default font for all other text and UI elements
-
-### Color Palette
-- **Primary**: Blue gradient themes (Ocean, Blue variants)
-- **Dark Mode**: Dark gradient backgrounds with light text
-- **Accent Colors**: Custom eFlow blue palette with multiple shades
-
-## 📋 Available Scripts
-
-### Workspace Commands
-```bash
-npm run dev           # Start frontend development server
-npm run build         # Build frontend for production
-npm run preview       # Preview production build
-npm run tauri:dev     # Start Tauri development environment
-npm run tauri:build   # Build Tauri application
-npm run install:all   # Install all dependencies
-npm run lint          # Run ESLint
-npm run format        # Format code with Prettier
-npm run test          # Run tests
-npm run clean         # Clean build artifacts
-```
-
-### Python Backend
-```bash
-# Available via project scripts
-hdf-reader           # HDF file reading utilities
-raster-converter     # Raster data conversion tools
-geometry-tools       # Geometric processing functions
-section-tools        # Cross-section analysis tools
-hydraulic-calc       # Hydraulic calculation engine
-export-tools         # Data export utilities
-```
-
-## 🏗️ Project Structure
-
-```
-eFlood2/
-├── frontend/                 # React frontend application
-│   ├── src/
-│   │   ├── components/       # React components
-│   │   │   ├── Homepage.tsx         # Landing page with features
-│   │   │   ├── HDFAnalyzer.tsx      # HDF file analysis
-│   │   │   ├── HydraulicCalculator.tsx # Hydraulic calculations
-│   │   │   ├── DataVisualization.tsx   # Charts and exports
-│   │   │   ├── GeometryTools.tsx       # Geometric operations
-│   │   │   ├── CrossSections.tsx       # Cross-section analysis
-│   │   │   └── Navigation.tsx          # App navigation
-│   │   ├── assets/           # Fonts and static assets
-│   │   └── utils/            # Utility functions
-├── backend/
-│   ├── src-tauri/            # Tauri Rust backend
-│   └── src-python/           # Python computational backend
-├── docs/                     # Documentation
-└── tests/                    # Test files
-```
-
-## 🎯 Use Cases
-
-### Civil Engineers
-- Analyze HEC-RAS 2D model outputs
-- Calculate hydraulic properties for channel design
-- Generate cross-sections for floodplain analysis
-- Export data for further analysis in other tools
-
-### Water Resources Professionals
-- Visualize hydraulic simulation results
-- Perform rapid hydraulic calculations
-- Create geometric elements for model setup
-- Export results in multiple formats for reporting
-
-### Researchers & Students
-- Explore HDF file structures and datasets
-- Learn hydraulic calculation principles
-- Visualize complex hydraulic data
-- Practice geometric modeling techniques
-
-## 📄 Documentation
-
-Additional documentation available in the `/docs` directory:
-- **[Workflow Automation](docs/WORKFLOW_AUTOMATION.md)**: Complete CI/CD and validation guide
-- **API Reference**: Detailed API documentation
-- **Architecture**: System architecture and design patterns
-- **Development Guide**: Setup and development instructions
-- **User Guide**: Complete user manual
-- **Deployment**: Deployment and distribution guide
-
-## 🔧 Development
-
-### Prerequisites
-- Node.js 18+ and npm
+### Prerrequisitos
+- Node.js 18+
 - Rust 1.70+
 - Python 3.11+
-- UV package manager for Python dependencies
+- UV package manager
 
-### Quick Start
+### Instalación
 ```bash
-# Clone the repository
+# Clonar el repositorio
 git clone https://github.com/cCornejoR/eFlow.git
-cd eFlood2
+cd eFlow
 
-# Setup development environment (Windows)
-.\scripts\setup-hooks.ps1
+# Instalar dependencias
+npm install
+cd src-python && uv sync && cd ..
 
-# Install all dependencies
-npm run install:all
-
-# Run validation
-.\scripts\validate.ps1
-
-# Start development environment
-npm run dev          # Frontend only
-npm run tauri:dev    # Full application with Tauri
+# Ejecutar en desarrollo
+npm run tauri:dev
 ```
 
-### Code Quality & Validation
-
-This project uses a comprehensive validation system with multiple layers:
-
-#### Automated Validation
-- **Pre-commit Hooks**: Automatic validation before each commit
-- **GitHub Actions**: CI/CD pipeline with comprehensive testing
-- **Branch Protection**: Enforced validation for main branch
-
-#### Manual Validation
+### Scripts Disponibles
 ```bash
-# Run complete validation
-.\scripts\validate.ps1
-
-# Auto-fix issues
-.\scripts\validate.ps1 -Fix
-
-# Individual checks
-npm run lint          # ESLint
-npm run format        # Prettier
-npm run test          # Tests
+npm run dev           # Servidor de desarrollo frontend
+npm run tauri:dev     # Aplicación completa con Tauri
+npm run tauri:build   # Construir aplicación para producción
+npm run lint          # Linter ESLint
+npm run format        # Formatear código con Prettier
 ```
 
-#### Quality Tools
-- **Frontend**: ESLint, Prettier, TypeScript, Vitest
-- **Python**: Black, isort, Flake8, MyPy, Pytest
-- **Rust**: rustfmt, Clippy, Cargo tests
-- **Security**: npm audit, cargo audit, secret scanning
+## 🏗️ Estructura del Proyecto
 
-### Contributing
-
-1. Fork the repository
-2. Create a feature branch: `git checkout -b feature/amazing-feature`
-3. Run validation: `.\scripts\validate.ps1`
-4. Commit changes: `git commit -m 'Add amazing feature'`
-5. Push to branch: `git push origin feature/amazing-feature`
-6. Open a Pull Request
-
-## 🚀 Deployment
-
-### Building for Production
-```bash
-# Build frontend
-npm run build
-
-# Build Tauri application
-npm run tauri:build
+```
+eFlow/
+├── src/                      # Frontend React
+│   ├── components/           # Componentes React
+│   │   ├── Homepage.tsx      # Página principal
+│   │   ├── HecRas/          # Suite de análisis HEC-RAS
+│   │   └── ui/              # Componentes UI reutilizables
+│   └── assets/              # Recursos estáticos
+├── src-tauri/               # Backend Rust
+├── src-python/              # Backend Python
+│   └── HECRAS-HDF/         # Procesamiento pyHMT2D
+└── docs/                    # Documentación
 ```
 
-### Release Process
-1. Update version in `package.json` and `Cargo.toml`
-2. Run full validation: `.\scripts\validate.ps1`
-3. Create release commit
-4. Tag release: `git tag v1.0.0`
-5. Push with tags: `git push origin main --tags`
+## 🎯 Casos de Uso
 
-## 📊 Project Status
+- **Ingenieros Civiles**: Análisis de salidas de modelos HEC-RAS 2D
+- **Profesionales de Recursos Hídricos**: Visualización de resultados de simulación
+- **Investigadores**: Exploración de estructuras de archivos HDF y datasets
+- **Estudiantes**: Aprendizaje de principios de cálculo hidráulico
 
-- ✅ **Frontend**: React + TypeScript + Tailwind CSS
-- ✅ **Backend**: Tauri + Rust + Python integration
-- ✅ **HDF Analysis**: Complete HDF5 file processing
-- ✅ **Hydraulic Calculations**: Normal/critical depth calculations
-- ✅ **Data Visualization**: Charts and export capabilities
-- ✅ **Geometry Tools**: Interactive drawing and spline creation
-- ✅ **Cross-Section Analysis**: Profile visualization and calculations
-- ✅ **CI/CD Pipeline**: Automated testing and validation
-- 🔄 **Documentation**: Ongoing improvements
-- 🔄 **Testing Coverage**: Expanding test suite
+## 🔧 Desarrollo
 
-## 🤝 Support
+### Contribuir
+1. Fork del repositorio
+2. Crear rama de feature: `git checkout -b feature/nueva-caracteristica`
+3. Commit de cambios: `git commit -m 'Agregar nueva característica'`
+4. Push a la rama: `git push origin feature/nueva-caracteristica`
+5. Abrir Pull Request
 
-- **Issues**: [GitHub Issues](https://github.com/cCornejoR/eFlow/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/cCornejoR/eFlow/discussions)
-- **Documentation**: [Project Wiki](https://github.com/cCornejoR/eFlow/wiki)
+## � Licencia
 
-## 📜 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+Este proyecto está licenciado bajo la Licencia MIT - ver el archivo [LICENSE](LICENSE) para detalles.
 
 ---
 
 <div align="center">
-  <strong>eFlood2</strong> - Empowering hydraulic analysis through modern technology
+  <strong>eFlood²</strong> - Potenciando el análisis hidráulico con tecnología moderna
   <br>
-  Built with ❤️ for the civil engineering community
+  Construido con ❤️ para la comunidad de ingeniería civil
   <br><br>
-  © 2024 eFlood2 Team. Built with Tauri + React + Python.
+  © 2025 eFlood² Team. Construido con Tauri + React + Python.
 </div>

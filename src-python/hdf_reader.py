@@ -147,6 +147,69 @@ class HDFReader:
 
         return hydraulic_datasets
 
+    def get_detailed_metadata(self) -> Dict[str, Any]:
+        """
+        Extract detailed metadata including dimensions, time steps, and cell counts
+
+        Returns:
+            Dict with detailed metadata
+        """
+        metadata = {
+            "total_datasets": 0,
+            "time_steps": 0,
+            "cell_count": 0,
+            "flow_areas": 0,
+            "variables": {
+                "depth": {"count": 0, "max_shape": []},
+                "velocity": {"count": 0, "max_shape": []},
+                "wse": {"count": 0, "max_shape": []},
+            }
+        }
+
+        try:
+            with h5py.File(self.file_path, "r") as f:
+                def analyze_dataset(name, obj):
+                    if isinstance(obj, h5py.Dataset):
+                        metadata["total_datasets"] += 1
+                        shape = obj.shape
+                        name_lower = name.lower()
+
+                        # Extraer dimensiones máximas
+                        if len(shape) >= 2:
+                            time_steps = shape[0]
+                            cells = shape[1]
+                            metadata["time_steps"] = max(metadata["time_steps"], time_steps)
+                            metadata["cell_count"] = max(metadata["cell_count"], cells)
+
+                        # Contar áreas de flujo
+                        if "2d flow area" in name_lower:
+                            metadata["flow_areas"] += 1
+
+                        # Categorizar variables
+                        if "depth" in name_lower:
+                            metadata["variables"]["depth"]["count"] += 1
+                            if len(shape) > len(metadata["variables"]["depth"]["max_shape"]):
+                                metadata["variables"]["depth"]["max_shape"] = list(shape)
+                        elif "velocity" in name_lower:
+                            metadata["variables"]["velocity"]["count"] += 1
+                            if len(shape) > len(metadata["variables"]["velocity"]["max_shape"]):
+                                metadata["variables"]["velocity"]["max_shape"] = list(shape)
+                        elif "wse" in name_lower or "water surface" in name_lower:
+                            metadata["variables"]["wse"]["count"] += 1
+                            if len(shape) > len(metadata["variables"]["wse"]["max_shape"]):
+                                metadata["variables"]["wse"]["max_shape"] = list(shape)
+
+                f.visititems(analyze_dataset)
+
+                # Asegurar valores mínimos
+                if metadata["flow_areas"] == 0:
+                    metadata["flow_areas"] = 1
+
+        except Exception as e:
+            print(f"Error extracting detailed metadata: {str(e)}")
+
+        return metadata
+
     def export_structure_to_json(self, output_path: str) -> None:
         """
         Export file structure to JSON file
@@ -189,6 +252,9 @@ def main():
         elif command == "hydraulic":
             hydraulic = reader.find_hydraulic_results()
             print(json.dumps(hydraulic, indent=2))
+        elif command == "metadata":
+            metadata = reader.get_detailed_metadata()
+            print(json.dumps(metadata, indent=2, default=str))
         else:
             print(f"Unknown command: {command}")
             sys.exit(1)

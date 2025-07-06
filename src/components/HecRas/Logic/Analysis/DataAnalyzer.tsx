@@ -17,19 +17,20 @@ import { motion } from 'framer-motion';
 import {
   CheckCircle,
   AlertCircle,
-  Loader2,
+
   Database,
   BarChart3,
   Clock,
   TrendingUp,
-  FileText,
   Layers,
   Zap,
+  Play,
 } from 'lucide-react';
 import { invoke } from '@tauri-apps/api/core';
 import { HecRasState } from '../../index';
 import { Button } from '@/components/ui/Button';
 import { DotFlow, DotFlowProps } from '@/components/ui/dot-flow';
+import { BoundaryConditionsViewer } from './BoundaryConditionsViewer';
 
 interface DataAnalyzerProps {
   state: HecRasState;
@@ -51,14 +52,10 @@ export const DataAnalyzer: React.FC<DataAnalyzerProps> = ({
   const [analysisStep, setAnalysisStep] = useState<string>('ready');
   const [analysisProgress, setAnalysisProgress] = useState(0);
   const [analysisError, setAnalysisError] = useState<string | null>(null);
-  const [analysisResults, setAnalysisResults] = useState<{
-    totalDatasets: number;
-    timeSteps: number;
-    flowAreas: number;
-    boundaryConditions: number;
-    cellCount: number;
-  } | null>(null);
   const [analysisStartTime, setAnalysisStartTime] = useState<number>(0);
+
+  // Usar analysisResults del estado global en lugar del estado local
+  const analysisResults = state.analysisResults;
 
   // 🎨 Animaciones predefinidas para el análisis
   const importing = [
@@ -211,14 +208,14 @@ export const DataAnalyzer: React.FC<DataAnalyzerProps> = ({
   };
 
   /**
-   * 🚀 Iniciar análisis automático
-   * Se ejecuta cuando el componente se monta y hay un archivo HDF
+   * 🚀 Iniciar análisis cuando el componente se monta
+   * Solo si hay archivo HDF y no hay datos ya procesados
    */
   useEffect(() => {
-    if (state.selectedHDFFile && !state.hdfData && !state.isAnalyzing) {
+    if (state.selectedHDFFile && !state.hdfData && !state.isAnalyzing && !analysisResults) {
       handleStartAnalysis();
     }
-  }, [state.selectedHDFFile]);
+  }, []); // Solo ejecutar una vez al montar el componente
 
   /**
    * 🔍 Ejecutar análisis completo
@@ -233,39 +230,63 @@ export const DataAnalyzer: React.FC<DataAnalyzerProps> = ({
       setAnalysisProgress(0);
       setAnalysisStartTime(Date.now());
 
-      // Paso 1: Leer estructura del archivo
+      // Paso 1: Leer información básica del archivo
+      setAnalysisStep('Leyendo información del archivo...');
+      setAnalysisProgress(15);
+
+      const fileInfo = await invoke('read_hdf_file_info', {
+        filePath: state.selectedHDFFile,
+      });
+
+      // Paso 2: Leer estructura del archivo
       setAnalysisStep('Leyendo estructura del archivo...');
-      setAnalysisProgress(25);
+      setAnalysisProgress(15);
 
       const fileStructure = await invoke('read_hdf_file_structure', {
         filePath: state.selectedHDFFile,
       });
 
-      // Paso 2: Procesar datos HEC-RAS con pyHMT2D
+      // Paso 2: Obtener metadatos detallados
+      setAnalysisStep('Extrayendo metadatos detallados...');
+      setAnalysisProgress(30);
+
+      const detailedMetadata = await invoke('get_detailed_hdf_metadata', {
+        filePath: state.selectedHDFFile,
+      });
+
+      // Paso 3: Procesar datos HEC-RAS con pyHMT2D
       setAnalysisStep('Procesando datos con pyHMT2D...');
       setAnalysisProgress(50);
 
-      const processedData = await invoke('process_hec_ras_data', {
-        hdf_file_path: state.selectedHDFFile,
-        terrain_file_path: state.selectedTerrainFile,
+      await invoke('process_hec_ras_data', {
+        hdfFilePath: state.selectedHDFFile,
+        terrainFilePath: state.selectedTerrainFile,
       });
 
-      // Paso 3: Extraer datasets hidráulicos
+      // Paso 4: Extraer datasets hidráulicos
       setAnalysisStep('Extrayendo datasets hidráulicos...');
-      setAnalysisProgress(75);
+      setAnalysisProgress(65);
 
       const hydraulicDatasets = await invoke('find_hydraulic_datasets', {
         filePath: state.selectedHDFFile,
+      });
+
+      // Paso 5: Extraer condiciones de contorno reales
+      setAnalysisStep('Extrayendo condiciones de contorno...');
+      setAnalysisProgress(75);
+
+      const boundaryConditions = await invoke('extract_boundary_conditions', {
+        hdfFilePath: state.selectedHDFFile,
       });
 
       // Paso 4: Generar hidrograma desde condiciones de contorno
       setAnalysisStep('Generando hidrograma...');
       setAnalysisProgress(90);
 
-      const hydrographData = await invoke('create_hydrograph_pyHMT2D', {
-        hdf_file_path: state.selectedHDFFile,
-        cell_id: null,
-        terrain_file_path: state.selectedTerrainFile,
+      const hydrographData = await invoke('create_hydrograph_py_hmt2_d', {
+        hdfFilePath: state.selectedHDFFile,
+        cellId: null,
+        terrainFilePath: state.selectedTerrainFile,
       });
 
       // Paso 5: Finalizar análisis
@@ -276,96 +297,39 @@ export const DataAnalyzer: React.FC<DataAnalyzerProps> = ({
       updateState({
         hdfData: fileStructure,
         hydrographData: hydrographData,
+        fileMetadata: fileInfo,
+        boundaryConditions: boundaryConditions,
+        isAnalyzing: false,
       });
 
       // Extraer información real de los datos procesados
       const realAnalysisResults = extractAnalysisResults(
         fileStructure,
         hydraulicDatasets,
-        processedData
+        boundaryConditions,
+        detailedMetadata
       );
-      setAnalysisResults(realAnalysisResults);
+
+      // Actualizar estado global con los resultados del análisis
+      updateState({ analysisResults: realAnalysisResults });
 
       setAnalysisStep('Análisis completado');
 
-      // Auto-avanzar al siguiente tab después de 2 segundos
-      setTimeout(() => {
-        onAnalysisComplete();
-      }, 2000);
+      // NO auto-avanzar al siguiente tab - mantener en la pestaña actual
+      // El usuario puede navegar manualmente al hidrograma cuando lo desee
     } catch (error) {
       console.error('Error durante el análisis:', error);
       setAnalysisError(`Error al analizar el archivo HDF: ${error}`);
+      setAnalysisStep('Error en el análisis');
 
-      // Fallback con datos mock para desarrollo
-      console.log('Usando datos mock para desarrollo...');
+      // Limpiar estado en caso de error
+      updateState({
+        hdfData: null,
+        hydrographData: null,
+        analysisResults: null,
+      });
 
-      try {
-        // Intentar al menos obtener la estructura del archivo
-        const fallbackStructure = await invoke('read_hdf_file_structure', {
-          filePath: state.selectedHDFFile,
-        });
-
-        updateState({
-          hdfData: fallbackStructure,
-          hydrographData: {
-            success: true,
-            message: 'Hidrograma generado desde condiciones de contorno (mock)',
-            data: generateMockHydrographData(),
-          },
-        });
-
-        // Usar datos reales si están disponibles, sino mock
-        const fallbackResults = fallbackStructure.success
-          ? extractAnalysisResults(
-              fallbackStructure,
-              { success: false },
-              { success: false }
-            )
-          : {
-              totalDatasets: 15,
-              timeSteps: 145,
-              flowAreas: 1,
-              boundaryConditions: 3,
-              cellCount: 34536,
-            };
-
-        setAnalysisResults(fallbackResults);
-        setAnalysisStep('Análisis completado con datos parciales');
-
-        // Limpiar error si pudimos obtener al menos la estructura
-        if (fallbackStructure.success) {
-          setAnalysisError(null);
-        }
-      } catch (fallbackError) {
-        console.error('Error en fallback:', fallbackError);
-
-        // Último recurso: datos completamente mock
-        updateState({
-          hdfData: {
-            success: true,
-            data: JSON.stringify(generateMockHDFStructure()),
-          },
-          hydrographData: {
-            success: true,
-            message: 'Hidrograma generado desde condiciones de contorno (mock)',
-            data: generateMockHydrographData(),
-          },
-        });
-
-        setAnalysisResults({
-          totalDatasets: 15,
-          timeSteps: 145,
-          flowAreas: 1,
-          boundaryConditions: 3,
-          cellCount: 34536,
-        });
-
-        setAnalysisStep('Análisis completado con datos mock');
-      }
-
-      setTimeout(() => {
-        onAnalysisComplete();
-      }, 2000);
+      // NO auto-avanzar en caso de error - mantener en la pestaña actual
     } finally {
       updateState({ isAnalyzing: false });
     }
@@ -376,8 +340,9 @@ export const DataAnalyzer: React.FC<DataAnalyzerProps> = ({
    */
   const extractAnalysisResults = (
     fileStructure: any,
-    hydraulicDatasets: any,
-    processedData: any
+    _hydraulicDatasets: any,
+    boundaryConditions: any,
+    detailedMetadata?: any
   ) => {
     try {
       // Parsear datos de estructura del archivo
@@ -386,125 +351,97 @@ export const DataAnalyzer: React.FC<DataAnalyzerProps> = ({
           ? JSON.parse(fileStructure.data)
           : {};
 
-      // Parsear datasets hidráulicos
-      const hydraulicData =
-        hydraulicDatasets.success && hydraulicDatasets.data
-          ? JSON.parse(hydraulicDatasets.data)
-          : {};
+      // Parsear datasets hidráulicos (para uso futuro)
+      // const hydraulicData =
+      //   hydraulicDatasets.success && hydraulicDatasets.data
+      //     ? JSON.parse(hydraulicDatasets.data)
+      //     : {};
 
-      // Contar datasets reales
-      const totalDatasets = Object.keys(structureData).length;
-
-      // Extraer información de pasos temporales y celdas
+      // Usar metadatos detallados si están disponibles
+      let totalDatasets = Object.keys(structureData).length;
       let timeSteps = 0;
       let cellCount = 0;
       let flowAreas = 0;
 
-      // Buscar datasets de profundidad para obtener dimensiones
-      for (const [path, info] of Object.entries(structureData)) {
-        if (typeof info === 'object' && info !== null && 'shape' in info) {
-          const shape = (info as any).shape;
-          if (
-            path.includes('Depth') &&
-            Array.isArray(shape) &&
-            shape.length >= 2
-          ) {
-            timeSteps = Math.max(timeSteps, shape[0] || 0);
-            cellCount = Math.max(cellCount, shape[1] || 0);
-          }
-          if (path.includes('2D Flow Areas')) {
-            flowAreas++;
+      if (detailedMetadata && detailedMetadata.success && detailedMetadata.data) {
+        try {
+          const metadata = JSON.parse(detailedMetadata.data);
+          totalDatasets = metadata.total_datasets || totalDatasets;
+          timeSteps = metadata.time_steps || 0;
+          cellCount = metadata.cell_count || 0;
+          flowAreas = metadata.flow_areas || 0;
+        } catch (error) {
+          console.warn('Error parsing detailed metadata:', error);
+        }
+      }
+
+      // Fallback: Buscar datasets de profundidad para obtener dimensiones
+      if (timeSteps === 0 || cellCount === 0) {
+        for (const [path, info] of Object.entries(structureData)) {
+          if (typeof info === 'object' && info !== null && 'shape' in info) {
+            const shape = (info as any).shape;
+            if (
+              path.includes('Depth') &&
+              Array.isArray(shape) &&
+              shape.length >= 2
+            ) {
+              timeSteps = Math.max(timeSteps, shape[0] || 0);
+              cellCount = Math.max(cellCount, shape[1] || 0);
+            }
+            if (path.includes('2D Flow Areas')) {
+              flowAreas++;
+            }
           }
         }
       }
 
-      // Contar condiciones de contorno
-      let boundaryConditions = 0;
-      for (const path of Object.keys(structureData)) {
-        if (
-          path.includes('Boundary Conditions') ||
-          path.includes('Event Conditions')
-        ) {
-          boundaryConditions++;
+      // Contar condiciones de contorno reales
+      let boundaryConditionsCount = 0;
+      if (boundaryConditions && boundaryConditions.success && boundaryConditions.data) {
+        try {
+          const bcData = JSON.parse(boundaryConditions.data);
+          boundaryConditionsCount = bcData.total_boundaries || bcData.boundary_conditions?.length || 0;
+        } catch (error) {
+          console.warn('Error parsing boundary conditions:', error);
+          // Fallback: buscar en estructura del archivo
+          for (const path of Object.keys(structureData)) {
+            if (
+              path.includes('Boundary Conditions') ||
+              path.includes('Event Conditions')
+            ) {
+              boundaryConditionsCount++;
+            }
+          }
         }
       }
 
       return {
-        totalDatasets: totalDatasets || 15, // Fallback a valor por defecto
-        timeSteps: timeSteps || 145,
-        flowAreas: Math.max(flowAreas, 1),
-        boundaryConditions: Math.max(boundaryConditions, 3),
-        cellCount: cellCount || 34536,
+        totalDatasets: totalDatasets,
+        timeSteps: timeSteps,
+        flowAreas: flowAreas,
+        boundaryConditions: boundaryConditionsCount,
+        cellCount: cellCount,
       };
     } catch (error) {
       console.error(
         'Error extrayendo resultados reales, usando valores por defecto:',
         error
       );
-      // Fallback a valores por defecto en caso de error
+      // Retornar valores nulos en caso de error para indicar falta de datos
       return {
-        totalDatasets: 15,
-        timeSteps: 145,
-        flowAreas: 1,
-        boundaryConditions: 3,
-        cellCount: 34536,
+        totalDatasets: 0,
+        timeSteps: 0,
+        flowAreas: 0,
+        boundaryConditions: 0,
+        cellCount: 0,
       };
     }
   };
 
-  /**
-   * 📊 Generar datos mock para desarrollo (fallback)
-   */
-  const generateMockHDFStructure = () => ({
-    'Results/Unsteady/Output/Output Blocks/Base Output/Unsteady Time Series/2D Flow Areas/Area 1/Depth':
-      {
-        type: 'dataset',
-        shape: [145, 34536],
-        dtype: 'float64',
-        size: 145 * 34536,
-      },
-    'Results/Unsteady/Output/Output Blocks/Base Output/Unsteady Time Series/2D Flow Areas/Area 1/Velocity':
-      {
-        type: 'dataset',
-        shape: [145, 34536, 2],
-        dtype: 'float64',
-        size: 145 * 34536 * 2,
-      },
-    'Geometry/2D Flow Areas/Area 1/Cells Center Coordinate': {
-      type: 'dataset',
-      shape: [34536, 2],
-      dtype: 'float64',
-      size: 34536 * 2,
-    },
-    'Event Conditions/Unsteady/Boundary Conditions': {
-      type: 'group',
-      attrs: {},
-    },
-  });
 
-  /**
-   * 📈 Generar datos mock de hidrograma
-   */
-  const generateMockHydrographData = () => {
-    const timePoints = Array.from({ length: 145 }, (_, i) => i * 3600); // Cada hora
-    const flowData = timePoints.map((t, i) => ({
-      time: t,
-      flow: 50 + 30 * Math.sin(i * 0.1) + 10 * Math.random(),
-      stage: 2.5 + 1.5 * Math.sin(i * 0.1) + 0.5 * Math.random(),
-    }));
-
-    return {
-      timePoints,
-      boundaries: {
-        SALIDA: flowData,
-        ENTRADA_RIO_HUAURA: flowData.map(d => ({ ...d, flow: d.flow * 1.5 })),
-        ENTRADA_RIO_CHICO: flowData.map(d => ({ ...d, flow: d.flow * 0.8 })),
-      },
-    };
-  };
 
   return (
-    <div className='space-y-6'>
+    <div className='space-y-4'>
       {/* 📋 Título y descripción */}
       <div className='text-center'>
         <h2 className='text-2xl font-bold text-white mb-2'>
@@ -551,7 +488,7 @@ export const DataAnalyzer: React.FC<DataAnalyzerProps> = ({
               <p className='text-red-200 text-sm'>{analysisError}</p>
             </div>
           </div>
-        ) : (
+        ) : state.hdfData ? (
           <div className='flex flex-col items-center justify-center space-y-4'>
             <CheckCircle className='h-12 w-12 text-green-400' />
             <div className='text-center'>
@@ -559,6 +496,39 @@ export const DataAnalyzer: React.FC<DataAnalyzerProps> = ({
                 Análisis Completado
               </h3>
               <p className='text-white/60 text-sm'>{analysisStep}</p>
+            </div>
+          </div>
+        ) : !analysisResults ? (
+          <div className='flex flex-col items-center justify-center space-y-4'>
+            <Play className='h-12 w-12 text-blue-400' />
+            <div className='text-center'>
+              <h3 className='text-lg font-semibold text-white mb-2'>
+                Listo para Analizar
+              </h3>
+              <p className='text-white/60 text-sm mb-4'>
+                Haz clic en el botón para iniciar el análisis del archivo HDF
+              </p>
+              <Button
+                onClick={handleStartAnalysis}
+                variant='default'
+                size='lg'
+                className='font-semibold'
+              >
+                <Play className='w-4 h-4 mr-2' />
+                Iniciar Análisis
+              </Button>
+            </div>
+          </div>
+        ) : (
+          <div className='flex flex-col items-center justify-center space-y-4'>
+            <CheckCircle className='h-12 w-12 text-green-400' />
+            <div className='text-center'>
+              <h3 className='text-lg font-semibold text-white mb-2'>
+                Análisis Completado
+              </h3>
+              <p className='text-white/60 text-sm'>
+                Los metadatos del modelo están disponibles abajo
+              </p>
             </div>
           </div>
         )}
@@ -590,7 +560,7 @@ export const DataAnalyzer: React.FC<DataAnalyzerProps> = ({
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className='space-y-6'
+          className='space-y-4'
         >
           {/* Resumen General */}
           <div className='bg-white/5 rounded-xl p-6 border border-white/10'>
@@ -653,100 +623,82 @@ export const DataAnalyzer: React.FC<DataAnalyzerProps> = ({
             </div>
           </div>
 
+          {/* Estado del Análisis - Compacto */}
+          <div className='bg-white/5 rounded-lg p-4 border border-white/10 mb-4'>
+            <div className='flex items-center justify-between'>
+              <div className='flex items-center gap-3'>
+                <div className='w-3 h-3 bg-green-400 rounded-full animate-pulse'></div>
+                <span className='text-green-400 font-medium'>Análisis Completado</span>
+                <span className='text-white/60 text-sm'>
+                  {state.selectedHDFFile?.split('/').pop() || 'N/A'}
+                </span>
+              </div>
+              <span className='text-white/40 text-xs'>
+                HEC-RAS 6.7 • Flujo 2D • Sistema Métrico
+              </span>
+            </div>
+          </div>
+
           {/* Información del Archivo */}
           <div className='grid grid-cols-1 lg:grid-cols-2 gap-6'>
-            {/* Información General */}
-            <div className='bg-white/5 rounded-xl p-6 border border-white/10'>
-              <h4 className='text-lg font-semibold text-white mb-4 flex items-center gap-2'>
-                <FileText className='h-5 w-5 text-blue-400' />
-                Información del Archivo
-              </h4>
-              <div className='space-y-3'>
-                <div className='flex justify-between items-center py-2 border-b border-white/10'>
-                  <span className='text-white/70 text-sm'>Archivo HDF:</span>
-                  <span className='text-white text-sm font-mono truncate max-w-[200px]'>
-                    {state.selectedHDFFile?.split('/').pop() || 'N/A'}
-                  </span>
-                </div>
-                <div className='flex justify-between items-center py-2 border-b border-white/10'>
-                  <span className='text-white/70 text-sm'>
-                    Versión HEC-RAS:
-                  </span>
-                  <span className='text-green-400 text-sm font-medium'>
-                    6.7
-                  </span>
-                </div>
-                <div className='flex justify-between items-center py-2 border-b border-white/10'>
-                  <span className='text-white/70 text-sm'>
-                    Tipo de Análisis:
-                  </span>
-                  <span className='text-blue-400 text-sm font-medium'>
-                    Flujo No Permanente 2D
-                  </span>
-                </div>
-                <div className='flex justify-between items-center py-2 border-b border-white/10'>
-                  <span className='text-white/70 text-sm'>Unidades:</span>
-                  <span className='text-white text-sm'>
-                    Sistema Métrico (m, m³/s)
-                  </span>
-                </div>
-                <div className='flex justify-between items-center py-2'>
-                  <span className='text-white/70 text-sm'>Estado:</span>
-                  <span className='text-green-400 text-sm font-medium'>
-                    ✓ Análisis Completado
-                  </span>
-                </div>
-              </div>
-            </div>
 
-            {/* Condiciones de Contorno */}
+            {/* Condiciones de Contorno Reales */}
             <div className='bg-white/5 rounded-xl p-6 border border-white/10'>
               <h4 className='text-lg font-semibold text-white mb-4 flex items-center gap-2'>
                 <Zap className='h-5 w-5 text-yellow-400' />
                 Condiciones de Contorno
               </h4>
               <div className='space-y-3'>
-                <div className='bg-white/5 rounded-lg p-3'>
-                  <div className='flex items-center justify-between mb-2'>
-                    <span className='text-white/80 text-sm font-medium'>
-                      ENTRADA_RIO_HUAURA
-                    </span>
-                    <span className='text-blue-400 text-xs bg-blue-500/20 px-2 py-1 rounded'>
-                      Caudal
-                    </span>
+                {state.boundaryConditions &&
+                 state.boundaryConditions.success &&
+                 state.boundaryConditions.data ? (
+                  (() => {
+                    try {
+                      const bcData = JSON.parse(state.boundaryConditions.data);
+                      return bcData.boundary_conditions?.map((bc: any, index: number) => (
+                        <div key={index} className='bg-white/5 rounded-lg p-3'>
+                          <div className='flex items-center justify-between mb-2'>
+                            <span className='text-white/80 text-sm font-medium'>
+                              {bc.name}
+                            </span>
+                            <span className={`text-xs px-2 py-1 rounded ${
+                              bc.type === 'Caudal'
+                                ? 'text-blue-400 bg-blue-500/20'
+                                : bc.type === 'Nivel'
+                                ? 'text-green-400 bg-green-500/20'
+                                : 'text-gray-400 bg-gray-500/20'
+                            }`}>
+                              {bc.type}
+                            </span>
+                          </div>
+                          <p className='text-white/60 text-xs'>
+                            {bc.description}
+                          </p>
+                          {bc.data_available && (
+                            <p className='text-white/40 text-xs mt-1'>
+                              {bc.time_steps} pasos temporales disponibles
+                            </p>
+                          )}
+                        </div>
+                      ));
+                    } catch (error) {
+                      console.error('Error parsing boundary conditions:', error);
+                      return (
+                        <div className='bg-red-500/10 rounded-lg p-3 border border-red-500/20'>
+                          <p className='text-red-400 text-sm'>
+                            Error al cargar condiciones de contorno
+                          </p>
+                        </div>
+                      );
+                    }
+                  })()
+                ) : (
+                  <div className='bg-yellow-500/10 rounded-lg p-3 border border-yellow-500/20'>
+                    <p className='text-yellow-400 text-sm'>
+                      No se encontraron condiciones de contorno en el archivo
+                    </p>
                   </div>
-                  <p className='text-white/60 text-xs'>
-                    Hidrograma de entrada principal
-                  </p>
-                </div>
-
-                <div className='bg-white/5 rounded-lg p-3'>
-                  <div className='flex items-center justify-between mb-2'>
-                    <span className='text-white/80 text-sm font-medium'>
-                      ENTRADA_RIO_CHICO
-                    </span>
-                    <span className='text-blue-400 text-xs bg-blue-500/20 px-2 py-1 rounded'>
-                      Caudal
-                    </span>
-                  </div>
-                  <p className='text-white/60 text-xs'>
-                    Hidrograma de entrada secundaria
-                  </p>
-                </div>
-
-                <div className='bg-white/5 rounded-lg p-3'>
-                  <div className='flex items-center justify-between mb-2'>
-                    <span className='text-white/80 text-sm font-medium'>
-                      SALIDA
-                    </span>
-                    <span className='text-green-400 text-xs bg-green-500/20 px-2 py-1 rounded'>
-                      Nivel
-                    </span>
-                  </div>
-                  <p className='text-white/60 text-xs'>
-                    Condición de salida normal
-                  </p>
-                </div>
+                )}
               </div>
             </div>
           </div>
@@ -808,22 +760,32 @@ export const DataAnalyzer: React.FC<DataAnalyzerProps> = ({
         </motion.div>
       )}
 
-      {/* ▶️ Botón de continuar */}
+      {/* ▶️ Botón opcional para ir al hidrograma */}
       {state.hdfData && !state.isAnalyzing && (
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           className='text-center'
         >
-          <Button
-            onClick={onAnalysisComplete}
-            variant='default'
-            size='lg'
-            className='font-semibold'
-          >
-            <TrendingUp className='w-4 h-4 mr-2' />
-            Ver Hidrograma
-          </Button>
+          <div className='space-y-2'>
+            <p className='text-white/60 text-sm'>
+              Análisis completado. Puedes navegar al hidrograma o continuar explorando los metadatos.
+            </p>
+            <Button
+              onClick={onAnalysisComplete}
+              variant='ghost'
+              size='lg'
+              className='font-semibold'
+            >
+              <TrendingUp className='w-4 h-4 mr-2' />
+              Ir al Hidrograma
+            </Button>
+          </div>
+
+          {/* Visualizador de Condiciones de Contorno */}
+          <div className='mt-8'>
+            <BoundaryConditionsViewer state={state} />
+          </div>
         </motion.div>
       )}
     </div>

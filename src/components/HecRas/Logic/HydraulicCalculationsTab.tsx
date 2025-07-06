@@ -122,7 +122,7 @@ const calculationTools: CalculationTool[] = [
  */
 export const HydraulicCalculationsTab: React.FC<
   HydraulicCalculationsTabProps
-> = ({ state, updateState }) => {
+> = ({ state: _state, updateState: _updateState }) => {
   const [selectedTool, setSelectedTool] = useState<CalculationType | null>(
     null
   );
@@ -176,18 +176,15 @@ export const HydraulicCalculationsTab: React.FC<
           results = await calculateBackwaterProfile();
           break;
         default:
-          results = generateMockResults(selectedTool, calculationInputs);
+          throw new Error(`Tipo de cálculo no implementado: ${selectedTool}`);
       }
 
       setCalculationResults(results);
     } catch (error) {
       console.error('Error en cálculo:', error);
-      // Fallback a resultados mock en caso de error
-      const fallbackResults = generateMockResults(
-        selectedTool,
-        calculationInputs
-      );
-      setCalculationResults(fallbackResults);
+      setCalculationResults(null);
+      // Mostrar error al usuario
+      alert(`Error en el cálculo: ${error}`);
     } finally {
       setIsCalculating(false);
     }
@@ -352,56 +349,7 @@ export const HydraulicCalculationsTab: React.FC<
     }
   };
 
-  /**
-   * 📊 Generar resultados mock para demostración
-   */
-  const generateMockResults = (
-    toolType: CalculationType,
-    _inputs: Record<string, number>
-  ) => {
-    switch (toolType) {
-      case 'uniform-flow':
-        return {
-          velocity: 2.5,
-          depth: 1.8,
-          area: 12.5,
-          wetted_perimeter: 8.2,
-          hydraulic_radius: 1.52,
-          froude_number: 0.6,
-        };
-      case 'specific-energy':
-        return {
-          critical_depth: 1.2,
-          critical_velocity: 3.1,
-          specific_energy: 2.1,
-          energy_head: 2.6,
-          flow_type: 'Subcrítico',
-        };
-      case 'manning':
-        return {
-          discharge: 25.8,
-          velocity: 2.1,
-          manning_coefficient: 0.035,
-          conveyance: 742.3,
-        };
-      case 'backwater':
-        return {
-          profile_length: 1250,
-          water_surface_slope: 0.0012,
-          energy_slope: 0.0015,
-          profile_type: 'M1',
-        };
-      case 'design':
-        return {
-          optimal_width: 4.5,
-          optimal_depth: 2.1,
-          minimum_freeboard: 0.5,
-          design_discharge: 30.0,
-        };
-      default:
-        return {};
-    }
-  };
+
 
   /**
    * 🎨 Obtener color de herramienta
@@ -422,7 +370,7 @@ export const HydraulicCalculationsTab: React.FC<
   );
 
   return (
-    <div className='space-y-6'>
+    <div className='space-y-4'>
       {/* 📋 Título y descripción */}
       <div className='text-center'>
         <h2 className='text-2xl font-bold text-white mb-2'>
