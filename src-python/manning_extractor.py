@@ -20,16 +20,16 @@ class ManningExtractor:
     """
     🔍 Extractor for Manning's n values from HEC-RAS HDF5 files
     """
-    
+
     def __init__(self, hdf_file_path: str):
         """
         Initialize the Manning extractor
-        
+
         Args:
             hdf_file_path (str): Path to the HDF5 file
         """
         self.hdf_file_path = hdf_file_path
-        
+
     def extract_manning_values(self) -> Dict[str, Any]:
         """
         Extract Manning's n values from the HDF5 file
@@ -80,21 +80,21 @@ class ManningExtractor:
                     "success": False,
                     "error": "No Manning data found in HDF5 file or associated LandCover.hdf"
                 }
-                
+
         except Exception as e:
             logger.error(f"Error reading Manning values: {str(e)}")
             return {
                 "success": False,
                 "error": str(e)
             }
-    
+
     def _search_manning_data(self, hf: h5py.File) -> Optional[np.ndarray]:
         """
         Search for Manning data in the HDF5 file
-        
+
         Args:
             hf: Open HDF5 file handle
-            
+
         Returns:
             Manning data array or None
         """
@@ -121,7 +121,7 @@ class ManningExtractor:
             "Geometry/Land Cover/Manning n",
             "Geometry/Land Cover/Manning",
         ]
-        
+
         for path in manning_paths:
             if path in hf:
                 logger.info(f"Found Manning data at: {path}")
@@ -137,27 +137,27 @@ class ManningExtractor:
                 except Exception as e:
                     logger.warning(f"Error reading Manning data at {path}: {str(e)}")
                     continue
-        
+
         # If not found in standard locations, search recursively
         logger.info("Manning data not found in standard paths, searching recursively...")
         logger.info(f"Available top-level groups: {list(hf.keys())}")
         return self._recursive_search_manning(hf)
-    
+
     def _recursive_search_manning(self, group, path="") -> Optional[np.ndarray]:
         """
         Recursively search for Manning data
-        
+
         Args:
             group: HDF5 group to search
             path: Current path in the hierarchy
-            
+
         Returns:
             Manning data array or None
         """
         for key in group.keys():
             item = group[key]
             current_path = f"{path}/{key}" if path else key
-            
+
             # Check if this looks like Manning data
             if ("manning" in key.lower() or "roughness" in key.lower() or
                 "land cover" in key.lower() or key.lower().endswith(" n")):
@@ -173,13 +173,13 @@ class ManningExtractor:
                     except Exception as e:
                         logger.debug(f"Error reading data at {current_path}: {str(e)}")
                         continue
-            
+
             # Recurse into groups
             if hasattr(item, 'keys'):
                 result = self._recursive_search_manning(item, current_path)
                 if result is not None:
                     return result
-        
+
         return None
 
     def _search_landcover_file(self, hf: h5py.File) -> Optional[np.ndarray]:
@@ -314,14 +314,14 @@ class ManningExtractor:
         except Exception as e:
             logger.error(f"Error extracting from LandCover file: {str(e)}")
             return None
-    
+
     def _process_manning_data(self, manning_array: np.ndarray) -> Dict[str, Any]:
         """
         Process raw Manning data into structured format
-        
+
         Args:
             manning_array: Raw Manning values array
-            
+
         Returns:
             Processed Manning data dictionary
         """
@@ -348,32 +348,32 @@ class ManningExtractor:
                 "table_data": [],
                 "formatted_table": ""
             }
-        
+
         # Get unique values and create zones
         unique_values = sorted(list(set(clean_data)))
         manning_zones = {}
         table_data = []
-        
+
         for i, value in enumerate(unique_values):
             zone_id = i + 1
             zone_name = self._get_manning_description(value)
-            
+
             manning_zones[str(zone_id)] = {
                 "name": zone_name,
                 "value": value,
                 "description": self._get_detailed_description(value)
             }
-            
+
             table_data.append([
                 zone_id,
                 zone_name,
                 f"{value:.4f}",
                 self._get_detailed_description(value)
             ])
-        
+
         # Create formatted table (simple text format)
         formatted_table = self._create_formatted_table(table_data)
-        
+
         return {
             "success": True,
             "manning_zones": manning_zones,
@@ -381,7 +381,7 @@ class ManningExtractor:
             "table_data": table_data,
             "formatted_table": formatted_table
         }
-    
+
     def _get_manning_description(self, value: float) -> str:
         """Get short description for Manning value"""
         if value < 0.020:
@@ -398,7 +398,7 @@ class ManningExtractor:
             return "Superficie extrema"
         else:
             return "Alta resistencia"
-    
+
     def _get_detailed_description(self, value: float) -> str:
         """Get detailed description for Manning value"""
         if value < 0.020:
@@ -415,19 +415,19 @@ class ManningExtractor:
             return "Superficie extremadamente rugosa (bosques)"
         else:
             return "Superficie con alta resistencia (urbano denso)"
-    
+
     def _create_formatted_table(self, table_data: List[List]) -> str:
         """Create a simple formatted table"""
         if not table_data:
             return "No hay datos de Manning disponibles"
-        
+
         lines = []
         lines.append("ID | Tipo de Cobertura | Manning n | Descripción")
         lines.append("-" * 60)
-        
+
         for row in table_data:
             lines.append(f"{row[0]:2d} | {row[1]:15s} | {row[2]:8s} | {row[3]}")
-        
+
         return "\n".join(lines)
 
 def main():
@@ -440,21 +440,21 @@ def main():
             "error": "Usage: python manning_extractor.py <hdf_file_path>"
         }))
         sys.exit(1)
-    
+
     hdf_file_path = sys.argv[1]
-    
+
     if not os.path.exists(hdf_file_path):
         print(json.dumps({
             "success": False,
             "error": f"HDF file not found: {hdf_file_path}"
         }))
         sys.exit(1)
-    
+
     try:
         extractor = ManningExtractor(hdf_file_path)
         result = extractor.extract_manning_values()
         print(json.dumps(result, indent=2))
-        
+
     except Exception as e:
         error_result = {
             "success": False,

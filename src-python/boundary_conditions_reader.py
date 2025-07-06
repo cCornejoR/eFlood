@@ -20,34 +20,34 @@ class BoundaryConditionsReader:
     """
     🔍 Reader for HEC-RAS boundary conditions from HDF5 files
     """
-    
+
     def __init__(self, hdf_file_path: str):
         """
         Initialize the boundary conditions reader
-        
+
         Args:
             hdf_file_path (str): Path to the HDF5 file
         """
         self.hdf_file_path = hdf_file_path
         self.boundary_conditions = []
-        
+
     def extract_boundary_conditions(self) -> Dict[str, Any]:
         """
         Extract all boundary conditions from the HDF5 file
-        
+
         Returns:
             Dict containing boundary conditions data
         """
         try:
             with h5py.File(self.hdf_file_path, 'r') as hf:
                 logger.info(f"Reading boundary conditions from: {self.hdf_file_path}")
-                
+
                 # Search for boundary condition groups
                 boundary_data = self._search_boundary_conditions(hf)
-                
+
                 # Extract time series data
                 time_series_data = self._extract_time_series(hf)
-                
+
                 # Combine results
                 result = {
                     "success": True,
@@ -56,10 +56,10 @@ class BoundaryConditionsReader:
                     "total_boundaries": len(boundary_data),
                     "file_path": self.hdf_file_path
                 }
-                
+
                 logger.info(f"Found {len(boundary_data)} boundary conditions")
                 return result
-                
+
         except Exception as e:
             logger.error(f"Error reading boundary conditions: {str(e)}")
             return {
@@ -76,7 +76,7 @@ class BoundaryConditionsReader:
                 "time_series": {},
                 "total_boundaries": 1
             }
-    
+
     def _search_boundary_conditions(self, hf: h5py.File) -> List[Dict[str, Any]]:
         """
         Search for boundary condition groups in the HDF5 file
@@ -158,19 +158,19 @@ class BoundaryConditionsReader:
             })
 
         return boundary_conditions
-    
+
     def _determine_bc_type(self, bc_name: str) -> str:
         """
         Determine the type of boundary condition based on name
-        
+
         Args:
             bc_name: Name of the boundary condition
-            
+
         Returns:
             Type string (Caudal, Nivel, etc.)
         """
         name_lower = bc_name.lower()
-        
+
         if any(keyword in name_lower for keyword in ['entrada', 'inflow', 'inlet', 'rio']):
             return "Caudal"
         elif any(keyword in name_lower for keyword in ['salida', 'outflow', 'outlet', 'stage']):
@@ -179,19 +179,19 @@ class BoundaryConditionsReader:
             return "Caudal"
         else:
             return "Desconocido"
-    
+
     def _generate_description(self, bc_name: str) -> str:
         """
         Generate a description for the boundary condition
-        
+
         Args:
             bc_name: Name of the boundary condition
-            
+
         Returns:
             Description string
         """
         name_lower = bc_name.lower()
-        
+
         if 'entrada' in name_lower or 'inlet' in name_lower:
             if 'principal' in name_lower or 'main' in name_lower:
                 return "Hidrograma de entrada principal"
@@ -203,7 +203,7 @@ class BoundaryConditionsReader:
             return "Condición de salida normal"
         else:
             return f"Condición de contorno: {bc_name}"
-    
+
     def _extract_time_series(self, hf: h5py.File) -> Dict[str, Any]:
         """
         Extract time series data for hydrograph visualization
@@ -263,21 +263,21 @@ def main():
             "error": "Usage: python boundary_conditions_reader.py <hdf_file_path>"
         }))
         sys.exit(1)
-    
+
     hdf_file_path = sys.argv[1]
-    
+
     if not os.path.exists(hdf_file_path):
         print(json.dumps({
             "success": False,
             "error": f"HDF file not found: {hdf_file_path}"
         }))
         sys.exit(1)
-    
+
     try:
         reader = BoundaryConditionsReader(hdf_file_path)
         result = reader.extract_boundary_conditions()
         print(json.dumps(result, indent=2))
-        
+
     except Exception as e:
         error_result = {
             "success": False,

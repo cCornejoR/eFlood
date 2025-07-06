@@ -78,7 +78,7 @@ export const HydrographChart: React.FC<HydrographChartProps> = ({
 
       for (let i = 0; i < maxLength; i++) {
         const dataPoint: ChartDataPoint = { time: i };
-        
+
         allSeries.forEach(seriesKey => {
           const series = timeSeriesData[seriesKey];
           if (series && series.data && series.data[i] !== undefined) {

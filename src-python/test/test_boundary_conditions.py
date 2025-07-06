@@ -14,10 +14,10 @@ from boundary_conditions_reader import BoundaryConditionsReader
 
 def test_boundary_conditions():
     """Test básico para verificar que el script no produce errores JSON"""
-    
+
     # Crear un reader con un archivo ficticio
     reader = BoundaryConditionsReader("fake_file.hdf")
-    
+
     # Simular el resultado que debería devolver
     test_result = {
         "success": True,
@@ -50,19 +50,19 @@ def test_boundary_conditions():
         },
         "total_boundaries": 2
     }
-    
+
     # Verificar que se puede convertir a JSON sin errores
     try:
         json_output = json.dumps(test_result, indent=2)
         print("✅ JSON válido generado:")
         print(json_output)
-        
+
         # Verificar que se puede parsear de vuelta
         parsed = json.loads(json_output)
         print("✅ JSON parseado correctamente")
-        
+
         return True
-        
+
     except Exception as e:
         print(f"❌ Error en JSON: {str(e)}")
         return False
@@ -70,7 +70,7 @@ def test_boundary_conditions():
 if __name__ == "__main__":
     print("🧪 Probando boundary_conditions_reader...")
     success = test_boundary_conditions()
-    
+
     if success:
         print("✅ Todas las pruebas pasaron")
         sys.exit(0)

@@ -20,14 +20,14 @@ interface AnalysisStatusProps {
 
 /**
  * 📊 Componente de Estado del Análisis
- * 
+ *
  * Muestra el estado actual del análisis HDF de forma compacta
  * para ser usado en el footer o en otras partes de la aplicación.
  */
-export const AnalysisStatus: React.FC<AnalysisStatusProps> = ({ 
-  state, 
+export const AnalysisStatus: React.FC<AnalysisStatusProps> = ({
+  state,
   className = '',
-  compact = false 
+  compact = false
 }) => {
   // 🎨 Configuración de elementos de estado
   const statusItems = [
@@ -51,10 +51,10 @@ export const AnalysisStatus: React.FC<AnalysisStatusProps> = ({
       id: 'analysis',
       icon: Play,
       label: 'Análisis',
-      status: state.isAnalyzing 
-        ? 'Procesando...' 
-        : state.hdfData 
-          ? 'Completado' 
+      status: state.isAnalyzing
+        ? 'Procesando...'
+        : state.hdfData
+          ? 'Completado'
           : 'Pendiente',
       isActive: !!state.hdfData,
       color: state.hdfData ? 'text-green-400' : 'text-gray-400'
@@ -93,7 +93,7 @@ export const AnalysisStatus: React.FC<AnalysisStatusProps> = ({
             </div>
           );
         })}
-        
+
         {/* Indicador de procesamiento */}
         {state.isAnalyzing && (
           <div className="flex items-center gap-1">

@@ -84,7 +84,7 @@ export const ManningDebugViewer: React.FC<ManningDebugViewerProps> = ({
               <div className="flex justify-between">
                 <span className="text-white/60">Zones Object:</span>
                 <span className="text-blue-400">
-                  {manningData?.manning_data?.manning_zones ? 
+                  {manningData?.manning_data?.manning_zones ?
                     Object.keys(manningData.manning_data.manning_zones).length : 0}
                 </span>
               </div>

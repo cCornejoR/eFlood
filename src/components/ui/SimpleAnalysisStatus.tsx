@@ -19,12 +19,12 @@ interface SimpleAnalysisStatusProps {
 
 /**
  * 📊 Componente Simple de Estado del Análisis
- * 
+ *
  * Versión minimalista y cool del estado del análisis
  * para mostrar encima del footer.
  */
-export const SimpleAnalysisStatus: React.FC<SimpleAnalysisStatusProps> = ({ 
-  state, 
+export const SimpleAnalysisStatus: React.FC<SimpleAnalysisStatusProps> = ({
+  state,
   className = ''
 }) => {
   // 🎨 Configuración de elementos de estado
@@ -71,7 +71,7 @@ export const SimpleAnalysisStatus: React.FC<SimpleAnalysisStatusProps> = ({
     >
       {statusItems.map((item, index) => {
         const Icon = item.icon;
-        
+
         return (
           <motion.div
             key={item.id}
@@ -82,16 +82,16 @@ export const SimpleAnalysisStatus: React.FC<SimpleAnalysisStatusProps> = ({
           >
             {/* Icono con estado */}
             <div className="relative">
-              <Icon 
+              <Icon
                 className={cn(
                   'h-4 w-4 transition-all duration-300',
-                  item.isActive 
-                    ? 'text-green-400' 
+                  item.isActive
+                    ? 'text-green-400'
                     : 'text-gray-500',
                   item.isProcessing && 'animate-pulse text-blue-400'
                 )}
               />
-              
+
               {/* Indicador de estado activo */}
               {item.isActive && !item.isProcessing && (
                 <motion.div
@@ -100,7 +100,7 @@ export const SimpleAnalysisStatus: React.FC<SimpleAnalysisStatusProps> = ({
                   className="absolute -top-1 -right-1 w-2 h-2 bg-green-400 rounded-full border border-[#131414]"
                 />
               )}
-              
+
               {/* Indicador de procesamiento */}
               {item.isProcessing && (
                 <motion.div
@@ -112,11 +112,11 @@ export const SimpleAnalysisStatus: React.FC<SimpleAnalysisStatusProps> = ({
             </div>
 
             {/* Label */}
-            <span 
+            <span
               className={cn(
                 'text-xs font-medium transition-colors duration-300',
-                item.isActive 
-                  ? 'text-white' 
+                item.isActive
+                  ? 'text-white'
                   : 'text-gray-500'
               )}
             >

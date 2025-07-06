@@ -59,25 +59,25 @@ def main():
     """Ejecutar todas las pruebas"""
     print("🚀 Iniciando pruebas del backend Python...")
     print("=" * 50)
-    
+
     tests = [
         test_hdf_reader,
         test_boundary_conditions_reader,
         test_hdf_data_extractor,
         test_hecras_processor,
     ]
-    
+
     passed = 0
     total = len(tests)
-    
+
     for test in tests:
         if test():
             passed += 1
         print()
-    
+
     print("=" * 50)
     print(f"📊 Resultados: {passed}/{total} pruebas pasaron")
-    
+
     if passed == total:
         print("🎉 ¡Todos los módulos del backend funcionan correctamente!")
         return True

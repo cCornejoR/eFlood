@@ -52,7 +52,7 @@ interface SystemMonitorProps {
 
 /**
  * 📊 Componente de Monitoreo del Sistema
- * 
+ *
  * Muestra métricas en tiempo real del uso de recursos de la aplicación
  * de forma minimalista en el footer.
  */

@@ -174,7 +174,7 @@ export const SimpleManningTable: React.FC<SimpleManningTableProps> = ({
           <TreePine className="h-6 w-6 text-green-400" />
           <h3 className="text-lg font-semibold text-white">Valores de Manning</h3>
         </div>
-        
+
         <div className="text-center py-8">
           <TreePine className="h-12 w-12 text-gray-600 mx-auto mb-4" />
           <p className="text-white/60 text-sm mb-2">

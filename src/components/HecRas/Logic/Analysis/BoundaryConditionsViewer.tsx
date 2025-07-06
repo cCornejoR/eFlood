@@ -198,12 +198,12 @@ export const BoundaryConditionsViewer: React.FC<BoundaryConditionsViewerProps> =
             <BarChart3 className='h-5 w-5 text-blue-400' />
             Detalles: {selectedBoundary}
           </h4>
-          
+
           <div className='bg-white/5 rounded-lg p-4'>
             <p className='text-white/60 text-sm mb-4'>
               Aquí se mostraría el hidrograma y datos detallados de la condición de contorno seleccionada.
             </p>
-            
+
             {/* Hydrograph Chart */}
             <HydrographChart
               boundaryConditions={boundaryConditions}

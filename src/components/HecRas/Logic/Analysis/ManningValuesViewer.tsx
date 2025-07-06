@@ -1,6 +1,6 @@
 /**
  * 🌿 Manning Values Viewer Component
- * 
+ *
  * Displays calibrated Manning's n values from HEC-RAS model
  * Shows a comprehensive table with land cover types and roughness coefficients
  */
@@ -102,7 +102,7 @@ export const ManningValuesViewer: React.FC<ManningValuesViewerProps> = ({
   // Get Manning value statistics
   const getManningStats = () => {
     if (manningArray.length === 0) return null;
-    
+
     const values = manningArray.map(m => m.value);
     return {
       min: Math.min(...values),
@@ -138,11 +138,11 @@ export const ManningValuesViewer: React.FC<ManningValuesViewerProps> = ({
             Valores de Manning
           </h3>
         </div>
-        
+
         <div className="flex items-center gap-3 text-gray-400">
           <Info className="w-4 h-4" />
           <span>
-            {manningData?.error 
+            {manningData?.error
               ? `Error: ${manningData.error}`
               : 'No hay valores de Manning disponibles. Ejecuta el análisis primero.'
             }
@@ -169,7 +169,7 @@ export const ManningValuesViewer: React.FC<ManningValuesViewerProps> = ({
             {totalZones} zonas
           </span>
         </div>
-        
+
         <div className="flex items-center gap-2">
           <button
             onClick={() => setShowDetails(!showDetails)}

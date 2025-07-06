@@ -1,6 +1,6 @@
 /**
  * 🌿 Professional Manning Values Table Component
- * 
+ *
  * Uses TanStack Table for professional data display with sorting, filtering, and export
  */
 
@@ -117,7 +117,7 @@ export const ProfessionalManningTable: React.FC<ProfessionalManningTableProps> =
         header: 'Tipo de Cobertura',
         cell: (info) => (
           <div className="flex items-center gap-2">
-            <div 
+            <div
               className={cn("w-3 h-3 rounded-full", info.row.original.color)}
             />
             <span className="font-medium text-white">
@@ -180,7 +180,7 @@ export const ProfessionalManningTable: React.FC<ProfessionalManningTableProps> =
   // Get Manning statistics
   const getManningStats = () => {
     if (tableData.length === 0) return null;
-    
+
     const values = tableData.map(item => item.value);
     return {
       min: Math.min(...values),
@@ -274,7 +274,7 @@ export const ProfessionalManningTable: React.FC<ProfessionalManningTableProps> =
             </p>
           </div>
         </div>
-        
+
         <div className="flex items-center gap-2">
           <button
             onClick={() => setShowDetails(!showDetails)}
@@ -283,7 +283,7 @@ export const ProfessionalManningTable: React.FC<ProfessionalManningTableProps> =
             {showDetails ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
             {showDetails ? 'Ocultar' : 'Mostrar'} Detalles
           </button>
-          
+
           <button
             onClick={exportToCSV}
             className="flex items-center gap-2 px-3 py-2 bg-green-600/20 hover:bg-green-600/30 text-green-400 text-sm rounded-lg transition-colors"
@@ -304,7 +304,7 @@ export const ProfessionalManningTable: React.FC<ProfessionalManningTableProps> =
             </div>
             <p className="text-lg font-bold text-blue-400">{stats.count}</p>
           </div>
-          
+
           <div className="bg-white/5 rounded-lg p-3 border border-white/10">
             <div className="flex items-center gap-2 mb-1">
               <ArrowDown className="h-4 w-4 text-green-400" />
@@ -312,7 +312,7 @@ export const ProfessionalManningTable: React.FC<ProfessionalManningTableProps> =
             </div>
             <p className="text-lg font-bold text-green-400">{stats.min.toFixed(3)}</p>
           </div>
-          
+
           <div className="bg-white/5 rounded-lg p-3 border border-white/10">
             <div className="flex items-center gap-2 mb-1">
               <ArrowUp className="h-4 w-4 text-red-400" />
@@ -320,7 +320,7 @@ export const ProfessionalManningTable: React.FC<ProfessionalManningTableProps> =
             </div>
             <p className="text-lg font-bold text-red-400">{stats.max.toFixed(3)}</p>
           </div>
-          
+
           <div className="bg-white/5 rounded-lg p-3 border border-white/10">
             <div className="flex items-center gap-2 mb-1">
               <BarChart3 className="h-4 w-4 text-yellow-400" />
@@ -343,7 +343,7 @@ export const ProfessionalManningTable: React.FC<ProfessionalManningTableProps> =
             className="w-full pl-10 pr-4 py-2 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-400/50"
           />
         </div>
-        
+
         <div className="flex items-center gap-2 text-sm text-gray-400">
           <Filter className="h-4 w-4" />
           <span>{table.getFilteredRowModel().rows.length} de {tableData.length}</span>
