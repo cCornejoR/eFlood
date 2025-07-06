@@ -17,11 +17,9 @@ import { motion } from 'framer-motion';
 import {
   CheckCircle,
   AlertCircle,
-
   Database,
   BarChart3,
   Clock,
-  TrendingUp,
   Layers,
   Zap,
   Play,
@@ -31,11 +29,11 @@ import { HecRasState } from '../../index';
 import { Button } from '@/components/ui/Button';
 import { DotFlow, DotFlowProps } from '@/components/ui/dot-flow';
 import { BoundaryConditionsViewer } from './BoundaryConditionsViewer';
+import { SimpleManningTable } from './SimpleManningTable';
 
 interface DataAnalyzerProps {
   state: HecRasState;
   updateState: (updates: Partial<HecRasState>) => void;
-  onAnalysisComplete: () => void;
 }
 
 /**
@@ -47,7 +45,6 @@ interface DataAnalyzerProps {
 export const DataAnalyzer: React.FC<DataAnalyzerProps> = ({
   state,
   updateState,
-  onAnalysisComplete,
 }) => {
   const [analysisStep, setAnalysisStep] = useState<string>('ready');
   const [analysisProgress, setAnalysisProgress] = useState(0);
@@ -56,6 +53,8 @@ export const DataAnalyzer: React.FC<DataAnalyzerProps> = ({
 
   // Usar analysisResults del estado global en lugar del estado local
   const analysisResults = state.analysisResults;
+
+  // Navegación manual al hidrograma - removida la navegación automática
 
   // 🎨 Animaciones predefinidas para el análisis
   const importing = [
@@ -212,7 +211,12 @@ export const DataAnalyzer: React.FC<DataAnalyzerProps> = ({
    * Solo si hay archivo HDF y no hay datos ya procesados
    */
   useEffect(() => {
-    if (state.selectedHDFFile && !state.hdfData && !state.isAnalyzing && !analysisResults) {
+    if (
+      state.selectedHDFFile &&
+      !state.hdfData &&
+      !state.isAnalyzing &&
+      !analysisResults
+    ) {
       handleStartAnalysis();
     }
   }, []); // Solo ejecutar una vez al montar el componente
@@ -273,11 +277,22 @@ export const DataAnalyzer: React.FC<DataAnalyzerProps> = ({
 
       // Paso 5: Extraer condiciones de contorno reales
       setAnalysisStep('Extrayendo condiciones de contorno...');
-      setAnalysisProgress(75);
+      setAnalysisProgress(70);
 
       const boundaryConditions = await invoke('extract_boundary_conditions', {
         hdfFilePath: state.selectedHDFFile,
       });
+
+      // Paso 6: Extraer valores de Manning calibrados
+      setAnalysisStep('Extrayendo valores de Manning calibrados...');
+      setAnalysisProgress(80);
+
+      console.log('🌿 Extracting Manning values from:', state.selectedHDFFile);
+      const manningValues = await invoke('extract_manning_values', {
+        hdfFilePath: state.selectedHDFFile,
+        terrainFilePath: state.selectedTerrainFile,
+      });
+      console.log('🌿 Manning extraction result:', manningValues);
 
       // Paso 4: Generar hidrograma desde condiciones de contorno
       setAnalysisStep('Generando hidrograma...');
@@ -299,6 +314,7 @@ export const DataAnalyzer: React.FC<DataAnalyzerProps> = ({
         hydrographData: hydrographData,
         fileMetadata: fileInfo,
         boundaryConditions: boundaryConditions,
+        manningValues: manningValues,
         isAnalyzing: false,
       });
 
@@ -307,7 +323,8 @@ export const DataAnalyzer: React.FC<DataAnalyzerProps> = ({
         fileStructure,
         hydraulicDatasets,
         boundaryConditions,
-        detailedMetadata
+        detailedMetadata,
+        manningValues
       );
 
       // Actualizar estado global con los resultados del análisis
@@ -342,7 +359,8 @@ export const DataAnalyzer: React.FC<DataAnalyzerProps> = ({
     fileStructure: any,
     _hydraulicDatasets: any,
     boundaryConditions: any,
-    detailedMetadata?: any
+    detailedMetadata?: any,
+    _manningValues?: any
   ) => {
     try {
       // Parsear datos de estructura del archivo
@@ -363,7 +381,11 @@ export const DataAnalyzer: React.FC<DataAnalyzerProps> = ({
       let cellCount = 0;
       let flowAreas = 0;
 
-      if (detailedMetadata && detailedMetadata.success && detailedMetadata.data) {
+      if (
+        detailedMetadata &&
+        detailedMetadata.success &&
+        detailedMetadata.data
+      ) {
         try {
           const metadata = JSON.parse(detailedMetadata.data);
           totalDatasets = metadata.total_datasets || totalDatasets;
@@ -397,10 +419,26 @@ export const DataAnalyzer: React.FC<DataAnalyzerProps> = ({
 
       // Contar condiciones de contorno reales
       let boundaryConditionsCount = 0;
-      if (boundaryConditions && boundaryConditions.success && boundaryConditions.data) {
+      if (
+        boundaryConditions &&
+        boundaryConditions.success &&
+        boundaryConditions.data
+      ) {
         try {
-          const bcData = JSON.parse(boundaryConditions.data);
-          boundaryConditionsCount = bcData.total_boundaries || bcData.boundary_conditions?.length || 0;
+          // Limpiar datos antes de parsear JSON
+          let cleanData = boundaryConditions.data;
+          if (typeof cleanData === 'string') {
+            // Reemplazar valores problemáticos
+            cleanData = cleanData
+              .replace(/\bNaN\b/g, '0')
+              .replace(/\bInfinity\b/g, '0')
+              .replace(/\b-Infinity\b/g, '0')
+              .replace(/\bnull\b/g, '0');
+          }
+
+          const bcData = JSON.parse(cleanData);
+          boundaryConditionsCount =
+            bcData.total_boundaries || bcData.boundary_conditions?.length || 0;
         } catch (error) {
           console.warn('Error parsing boundary conditions:', error);
           // Fallback: buscar en estructura del archivo
@@ -438,24 +476,12 @@ export const DataAnalyzer: React.FC<DataAnalyzerProps> = ({
     }
   };
 
-
-
   return (
     <div className='space-y-4'>
-      {/* 📋 Título y descripción */}
-      <div className='text-center'>
-        <h2 className='text-2xl font-bold text-white mb-2'>
-          Análisis de Datos
-        </h2>
-        <p className='text-white/60'>
-          Procesando archivo HDF y extrayendo información hidráulica
-        </p>
-      </div>
-
       {/* 🔄 Panel de análisis */}
-      <div className='bg-white/5 rounded-2xl p-8 backdrop-blur-sm border border-white/10'>
+      <div className='bg-white/5 rounded-2xl px-8 backdrop-blur-sm border border-white/10'>
         {state.isAnalyzing ? (
-          <div className='flex flex-col items-center justify-center space-y-8'>
+          <div className='flex flex-col items-center justify-center min-h-[60vh] space-y-8'>
             {/* DotFlow centrado con animaciones dinámicas */}
             <DotFlow
               items={getAnalysisItems()}
@@ -489,14 +515,11 @@ export const DataAnalyzer: React.FC<DataAnalyzerProps> = ({
             </div>
           </div>
         ) : state.hdfData ? (
-          <div className='flex flex-col items-center justify-center space-y-4'>
-            <CheckCircle className='h-12 w-12 text-green-400' />
-            <div className='text-center'>
-              <h3 className='text-lg font-semibold text-white mb-2'>
-                Análisis Completado
-              </h3>
-              <p className='text-white/60 text-sm'>{analysisStep}</p>
-            </div>
+          <div className='flex items-center justify-center gap-2'>
+            <CheckCircle className='h-4 w-4 text-green-400' />
+            <span className='text-green-400 text-sm font-medium'>
+              Completado
+            </span>
           </div>
         ) : !analysisResults ? (
           <div className='flex flex-col items-center justify-center space-y-4'>
@@ -520,16 +543,11 @@ export const DataAnalyzer: React.FC<DataAnalyzerProps> = ({
             </div>
           </div>
         ) : (
-          <div className='flex flex-col items-center justify-center space-y-4'>
-            <CheckCircle className='h-12 w-12 text-green-400' />
-            <div className='text-center'>
-              <h3 className='text-lg font-semibold text-white mb-2'>
-                Análisis Completado
-              </h3>
-              <p className='text-white/60 text-sm'>
-                Los metadatos del modelo están disponibles abajo
-              </p>
-            </div>
+          <div className='flex items-center justify-center gap-2'>
+            <CheckCircle className='h-4 w-4 text-green-400' />
+            <span className='text-green-400 text-sm font-medium'>
+              Completado
+            </span>
           </div>
         )}
       </div>
@@ -610,7 +628,7 @@ export const DataAnalyzer: React.FC<DataAnalyzerProps> = ({
 
               <div className='bg-white/5 rounded-lg p-4'>
                 <div className='flex items-center gap-2 mb-2'>
-                  <TrendingUp className='h-4 w-4 text-yellow-400' />
+                  <Layers className='h-4 w-4 text-yellow-400' />
                   <span className='text-white/80 text-sm font-medium'>
                     Áreas
                   </span>
@@ -623,83 +641,100 @@ export const DataAnalyzer: React.FC<DataAnalyzerProps> = ({
             </div>
           </div>
 
-          {/* Estado del Análisis - Compacto */}
-          <div className='bg-white/5 rounded-lg p-4 border border-white/10 mb-4'>
-            <div className='flex items-center justify-between'>
-              <div className='flex items-center gap-3'>
-                <div className='w-3 h-3 bg-green-400 rounded-full animate-pulse'></div>
-                <span className='text-green-400 font-medium'>Análisis Completado</span>
-                <span className='text-white/60 text-sm'>
-                  {state.selectedHDFFile?.split('/').pop() || 'N/A'}
-                </span>
-              </div>
-              <span className='text-white/40 text-xs'>
-                HEC-RAS 6.7 • Flujo 2D • Sistema Métrico
-              </span>
-            </div>
-          </div>
+          {/* Condiciones de Contorno Reales - Ancho completo */}
+          <div className='bg-white/5 rounded-xl p-6 border border-white/10'>
+            <h4 className='text-lg font-semibold text-white mb-4 flex items-center gap-2'>
+              <Zap className='h-5 w-5 text-yellow-400' />
+              Condiciones de Contorno
+            </h4>
+            <div>
+              {state.boundaryConditions &&
+              state.boundaryConditions.success &&
+              state.boundaryConditions.data ? (
+                (() => {
+                  try {
+                    // Limpiar datos antes de parsear JSON
+                    let cleanData = state.boundaryConditions.data;
+                    if (typeof cleanData === 'string') {
+                      cleanData = cleanData
+                        .replace(/\bNaN\b/g, '0')
+                        .replace(/\bInfinity\b/g, '0')
+                        .replace(/\b-Infinity\b/g, '0')
+                        .replace(/\bnull\b/g, '0');
+                    }
 
-          {/* Información del Archivo */}
-          <div className='grid grid-cols-1 lg:grid-cols-2 gap-6'>
+                    const bcData = JSON.parse(cleanData);
+                    const boundaryConditions = bcData.boundary_conditions || [];
 
-            {/* Condiciones de Contorno Reales */}
-            <div className='bg-white/5 rounded-xl p-6 border border-white/10'>
-              <h4 className='text-lg font-semibold text-white mb-4 flex items-center gap-2'>
-                <Zap className='h-5 w-5 text-yellow-400' />
-                Condiciones de Contorno
-              </h4>
-              <div className='space-y-3'>
-                {state.boundaryConditions &&
-                 state.boundaryConditions.success &&
-                 state.boundaryConditions.data ? (
-                  (() => {
-                    try {
-                      const bcData = JSON.parse(state.boundaryConditions.data);
-                      return bcData.boundary_conditions?.map((bc: any, index: number) => (
-                        <div key={index} className='bg-white/5 rounded-lg p-3'>
-                          <div className='flex items-center justify-between mb-2'>
-                            <span className='text-white/80 text-sm font-medium'>
-                              {bc.name}
-                            </span>
-                            <span className={`text-xs px-2 py-1 rounded ${
-                              bc.type === 'Caudal'
-                                ? 'text-blue-400 bg-blue-500/20'
-                                : bc.type === 'Nivel'
-                                ? 'text-green-400 bg-green-500/20'
-                                : 'text-gray-400 bg-gray-500/20'
-                            }`}>
-                              {bc.type}
-                            </span>
-                          </div>
-                          <p className='text-white/60 text-xs'>
-                            {bc.description}
-                          </p>
-                          {bc.data_available && (
-                            <p className='text-white/40 text-xs mt-1'>
-                              {bc.time_steps} pasos temporales disponibles
-                            </p>
-                          )}
-                        </div>
-                      ));
-                    } catch (error) {
-                      console.error('Error parsing boundary conditions:', error);
+                    if (boundaryConditions.length === 0) {
                       return (
-                        <div className='bg-red-500/10 rounded-lg p-3 border border-red-500/20'>
-                          <p className='text-red-400 text-sm'>
-                            Error al cargar condiciones de contorno
+                        <div className='bg-yellow-500/10 rounded-lg p-3 border border-yellow-500/20'>
+                          <p className='text-yellow-400 text-sm'>
+                            No se encontraron condiciones de contorno en el
+                            archivo HDF5
                           </p>
                         </div>
                       );
                     }
-                  })()
-                ) : (
-                  <div className='bg-yellow-500/10 rounded-lg p-3 border border-yellow-500/20'>
-                    <p className='text-yellow-400 text-sm'>
-                      No se encontraron condiciones de contorno en el archivo
-                    </p>
-                  </div>
-                )}
-              </div>
+
+                    return (
+                      <div className='grid grid-cols-1 md:grid-cols-2 gap-3'>
+                        {boundaryConditions.map((bc: any, index: number) => (
+                          <div
+                            key={index}
+                            className='bg-white/5 rounded-lg p-3'
+                          >
+                            <div className='flex items-center justify-between mb-2'>
+                              <span className='text-white/80 text-sm font-medium'>
+                                {bc.name || 'Condición sin nombre'}
+                              </span>
+                              <span
+                                className={`text-xs px-2 py-1 rounded ${
+                                  bc.type === 'Caudal'
+                                    ? 'text-blue-400 bg-blue-500/20'
+                                    : bc.type === 'Nivel'
+                                      ? 'text-green-400 bg-green-500/20'
+                                      : bc.type === 'Error'
+                                        ? 'text-red-400 bg-red-500/20'
+                                        : 'text-gray-400 bg-gray-500/20'
+                                }`}
+                              >
+                                {bc.type || 'Desconocido'}
+                              </span>
+                            </div>
+                            <p className='text-white/60 text-xs'>
+                              {bc.description || 'Sin descripción disponible'}
+                            </p>
+                            {bc.data_available && bc.time_steps > 0 && (
+                              <p className='text-white/40 text-xs mt-1'>
+                                {bc.time_steps} pasos temporales disponibles
+                              </p>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    );
+                  } catch (error) {
+                    console.error('Error parsing boundary conditions:', error);
+                    return (
+                      <div className='bg-red-500/10 rounded-lg p-3 border border-red-500/20'>
+                        <p className='text-red-400 text-sm'>
+                          Error al cargar condiciones de contorno:{' '}
+                          {error instanceof Error
+                            ? error.message
+                            : 'Error desconocido'}
+                        </p>
+                      </div>
+                    );
+                  }
+                })()
+              ) : (
+                <div className='bg-yellow-500/10 rounded-lg p-3 border border-yellow-500/20'>
+                  <p className='text-yellow-400 text-sm'>
+                    No se encontraron condiciones de contorno en el archivo
+                  </p>
+                </div>
+              )}
             </div>
           </div>
 
@@ -760,31 +795,21 @@ export const DataAnalyzer: React.FC<DataAnalyzerProps> = ({
         </motion.div>
       )}
 
-      {/* ▶️ Botón opcional para ir al hidrograma */}
+      {/* Visualizadores de datos después del análisis */}
       {state.hdfData && !state.isAnalyzing && (
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className='text-center'
+          className='space-y-8'
         >
-          <div className='space-y-2'>
-            <p className='text-white/60 text-sm'>
-              Análisis completado. Puedes navegar al hidrograma o continuar explorando los metadatos.
-            </p>
-            <Button
-              onClick={onAnalysisComplete}
-              variant='ghost'
-              size='lg'
-              className='font-semibold'
-            >
-              <TrendingUp className='w-4 h-4 mr-2' />
-              Ir al Hidrograma
-            </Button>
+          {/* Visualizador de Condiciones de Contorno */}
+          <div>
+            <BoundaryConditionsViewer state={state} />
           </div>
 
-          {/* Visualizador de Condiciones de Contorno */}
-          <div className='mt-8'>
-            <BoundaryConditionsViewer state={state} />
+          {/* Tabla Simple de Valores de Manning */}
+          <div>
+            <SimpleManningTable state={state} />
           </div>
         </motion.div>
       )}

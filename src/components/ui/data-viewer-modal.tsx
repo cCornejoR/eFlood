@@ -474,22 +474,22 @@ export const DataViewerModal: React.FC<DataViewerModalProps> = ({
                             <h4 className='text-md font-medium text-white mb-3'>
                               Atributos
                             </h4>
-                            <div className='bg-gray-800/50 border border-gray-600/30 rounded-lg p-4 max-h-40 overflow-y-auto backdrop-blur-sm'>
-                              <div className='space-y-2'>
+                            <div className='bg-gray-800/50 border border-gray-600/30 rounded-lg p-4 max-h-60 overflow-y-auto backdrop-blur-sm'>
+                              <div className='grid grid-cols-1 md:grid-cols-2 gap-3'>
                                 {Object.entries(data.metadata.attrs).map(
                                   ([key, value]) => (
                                     <div
                                       key={key}
-                                      className='flex justify-between items-start'
+                                      className='bg-gray-700/30 rounded-lg p-3 border border-gray-600/20'
                                     >
-                                      <span className='text-gray-400 text-sm'>
-                                        {key}:
-                                      </span>
-                                      <span className='text-white text-sm font-mono ml-4 text-right'>
+                                      <div className='text-gray-400 text-xs font-medium mb-1'>
+                                        {key}
+                                      </div>
+                                      <div className='text-white text-sm font-mono break-all'>
                                         {typeof value === 'object'
                                           ? JSON.stringify(value)
                                           : String(value)}
-                                      </span>
+                                      </div>
                                     </div>
                                   )
                                 )}

@@ -132,91 +132,93 @@ export const HecRasMenu: React.FC<HecRasMenuProps> = ({
 
           {/* Menu principal */}
           <ul className='flex items-center gap-0.5 sm:gap-1'>
-          {menuItems.map(item => {
-            const Icon = item.icon;
-            const isActive = item.id === activeTab;
+            {menuItems.map(item => {
+              const Icon = item.icon;
+              const isActive = item.id === activeTab;
 
-            return (
-              <motion.li key={item.id} className='relative'>
-                <button
-                  onClick={() => onTabChange(item.id)}
-                  className='block w-full'
-                  title={item.description}
-                >
-                  <motion.div
-                    className='block rounded-xl overflow-visible group relative'
-                    style={{ perspective: '600px' }}
-                    whileHover='hover'
-                    initial='initial'
+              return (
+                <motion.li key={item.id} className='relative'>
+                  <button
+                    onClick={() => onTabChange(item.id)}
+                    className='block w-full'
+                    title={item.description}
                   >
                     <motion.div
-                      className='absolute inset-0 z-0 pointer-events-none'
-                      variants={glowVariants}
-                      animate={isActive ? 'hover' : 'initial'}
-                      style={{
-                        background: item.gradient,
-                        opacity: isActive ? 1 : 0,
-                        borderRadius: '16px',
-                      }}
-                    />
-                    <motion.div
-                      className={cn(
-                        'flex items-center gap-1 sm:gap-1.5 px-2 sm:px-2.5 md:px-3 py-1.5 sm:py-2 relative z-10 bg-transparent transition-colors rounded-xl',
-                        isActive
-                          ? 'text-foreground'
-                          : 'text-muted-foreground group-hover:text-foreground'
-                      )}
-                      variants={itemVariants}
-                      transition={sharedTransition}
-                      style={{
-                        transformStyle: 'preserve-3d',
-                        transformOrigin: 'center bottom',
-                      }}
+                      className='block rounded-xl overflow-visible group relative'
+                      style={{ perspective: '600px' }}
+                      whileHover='hover'
+                      initial='initial'
                     >
-                      <span
+                      <motion.div
+                        className='absolute inset-0 z-0 pointer-events-none'
+                        variants={glowVariants}
+                        animate={isActive ? 'hover' : 'initial'}
+                        style={{
+                          background: item.gradient,
+                          opacity: isActive ? 1 : 0,
+                          borderRadius: '16px',
+                        }}
+                      />
+                      <motion.div
                         className={cn(
-                          'transition-colors duration-300',
-                          isActive ? item.iconColor : 'text-foreground',
-                          `group-hover:${item.iconColor}`
+                          'flex items-center gap-1 sm:gap-1.5 px-2 sm:px-2.5 md:px-3 py-1.5 sm:py-2 relative z-10 bg-transparent transition-colors rounded-xl',
+                          isActive
+                            ? 'text-foreground'
+                            : 'text-muted-foreground group-hover:text-foreground'
                         )}
+                        variants={itemVariants}
+                        transition={sharedTransition}
+                        style={{
+                          transformStyle: 'preserve-3d',
+                          transformOrigin: 'center bottom',
+                        }}
                       >
-                        <Icon className='h-4 w-4 sm:h-5 sm:w-5' />
-                      </span>
-                      <span className='text-sm sm:text-base font-medium'>
-                        {item.label}
-                      </span>
-                    </motion.div>
-                    <motion.div
-                      className={cn(
-                        'flex items-center gap-1 sm:gap-1.5 px-2 sm:px-2.5 md:px-3 py-1.5 sm:py-2 absolute inset-0 z-0 bg-transparent transition-colors rounded-xl pointer-events-none',
-                        isActive
-                          ? 'text-foreground'
-                          : 'text-muted-foreground group-hover:text-foreground'
-                      )}
-                      variants={backVariants}
-                      transition={sharedTransition}
-                      style={{
-                        transformStyle: 'preserve-3d',
-                        transformOrigin: 'center top',
-                        rotateX: 90,
-                      }}
-                    >
-                      <span
+                        <span
+                          className={cn(
+                            'transition-colors duration-300',
+                            isActive ? item.iconColor : 'text-foreground',
+                            `group-hover:${item.iconColor}`
+                          )}
+                        >
+                          <Icon className='h-4 w-4 sm:h-5 sm:w-5' />
+                        </span>
+                        <span className='text-sm sm:text-base font-medium'>
+                          {item.label}
+                        </span>
+                      </motion.div>
+                      <motion.div
                         className={cn(
-                          'transition-colors duration-300',
-                          isActive ? item.iconColor : 'text-foreground',
-                          `group-hover:${item.iconColor}`
+                          'flex items-center gap-1 sm:gap-1.5 px-2 sm:px-2.5 md:px-3 py-1.5 sm:py-2 absolute inset-0 z-0 bg-transparent transition-colors rounded-xl pointer-events-none',
+                          isActive
+                            ? 'text-foreground'
+                            : 'text-muted-foreground group-hover:text-foreground'
                         )}
+                        variants={backVariants}
+                        transition={sharedTransition}
+                        style={{
+                          transformStyle: 'preserve-3d',
+                          transformOrigin: 'center top',
+                          rotateX: 90,
+                        }}
                       >
-                        <Icon className='h-4 w-4 sm:h-5 sm:w-5' />
-                      </span>
-                      <span className='text-sm sm:text-base font-medium'>{item.label}</span>
+                        <span
+                          className={cn(
+                            'transition-colors duration-300',
+                            isActive ? item.iconColor : 'text-foreground',
+                            `group-hover:${item.iconColor}`
+                          )}
+                        >
+                          <Icon className='h-4 w-4 sm:h-5 sm:w-5' />
+                        </span>
+                        <span className='text-sm sm:text-base font-medium'>
+                          {item.label}
+                        </span>
+                      </motion.div>
                     </motion.div>
-                  </motion.div>
-                </button>
-              </motion.li>
-            );
-          })}
+                  </button>
+                </motion.li>
+              );
+            })}
           </ul>
 
           {/* Espacio para balance visual - reducido */}

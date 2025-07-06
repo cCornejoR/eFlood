@@ -35,7 +35,8 @@
       "Bash(npm run build:*)",
       "Bash(cargo check:*)",
       "Bash(git add:*)",
-      "Bash(git commit:*)"
+      "Bash(git commit:*)",
+      "Bash(git reset:*)"
     ],
     "deny": []
   }

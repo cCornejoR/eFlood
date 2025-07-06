@@ -47,7 +47,10 @@ export const HydrographViewer: React.FC<HydrographViewerProps> = ({
 
   // Inicializar condiciones de contorno seleccionadas
   useEffect(() => {
-    if (state.hydrographData?.data?.boundaries && typeof state.hydrographData.data.boundaries === 'object') {
+    if (
+      state.hydrographData?.data?.boundaries &&
+      typeof state.hydrographData.data.boundaries === 'object'
+    ) {
       const boundaryNames = Object.keys(state.hydrographData.data.boundaries);
       setSelectedBoundaries(boundaryNames);
     }
@@ -82,7 +85,10 @@ export const HydrographViewer: React.FC<HydrographViewerProps> = ({
       //   format: 'csv'
       // });
 
-      console.log('Exportación de hidrograma preparada para:', selectedBoundaries);
+      console.log(
+        'Exportación de hidrograma preparada para:',
+        selectedBoundaries
+      );
       await new Promise(resolve => setTimeout(resolve, 1000));
     } catch (error) {
       console.error('Error exportando hidrograma:', error);

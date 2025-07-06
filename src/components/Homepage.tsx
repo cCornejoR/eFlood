@@ -137,14 +137,13 @@ export default function Homepage({ onNavigate }: HomepageProps) {
                   transition={{ duration: 0.6, delay: 0.3 }}
                 >
                   <FlowButton
-                    text="Analizar"
+                    text='Analizar'
                     onClick={() => onNavigate?.('hecras')}
                   />
                 </motion.div>
               </div>
             </motion.div>
           </div>
-
         </div>
       </div>
 

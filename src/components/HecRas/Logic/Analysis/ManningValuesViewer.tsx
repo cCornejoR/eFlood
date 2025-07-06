@@ -7,14 +7,7 @@
 
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import {
-  TreePine,
-  Info,
-  Eye,
-  EyeOff,
-  BarChart3,
-  Layers,
-} from 'lucide-react';
+import { TreePine, Info, Eye, EyeOff, BarChart3, Layers } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { HecRasState } from '../../index';
 
@@ -60,7 +53,9 @@ export const ManningValuesViewer: React.FC<ManningValuesViewerProps> = ({
     success: manningData?.success,
     manning_data: manningData?.manning_data,
     manning_zones: manningData?.manning_data?.manning_zones,
-    zones_keys: manningData?.manning_data?.manning_zones ? Object.keys(manningData?.manning_data?.manning_zones) : []
+    zones_keys: manningData?.manning_data?.manning_zones
+      ? Object.keys(manningData?.manning_data?.manning_zones)
+      : [],
   });
 
   const hasManningData = !!(
@@ -74,7 +69,9 @@ export const ManningValuesViewer: React.FC<ManningValuesViewerProps> = ({
     step1_success: !!manningData?.success,
     step2_manning_data: !!manningData?.manning_data,
     step3_manning_zones: !!manningData?.manning_data?.manning_zones,
-    step4_zones_count: manningData?.manning_data?.manning_zones ? Object.keys(manningData.manning_data.manning_zones).length : 0
+    step4_zones_count: manningData?.manning_data?.manning_zones
+      ? Object.keys(manningData.manning_data.manning_zones).length
+      : 0,
   });
 
   const manningZones = manningData?.manning_data?.manning_zones || {};
@@ -116,12 +113,12 @@ export const ManningValuesViewer: React.FC<ManningValuesViewerProps> = ({
 
   // Get color for Manning value
   const getManningColor = (value: number) => {
-    if (value < 0.020) return 'text-blue-400';
-    if (value < 0.030) return 'text-cyan-400';
-    if (value < 0.040) return 'text-green-400';
-    if (value < 0.050) return 'text-yellow-400';
-    if (value < 0.070) return 'text-orange-400';
-    if (value < 0.100) return 'text-red-400';
+    if (value < 0.02) return 'text-blue-400';
+    if (value < 0.03) return 'text-cyan-400';
+    if (value < 0.04) return 'text-green-400';
+    if (value < 0.05) return 'text-yellow-400';
+    if (value < 0.07) return 'text-orange-400';
+    if (value < 0.1) return 'text-red-400';
     return 'text-purple-400';
   };
 
@@ -130,22 +127,26 @@ export const ManningValuesViewer: React.FC<ManningValuesViewerProps> = ({
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="bg-[#1a1a1a] rounded-lg border border-gray-800 p-6"
+        className='bg-[#1a1a1a] rounded-lg border border-gray-800 p-6'
       >
-        <div className="flex items-center gap-3 mb-4">
-          <TreePine className="w-5 h-5 text-green-400" />
-          <h3 className="text-lg font-semibold text-white">
+        <div className='flex items-center gap-3 mb-4'>
+          <TreePine className='w-5 h-5 text-green-400' />
+          <h3 className='text-lg font-semibold text-white'>
             Valores de Manning
           </h3>
         </div>
 
+<<<<<<< Updated upstream
         <div className="flex items-center gap-3 text-gray-400">
           <Info className="w-4 h-4" />
+=======
+        <div className='flex items-center gap-3 text-gray-400'>
+          <Info className='w-4 h-4' />
+>>>>>>> Stashed changes
           <span>
             {manningData?.error
               ? `Error: ${manningData.error}`
-              : 'No hay valores de Manning disponibles. Ejecuta el análisis primero.'
-            }
+              : 'No hay valores de Manning disponibles. Ejecuta el análisis primero.'}
           </span>
         </div>
       </motion.div>
@@ -156,59 +157,67 @@ export const ManningValuesViewer: React.FC<ManningValuesViewerProps> = ({
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="bg-[#1a1a1a] rounded-lg border border-gray-800 p-6"
+      className='bg-[#1a1a1a] rounded-lg border border-gray-800 p-6'
     >
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center gap-3">
-          <TreePine className="w-5 h-5 text-green-400" />
-          <h3 className="text-lg font-semibold text-white">
+      <div className='flex items-center justify-between mb-6'>
+        <div className='flex items-center gap-3'>
+          <TreePine className='w-5 h-5 text-green-400' />
+          <h3 className='text-lg font-semibold text-white'>
             Valores de Manning Calibrados
           </h3>
-          <span className="bg-green-500/20 text-green-400 px-2 py-1 rounded text-sm">
+          <span className='bg-green-500/20 text-green-400 px-2 py-1 rounded text-sm'>
             {totalZones} zonas
           </span>
         </div>
 
+<<<<<<< Updated upstream
         <div className="flex items-center gap-2">
+=======
+        <div className='flex items-center gap-2'>
+>>>>>>> Stashed changes
           <button
             onClick={() => setShowDetails(!showDetails)}
             className={cn(
-              "p-2 rounded-lg transition-colors",
+              'p-2 rounded-lg transition-colors',
               showDetails
-                ? "bg-green-500/20 text-green-400"
-                : "bg-gray-800 text-gray-400 hover:text-white"
+                ? 'bg-green-500/20 text-green-400'
+                : 'bg-gray-800 text-gray-400 hover:text-white'
             )}
           >
-            {showDetails ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
+            {showDetails ? (
+              <Eye className='w-4 h-4' />
+            ) : (
+              <EyeOff className='w-4 h-4' />
+            )}
           </button>
         </div>
       </div>
 
       {/* Statistics */}
       {stats && (
-        <div className="grid grid-cols-4 gap-4 mb-6">
-          <div className="bg-gray-800/50 rounded-lg p-3">
-            <div className="text-sm text-gray-400">Mínimo</div>
-            <div className="text-lg font-semibold text-blue-400">
+        <div className='grid grid-cols-4 gap-4 mb-6'>
+          <div className='bg-gray-800/50 rounded-lg p-3'>
+            <div className='text-sm text-gray-400'>Mínimo</div>
+            <div className='text-lg font-semibold text-blue-400'>
               {stats.min.toFixed(4)}
             </div>
           </div>
-          <div className="bg-gray-800/50 rounded-lg p-3">
-            <div className="text-sm text-gray-400">Máximo</div>
-            <div className="text-lg font-semibold text-red-400">
+          <div className='bg-gray-800/50 rounded-lg p-3'>
+            <div className='text-sm text-gray-400'>Máximo</div>
+            <div className='text-lg font-semibold text-red-400'>
               {stats.max.toFixed(4)}
             </div>
           </div>
-          <div className="bg-gray-800/50 rounded-lg p-3">
-            <div className="text-sm text-gray-400">Promedio</div>
-            <div className="text-lg font-semibold text-yellow-400">
+          <div className='bg-gray-800/50 rounded-lg p-3'>
+            <div className='text-sm text-gray-400'>Promedio</div>
+            <div className='text-lg font-semibold text-yellow-400'>
               {stats.avg.toFixed(4)}
             </div>
           </div>
-          <div className="bg-gray-800/50 rounded-lg p-3">
-            <div className="text-sm text-gray-400">Total</div>
-            <div className="text-lg font-semibold text-green-400">
+          <div className='bg-gray-800/50 rounded-lg p-3'>
+            <div className='text-sm text-gray-400'>Total</div>
+            <div className='text-lg font-semibold text-green-400'>
               {stats.count}
             </div>
           </div>
@@ -216,17 +225,17 @@ export const ManningValuesViewer: React.FC<ManningValuesViewerProps> = ({
       )}
 
       {/* Sort Controls */}
-      <div className="flex items-center gap-2 mb-4">
-        <span className="text-sm text-gray-400">Ordenar por:</span>
-        {(['id', 'name', 'value'] as const).map((option) => (
+      <div className='flex items-center gap-2 mb-4'>
+        <span className='text-sm text-gray-400'>Ordenar por:</span>
+        {(['id', 'name', 'value'] as const).map(option => (
           <button
             key={option}
             onClick={() => setSortBy(option)}
             className={cn(
-              "px-3 py-1 rounded text-sm transition-colors",
+              'px-3 py-1 rounded text-sm transition-colors',
               sortBy === option
-                ? "bg-green-500/20 text-green-400"
-                : "bg-gray-800 text-gray-400 hover:text-white"
+                ? 'bg-green-500/20 text-green-400'
+                : 'bg-gray-800 text-gray-400 hover:text-white'
             )}
           >
             {option === 'id' ? 'ID' : option === 'name' ? 'Nombre' : 'Valor'}
@@ -236,20 +245,20 @@ export const ManningValuesViewer: React.FC<ManningValuesViewerProps> = ({
 
       {/* Manning Values Table */}
       {showDetails && (
-        <div className="overflow-x-auto">
-          <table className="w-full">
+        <div className='overflow-x-auto'>
+          <table className='w-full'>
             <thead>
-              <tr className="border-b border-gray-700">
-                <th className="text-left py-3 px-2 text-sm font-medium text-gray-400">
+              <tr className='border-b border-gray-700'>
+                <th className='text-left py-3 px-2 text-sm font-medium text-gray-400'>
                   ID
                 </th>
-                <th className="text-left py-3 px-2 text-sm font-medium text-gray-400">
+                <th className='text-left py-3 px-2 text-sm font-medium text-gray-400'>
                   Tipo de Cobertura
                 </th>
-                <th className="text-left py-3 px-2 text-sm font-medium text-gray-400">
+                <th className='text-left py-3 px-2 text-sm font-medium text-gray-400'>
                   Manning n
                 </th>
-                <th className="text-left py-3 px-2 text-sm font-medium text-gray-400">
+                <th className='text-left py-3 px-2 text-sm font-medium text-gray-400'>
                   Descripción
                 </th>
               </tr>
@@ -261,23 +270,25 @@ export const ManningValuesViewer: React.FC<ManningValuesViewerProps> = ({
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: index * 0.05 }}
-                  className="border-b border-gray-800/50 hover:bg-gray-800/30 transition-colors"
+                  className='border-b border-gray-800/50 hover:bg-gray-800/30 transition-colors'
                 >
-                  <td className="py-3 px-2 text-sm text-gray-300">
+                  <td className='py-3 px-2 text-sm text-gray-300'>
                     {manning.id}
                   </td>
-                  <td className="py-3 px-2 text-sm text-white font-medium">
+                  <td className='py-3 px-2 text-sm text-white font-medium'>
                     {manning.name}
                   </td>
-                  <td className="py-3 px-2">
-                    <span className={cn(
-                      "text-sm font-mono font-semibold",
-                      getManningColor(manning.value)
-                    )}>
+                  <td className='py-3 px-2'>
+                    <span
+                      className={cn(
+                        'text-sm font-mono font-semibold',
+                        getManningColor(manning.value)
+                      )}
+                    >
                       {manning.value.toFixed(4)}
                     </span>
                   </td>
-                  <td className="py-3 px-2 text-sm text-gray-400">
+                  <td className='py-3 px-2 text-sm text-gray-400'>
                     {manning.description}
                   </td>
                 </motion.tr>
@@ -288,15 +299,13 @@ export const ManningValuesViewer: React.FC<ManningValuesViewerProps> = ({
       )}
 
       {/* Footer Info */}
-      <div className="mt-4 pt-4 border-t border-gray-800 flex items-center justify-between text-sm text-gray-400">
-        <div className="flex items-center gap-2">
-          <Layers className="w-4 h-4" />
-          <span>
-            Valores calibrados extraídos del modelo HEC-RAS
-          </span>
+      <div className='mt-4 pt-4 border-t border-gray-800 flex items-center justify-between text-sm text-gray-400'>
+        <div className='flex items-center gap-2'>
+          <Layers className='w-4 h-4' />
+          <span>Valores calibrados extraídos del modelo HEC-RAS</span>
         </div>
-        <div className="flex items-center gap-2">
-          <BarChart3 className="w-4 h-4" />
+        <div className='flex items-center gap-2'>
+          <BarChart3 className='w-4 h-4' />
           <span>
             Rango: {stats?.min.toFixed(3)} - {stats?.max.toFixed(3)}
           </span>

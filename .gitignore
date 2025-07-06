@@ -111,6 +111,10 @@ samples/
 *.bin
 *.dat
 
+# Large wheel files
+src-python/gdal-whl/
+*.whl
+
 # IDE and Editor Files
 .vscode/*
 !.vscode/extensions.json

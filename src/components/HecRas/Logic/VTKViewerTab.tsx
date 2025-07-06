@@ -62,9 +62,7 @@ interface VTKFile {
  * Interfaz completa para cargar y visualizar archivos VTK
  * con controles avanzados de renderizado 3D
  */
-export const VTKViewerTab: React.FC<VTKViewerTabProps> = ({
-  state,
-}) => {
+export const VTKViewerTab: React.FC<VTKViewerTabProps> = ({ state }) => {
   const [loadedVTKFiles, setLoadedVTKFiles] = useState<VTKFile[]>([]);
   const [selectedFile, setSelectedFile] = useState<VTKFile | null>(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -216,7 +214,6 @@ export const VTKViewerTab: React.FC<VTKViewerTabProps> = ({
 
         renderWindow.render();
         renderWindowRef.current = renderWindow;
-
       } catch (error) {
         console.error('Error cargando archivo VTK:', error);
         throw new Error('No se pudo cargar el archivo VTK');

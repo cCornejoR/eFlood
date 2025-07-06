@@ -1,11 +1,32 @@
 use serde::{Deserialize, Serialize};
 use std::path::PathBuf;
 use std::process::Command;
+use std::fs;
 use tauri::AppHandle;
+use sysinfo::{System, Pid};
 
 // Constants for better maintainability
 const HECRAS_PROCESSOR_SCRIPT: &str = "HECRAS-HDF/hecras_processor.py";
 const NULL_ARG: &str = "null";
+
+/// System metrics structure for monitoring app performance
+#[derive(Debug, Serialize, Deserialize)]
+pub struct SystemMetrics {
+    /// Memory usage in MB
+    pub memory_usage_mb: f64,
+    /// CPU usage percentage (0-100)
+    pub cpu_usage_percent: f64,
+    /// GPU usage percentage (0-100) - may be 0 if not available
+    pub gpu_usage_percent: f64,
+    /// Total system memory in MB
+    pub total_memory_mb: f64,
+    /// Available system memory in MB
+    pub available_memory_mb: f64,
+    /// Process ID of the current application
+    pub process_id: u32,
+    /// Number of CPU cores
+    pub cpu_cores: usize,
+}
 
 /// Helper function to convert optional terrain file path to string argument
 ///
@@ -46,6 +67,12 @@ pub struct HDFFileInfo {
     pub path: String,
     pub size_mb: f64,
     pub modified: f64,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct FileInfo {
+    pub size: u64,
+    pub modified: u64,
 }
 
 // Python execution helper function
@@ -150,6 +177,19 @@ async fn find_hydraulic_datasets(file_path: String) -> Result<PythonResult, Stri
 #[tauri::command]
 async fn get_detailed_hdf_metadata(file_path: String) -> Result<PythonResult, String> {
     let result = execute_python_script("hdf_reader.py", vec![file_path, "metadata".to_string()]);
+    Ok(result)
+}
+
+#[tauri::command]
+async fn extract_manning_values(
+    hdf_file_path: String,
+    _terrain_file_path: Option<String>,
+) -> Result<PythonResult, String> {
+    // Use the new manning_extractor.py script that doesn't require terrain files
+    let result = execute_python_script(
+        "manning_extractor.py",
+        vec![hdf_file_path],
+    );
     Ok(result)
 }
 
@@ -340,7 +380,7 @@ async fn export_hdf_to_csv(
     use tauri_plugin_dialog::DialogExt;
 
     // Crear nombre de archivo sugerido
-    let safe_dataset_name = dataset_path.replace('/', "_").replace(' ', "_");
+    let safe_dataset_name = dataset_path.replace(['/', ' '], "_");
     let suggested_name = format!("hdf_export_{}.csv", safe_dataset_name);
 
     // Abrir diálogo de guardado
@@ -381,7 +421,7 @@ async fn export_hdf_to_json(
     use tauri_plugin_dialog::DialogExt;
 
     // Crear nombre de archivo sugerido
-    let safe_dataset_name = dataset_path.replace('/', "_").replace(' ', "_");
+    let safe_dataset_name = dataset_path.replace(['/', ' '], "_");
     let suggested_name = format!("hdf_export_{}.json", safe_dataset_name);
 
     // Abrir diálogo de guardado
@@ -598,7 +638,7 @@ async fn get_vtk_export_info(
 // Boundary conditions extraction command
 #[tauri::command]
 async fn extract_boundary_conditions(hdf_file_path: String) -> Result<PythonResult, String> {
-    let result = execute_python_script("boundary_conditions_reader.py", vec![hdf_file_path]);
+    let result = execute_python_script("enhanced_boundary_conditions_reader.py", vec![hdf_file_path]);
     Ok(result)
 }
 
@@ -658,6 +698,65 @@ async fn open_directory(path: String) -> Result<(), String> {
     Ok(())
 }
 
+/// Get file information (size and modification time)
+#[tauri::command]
+async fn get_file_info(file_path: String) -> Result<FileInfo, String> {
+    let metadata = fs::metadata(&file_path)
+        .map_err(|e| format!("Error obteniendo información del archivo: {}", e))?;
+
+    let size = metadata.len();
+    let modified = metadata
+        .modified()
+        .map_err(|e| format!("Error obteniendo fecha de modificación: {}", e))?
+        .duration_since(std::time::UNIX_EPOCH)
+        .map_err(|e| format!("Error convirtiendo fecha: {}", e))?
+        .as_secs();
+
+    Ok(FileInfo { size, modified })
+}
+
+/// Get system metrics for monitoring app performance
+#[tauri::command]
+async fn get_system_metrics() -> Result<SystemMetrics, String> {
+    let mut system = System::new_all();
+    system.refresh_all();
+
+    // Get current process info
+    let current_pid = std::process::id();
+    let process = system.process(Pid::from(current_pid as usize));
+
+    // Calculate memory usage
+    let memory_usage_mb = if let Some(proc) = process {
+        proc.memory() as f64 / 1024.0 / 1024.0 // Convert from bytes to MB
+    } else {
+        0.0
+    };
+
+    // Calculate CPU usage (average across all cores)
+    let cpu_usage_percent = system.global_cpu_info().cpu_usage() as f64;
+
+    // Get total and available memory
+    let total_memory_mb = system.total_memory() as f64 / 1024.0 / 1024.0;
+    let available_memory_mb = system.available_memory() as f64 / 1024.0 / 1024.0;
+
+    // Get CPU cores count
+    let cpu_cores = system.cpus().len();
+
+    // GPU usage - simplified approach (would need additional crates for detailed GPU monitoring)
+    // For now, we'll estimate based on system load or return 0
+    let gpu_usage_percent = 0.0; // TODO: Implement proper GPU monitoring
+
+    Ok(SystemMetrics {
+        memory_usage_mb,
+        cpu_usage_percent,
+        gpu_usage_percent,
+        total_memory_mb,
+        available_memory_mb,
+        process_id: current_pid,
+        cpu_cores,
+    })
+}
+
 // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
 #[tauri::command]
 fn greet(name: &str) -> String {
@@ -671,10 +770,13 @@ pub fn run() {
         .plugin(tauri_plugin_dialog::init())
         .invoke_handler(tauri::generate_handler![
             greet,
+            get_file_info,
+            get_system_metrics,
             read_hdf_file_info,
             read_hdf_file_structure,
             find_hydraulic_datasets,
             get_detailed_hdf_metadata,
+            extract_manning_values,
             convert_to_raster,
             get_raster_info,
             create_spline_from_points,

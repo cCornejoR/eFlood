@@ -349,8 +349,6 @@ export const HydraulicCalculationsTab: React.FC<
     }
   };
 
-
-
   /**
    * 🎨 Obtener color de herramienta
    */
@@ -432,7 +430,7 @@ export const HydraulicCalculationsTab: React.FC<
               </h3>
             </div>
 
-            <div className='grid grid-cols-1 lg:grid-cols-2 gap-6'>
+            <div className='grid grid-cols-2 lg:grid-cols-2 gap-6'>
               {/* 📝 Panel de entradas */}
               <div className='space-y-4'>
                 <h4 className='font-medium text-white mb-3'>

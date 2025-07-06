@@ -230,7 +230,10 @@ export const HydrographChart: React.FC<HydrographChartProps> = ({
         <ResponsiveContainer width='100%' height='100%'>
           {chartType === 'line' ? (
             <LineChart data={chartData}>
-              <CartesianGrid strokeDasharray='3 3' stroke='rgba(255,255,255,0.1)' />
+              <CartesianGrid
+                strokeDasharray='3 3'
+                stroke='rgba(255,255,255,0.1)'
+              />
               <XAxis
                 dataKey='time'
                 stroke='rgba(255,255,255,0.6)'
@@ -251,23 +254,27 @@ export const HydrographChart: React.FC<HydrographChartProps> = ({
                 }}
               />
               <Legend />
-              {getAllSeriesNames().map((seriesName, index) => (
-                visibleSeries.has(seriesName) && (
-                  <Line
-                    key={seriesName}
-                    type='monotone'
-                    dataKey={seriesName}
-                    stroke={getSeriesColor(index)}
-                    strokeWidth={2}
-                    dot={false}
-                    activeDot={{ r: 4, fill: getSeriesColor(index) }}
-                  />
-                )
-              ))}
+              {getAllSeriesNames().map(
+                (seriesName, index) =>
+                  visibleSeries.has(seriesName) && (
+                    <Line
+                      key={seriesName}
+                      type='monotone'
+                      dataKey={seriesName}
+                      stroke={getSeriesColor(index)}
+                      strokeWidth={2}
+                      dot={false}
+                      activeDot={{ r: 4, fill: getSeriesColor(index) }}
+                    />
+                  )
+              )}
             </LineChart>
           ) : (
             <AreaChart data={chartData}>
-              <CartesianGrid strokeDasharray='3 3' stroke='rgba(255,255,255,0.1)' />
+              <CartesianGrid
+                strokeDasharray='3 3'
+                stroke='rgba(255,255,255,0.1)'
+              />
               <XAxis
                 dataKey='time'
                 stroke='rgba(255,255,255,0.6)'
@@ -288,19 +295,20 @@ export const HydrographChart: React.FC<HydrographChartProps> = ({
                 }}
               />
               <Legend />
-              {getAllSeriesNames().map((seriesName, index) => (
-                visibleSeries.has(seriesName) && (
-                  <Area
-                    key={seriesName}
-                    type='monotone'
-                    dataKey={seriesName}
-                    stroke={getSeriesColor(index)}
-                    fill={getSeriesColor(index)}
-                    fillOpacity={0.3}
-                    strokeWidth={2}
-                  />
-                )
-              ))}
+              {getAllSeriesNames().map(
+                (seriesName, index) =>
+                  visibleSeries.has(seriesName) && (
+                    <Area
+                      key={seriesName}
+                      type='monotone'
+                      dataKey={seriesName}
+                      stroke={getSeriesColor(index)}
+                      fill={getSeriesColor(index)}
+                      fillOpacity={0.3}
+                      strokeWidth={2}
+                    />
+                  )
+              )}
             </AreaChart>
           )}
         </ResponsiveContainer>
@@ -308,38 +316,43 @@ export const HydrographChart: React.FC<HydrographChartProps> = ({
 
       {/* Chart Statistics */}
       <div className='grid grid-cols-1 md:grid-cols-3 gap-4 mt-6 pt-6 border-t border-white/10'>
-        {getAllSeriesNames().slice(0, 3).map((seriesName, index) => {
-          const seriesData = chartData.map(d => d[seriesName]).filter(v => v !== undefined);
-          const max = Math.max(...seriesData);
-          const min = Math.min(...seriesData);
-          const avg = seriesData.reduce((a, b) => a + b, 0) / seriesData.length;
+        {getAllSeriesNames()
+          .slice(0, 3)
+          .map((seriesName, index) => {
+            const seriesData = chartData
+              .map(d => d[seriesName])
+              .filter(v => v !== undefined);
+            const max = Math.max(...seriesData);
+            const min = Math.min(...seriesData);
+            const avg =
+              seriesData.reduce((a, b) => a + b, 0) / seriesData.length;
 
-          return (
-            <div key={seriesName} className='bg-white/5 rounded-lg p-3'>
-              <h5 className='text-white font-medium text-sm mb-2 flex items-center gap-2'>
-                <div
-                  className='w-3 h-3 rounded-full'
-                  style={{ backgroundColor: getSeriesColor(index) }}
-                ></div>
-                {seriesName}
-              </h5>
-              <div className='space-y-1 text-xs'>
-                <div className='flex justify-between'>
-                  <span className='text-white/60'>Máximo:</span>
-                  <span className='text-white'>{max.toFixed(2)}</span>
-                </div>
-                <div className='flex justify-between'>
-                  <span className='text-white/60'>Mínimo:</span>
-                  <span className='text-white'>{min.toFixed(2)}</span>
-                </div>
-                <div className='flex justify-between'>
-                  <span className='text-white/60'>Promedio:</span>
-                  <span className='text-white'>{avg.toFixed(2)}</span>
+            return (
+              <div key={seriesName} className='bg-white/5 rounded-lg p-3'>
+                <h5 className='text-white font-medium text-sm mb-2 flex items-center gap-2'>
+                  <div
+                    className='w-3 h-3 rounded-full'
+                    style={{ backgroundColor: getSeriesColor(index) }}
+                  ></div>
+                  {seriesName}
+                </h5>
+                <div className='space-y-1 text-xs'>
+                  <div className='flex justify-between'>
+                    <span className='text-white/60'>Máximo:</span>
+                    <span className='text-white'>{max.toFixed(2)}</span>
+                  </div>
+                  <div className='flex justify-between'>
+                    <span className='text-white/60'>Mínimo:</span>
+                    <span className='text-white'>{min.toFixed(2)}</span>
+                  </div>
+                  <div className='flex justify-between'>
+                    <span className='text-white/60'>Promedio:</span>
+                    <span className='text-white'>{avg.toFixed(2)}</span>
+                  </div>
                 </div>
               </div>
-            </div>
-          );
-        })}
+            );
+          })}
       </div>
     </motion.div>
   );

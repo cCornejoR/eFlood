@@ -105,7 +105,7 @@ export const VTKExportModal: React.FC<VTKExportModalProps> = ({
         console.log('Exportación VTK exitosa:', {
           archivos: result.num_files,
           directorio: result.output_directory,
-          archivos_creados: result.files_created
+          archivos_creados: result.files_created,
         });
       } else {
         setProgress(`Error en la exportación: ${result.error}`);
@@ -357,8 +357,11 @@ export const VTKExportModal: React.FC<VTKExportModalProps> = ({
                       <button
                         onClick={() => {
                           // Abrir directorio en el explorador
-                          invoke('open_directory', { path: exportResult.output_directory })
-                            .catch(err => console.error('Error abriendo directorio:', err));
+                          invoke('open_directory', {
+                            path: exportResult.output_directory,
+                          }).catch(err =>
+                            console.error('Error abriendo directorio:', err)
+                          );
                         }}
                         className='flex items-center gap-2 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs rounded transition-colors'
                       >

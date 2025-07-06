@@ -12,14 +12,7 @@
 
 import React, { useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import {
-  Upload,
-  Play,
-  TrendingUp,
-  Download,
-  Database,
-  MapPin,
-} from 'lucide-react';
+import { Upload, Play, TrendingUp, Download } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { HecRasState } from '../index';
 import { DataLoader } from './Analysis/DataLoader';
@@ -111,13 +104,7 @@ export const AnalysisTab: React.FC<AnalysisTabProps> = ({
           />
         );
       case 'analyze':
-        return (
-          <DataAnalyzer
-            state={state}
-            updateState={updateState}
-            onAnalysisComplete={() => setActiveSubTab('hydrograph')}
-          />
-        );
+        return <DataAnalyzer state={state} updateState={updateState} />;
       case 'hydrograph':
         return <HydrographViewer state={state} updateState={updateState} />;
       case 'export':
@@ -128,9 +115,9 @@ export const AnalysisTab: React.FC<AnalysisTabProps> = ({
   };
 
   return (
-    <div className='space-y-2'>
-      {/* 🎛️ Sub-navegación de análisis - centrado */}
-      <div className='w-full flex justify-center'>
+    <div className='space-y-6'>
+      {/* 🎛️ Sub-navegación de análisis - centrado y elevado */}
+      <div className='w-full flex justify-center -mt-2'>
         <nav className='flex h-10 items-center space-x-1 rounded-2xl border border-white/20 bg-white/5 backdrop-blur-sm p-1 w-fit'>
           {analysisSubTabs.map(subTab => {
             const Icon = subTab.icon;
@@ -198,84 +185,6 @@ export const AnalysisTab: React.FC<AnalysisTabProps> = ({
           {renderActiveSubTab()}
         </motion.div>
       </AnimatePresence>
-
-      {/* 📊 Panel de estado general */}
-      <div className='bg-white/5 rounded-xl p-4 backdrop-blur-sm border border-white/10'>
-        <h3 className='text-base font-semibold text-white mb-3'>
-          Estado del Análisis
-        </h3>
-        <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3'>
-          {/* HDF File Status */}
-          <div className='flex items-center gap-2 p-2 bg-white/5 rounded-lg'>
-            <Database
-              className={cn(
-                'h-4 w-4',
-                state.selectedHDFFile ? 'text-green-400' : 'text-gray-400'
-              )}
-            />
-            <div>
-              <p className='text-xs font-medium text-white'>Archivo HDF</p>
-              <p className='text-xs text-white/60'>
-                {state.selectedHDFFile ? 'Cargado' : 'No cargado'}
-              </p>
-            </div>
-          </div>
-
-          {/* Terrain File Status */}
-          <div className='flex items-center gap-2 p-2 bg-white/5 rounded-lg'>
-            <MapPin
-              className={cn(
-                'h-4 w-4',
-                state.selectedTerrainFile ? 'text-green-400' : 'text-gray-400'
-              )}
-            />
-            <div>
-              <p className='text-xs font-medium text-white'>Terreno</p>
-              <p className='text-xs text-white/60'>
-                {state.selectedTerrainFile ? 'Cargado' : 'Opcional'}
-              </p>
-            </div>
-          </div>
-
-          {/* Analysis Status */}
-          <div className='flex items-center gap-2 p-2 bg-white/5 rounded-lg'>
-            <Play
-              className={cn(
-                'h-4 w-4',
-                state.hdfData ? 'text-green-400' : 'text-gray-400'
-              )}
-            />
-            <div>
-              <p className='text-xs font-medium text-white'>Análisis</p>
-              <p className='text-xs text-white/60'>
-                {state.isAnalyzing
-                  ? 'Procesando...'
-                  : state.hdfData
-                    ? 'Completado'
-                    : 'Pendiente'}
-              </p>
-            </div>
-          </div>
-
-          {/* Export Status */}
-          <div className='flex items-center gap-2 p-2 bg-white/5 rounded-lg'>
-            <Download
-              className={cn(
-                'h-4 w-4',
-                state.exportedVTKFiles.length > 0
-                  ? 'text-green-400'
-                  : 'text-gray-400'
-              )}
-            />
-            <div>
-              <p className='text-xs font-medium text-white'>Exportación</p>
-              <p className='text-xs text-white/60'>
-                {state.exportedVTKFiles.length} archivos VTK
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
     </div>
   );
 };

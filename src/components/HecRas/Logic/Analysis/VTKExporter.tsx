@@ -127,22 +127,30 @@ export const VTKExporter: React.FC<VTKExporterProps> = ({
           setExportResults(resultData);
 
           // Actualizar estado con archivos reales exportados
-          if (resultData.files_created && Array.isArray(resultData.files_created)) {
+          if (
+            resultData.files_created &&
+            Array.isArray(resultData.files_created)
+          ) {
             updateState({
               exportedVTKFiles: [
                 ...state.exportedVTKFiles,
-                ...resultData.files_created.map((fileName: string) =>
-                  `${exportOptions.outputDirectory}/${fileName}`
+                ...resultData.files_created.map(
+                  (fileName: string) =>
+                    `${exportOptions.outputDirectory}/${fileName}`
                 ),
               ],
             });
           }
         } else {
-          throw new Error((result as any).error || 'Error en la exportación VTK');
+          throw new Error(
+            (result as any).error || 'Error en la exportación VTK'
+          );
         }
       } catch (error) {
         console.error('Error en exportación VTK:', error);
-        setExportError(`Error al exportar archivos VTK: ${error instanceof Error ? error.message : 'Error desconocido'}`);
+        setExportError(
+          `Error al exportar archivos VTK: ${error instanceof Error ? error.message : 'Error desconocido'}`
+        );
         return;
       }
 
@@ -155,8 +163,6 @@ export const VTKExporter: React.FC<VTKExporterProps> = ({
       setIsExporting(false);
     }
   };
-
-
 
   /**
    * 🔧 Actualizar opción de exportación

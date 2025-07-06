@@ -25,7 +25,11 @@ interface SimpleAnalysisStatusProps {
  */
 export const SimpleAnalysisStatus: React.FC<SimpleAnalysisStatusProps> = ({
   state,
+<<<<<<< Updated upstream
   className = ''
+=======
+  className = '',
+>>>>>>> Stashed changes
 }) => {
   // 🎨 Configuración de elementos de estado
   const statusItems = [
@@ -33,28 +37,28 @@ export const SimpleAnalysisStatus: React.FC<SimpleAnalysisStatusProps> = ({
       id: 'hdf',
       icon: Database,
       isActive: !!state.selectedHDFFile,
-      label: 'HDF'
+      label: 'HDF',
     },
     {
       id: 'terrain',
       icon: MapPin,
       isActive: !!state.selectedTerrainFile,
-      label: 'Terreno'
+      label: 'Terreno',
     },
     {
       id: 'analysis',
       icon: Play,
       isActive: !!state.hdfData,
       isProcessing: state.isAnalyzing,
-      label: 'Análisis'
+      label: 'Análisis',
     },
     {
       id: 'export',
       icon: Download,
       isActive: state.exportedVTKFiles.length > 0,
       count: state.exportedVTKFiles.length,
-      label: 'Export'
-    }
+      label: 'Export',
+    },
   ];
 
   return (
@@ -78,9 +82,10 @@ export const SimpleAnalysisStatus: React.FC<SimpleAnalysisStatusProps> = ({
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.3, delay: index * 0.1 }}
-            className="flex items-center gap-2"
+            className='flex items-center gap-2'
           >
             {/* Icono con estado */}
+<<<<<<< Updated upstream
             <div className="relative">
               <Icon
                 className={cn(
@@ -88,6 +93,13 @@ export const SimpleAnalysisStatus: React.FC<SimpleAnalysisStatusProps> = ({
                   item.isActive
                     ? 'text-green-400'
                     : 'text-gray-500',
+=======
+            <div className='relative'>
+              <Icon
+                className={cn(
+                  'h-4 w-4 transition-all duration-300',
+                  item.isActive ? 'text-green-400' : 'text-gray-500',
+>>>>>>> Stashed changes
                   item.isProcessing && 'animate-pulse text-blue-400'
                 )}
               />
@@ -97,7 +109,7 @@ export const SimpleAnalysisStatus: React.FC<SimpleAnalysisStatusProps> = ({
                 <motion.div
                   initial={{ scale: 0 }}
                   animate={{ scale: 1 }}
-                  className="absolute -top-1 -right-1 w-2 h-2 bg-green-400 rounded-full border border-[#131414]"
+                  className='absolute -top-1 -right-1 w-2 h-2 bg-green-400 rounded-full border border-[#131414]'
                 />
               )}
 
@@ -106,7 +118,7 @@ export const SimpleAnalysisStatus: React.FC<SimpleAnalysisStatusProps> = ({
                 <motion.div
                   animate={{ scale: [1, 1.2, 1] }}
                   transition={{ duration: 1, repeat: Infinity }}
-                  className="absolute -top-1 -right-1 w-2 h-2 bg-blue-400 rounded-full border border-[#131414]"
+                  className='absolute -top-1 -right-1 w-2 h-2 bg-blue-400 rounded-full border border-[#131414]'
                 />
               )}
             </div>
@@ -115,9 +127,13 @@ export const SimpleAnalysisStatus: React.FC<SimpleAnalysisStatusProps> = ({
             <span
               className={cn(
                 'text-xs font-medium transition-colors duration-300',
+<<<<<<< Updated upstream
                 item.isActive
                   ? 'text-white'
                   : 'text-gray-500'
+=======
+                item.isActive ? 'text-white' : 'text-gray-500'
+>>>>>>> Stashed changes
               )}
             >
               {item.label}
@@ -128,7 +144,7 @@ export const SimpleAnalysisStatus: React.FC<SimpleAnalysisStatusProps> = ({
               <motion.span
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
-                className="text-xs font-mono text-green-400 bg-green-400/10 px-1.5 py-0.5 rounded-full"
+                className='text-xs font-mono text-green-400 bg-green-400/10 px-1.5 py-0.5 rounded-full'
               >
                 {item.count}
               </motion.span>
@@ -136,7 +152,7 @@ export const SimpleAnalysisStatus: React.FC<SimpleAnalysisStatusProps> = ({
 
             {/* Separador */}
             {index < statusItems.length - 1 && (
-              <div className="w-px h-4 bg-white/20 ml-2" />
+              <div className='w-px h-4 bg-white/20 ml-2' />
             )}
           </motion.div>
         );

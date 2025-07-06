@@ -70,6 +70,12 @@ function App() {
       setShowOnboarding(true);
       return;
     }
+
+    // Collapse license panel when entering analyzer
+    if (tab === 'hecras') {
+      setIsLicensePanelCollapsed(true);
+    }
+
     setActiveTab(tab as ActiveTab);
   };
 

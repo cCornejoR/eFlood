@@ -28,6 +28,7 @@
     "@kitware/vtk.js": "^34.3.1",
     "@radix-ui/react-context-menu": "^2.2.15",
     "@radix-ui/react-slot": "^1.2.3",
+    "@tanstack/react-table": "^8.21.3",
     "@tauri-apps/api": "2.6.0",
     "@tauri-apps/plugin-dialog": "^2.3.0",
     "@tauri-apps/plugin-opener": "2.4.0",

@@ -27,7 +27,11 @@ interface AnalysisStatusProps {
 export const AnalysisStatus: React.FC<AnalysisStatusProps> = ({
   state,
   className = '',
+<<<<<<< Updated upstream
   compact = false
+=======
+  compact = false,
+>>>>>>> Stashed changes
 }) => {
   // 🎨 Configuración de elementos de estado
   const statusItems = [
@@ -37,7 +41,7 @@ export const AnalysisStatus: React.FC<AnalysisStatusProps> = ({
       label: 'Archivo HDF',
       status: state.selectedHDFFile ? 'Cargado' : 'No cargado',
       isActive: !!state.selectedHDFFile,
-      color: state.selectedHDFFile ? 'text-green-400' : 'text-gray-400'
+      color: state.selectedHDFFile ? 'text-green-400' : 'text-gray-400',
     },
     {
       id: 'terrain',
@@ -45,7 +49,7 @@ export const AnalysisStatus: React.FC<AnalysisStatusProps> = ({
       label: 'Terreno',
       status: state.selectedTerrainFile ? 'Cargado' : 'Opcional',
       isActive: !!state.selectedTerrainFile,
-      color: state.selectedTerrainFile ? 'text-green-400' : 'text-gray-400'
+      color: state.selectedTerrainFile ? 'text-green-400' : 'text-gray-400',
     },
     {
       id: 'analysis',
@@ -57,7 +61,7 @@ export const AnalysisStatus: React.FC<AnalysisStatusProps> = ({
           ? 'Completado'
           : 'Pendiente',
       isActive: !!state.hdfData,
-      color: state.hdfData ? 'text-green-400' : 'text-gray-400'
+      color: state.hdfData ? 'text-green-400' : 'text-gray-400',
     },
     {
       id: 'export',
@@ -65,8 +69,9 @@ export const AnalysisStatus: React.FC<AnalysisStatusProps> = ({
       label: 'Exportación',
       status: `${state.exportedVTKFiles.length} archivos VTK`,
       isActive: state.exportedVTKFiles.length > 0,
-      color: state.exportedVTKFiles.length > 0 ? 'text-green-400' : 'text-gray-400'
-    }
+      color:
+        state.exportedVTKFiles.length > 0 ? 'text-green-400' : 'text-gray-400',
+    },
   ];
 
   if (compact) {
@@ -77,18 +82,18 @@ export const AnalysisStatus: React.FC<AnalysisStatusProps> = ({
         transition={{ duration: 0.3 }}
         className={`flex items-center gap-3 ${className}`}
       >
-        {statusItems.map((item) => {
+        {statusItems.map(item => {
           const Icon = item.icon;
           return (
-            <div key={item.id} className="flex items-center gap-1">
+            <div key={item.id} className='flex items-center gap-1'>
               <Icon className={cn('h-3 w-3', item.color)} />
               {item.id === 'export' && state.exportedVTKFiles.length > 0 && (
-                <span className="text-xs font-mono text-green-400">
+                <span className='text-xs font-mono text-green-400'>
                   {state.exportedVTKFiles.length}
                 </span>
               )}
               {item.isActive && item.id !== 'export' && (
-                <div className="w-1 h-1 bg-green-400 rounded-full"></div>
+                <div className='w-1 h-1 bg-green-400 rounded-full'></div>
               )}
             </div>
           );
@@ -96,9 +101,9 @@ export const AnalysisStatus: React.FC<AnalysisStatusProps> = ({
 
         {/* Indicador de procesamiento */}
         {state.isAnalyzing && (
-          <div className="flex items-center gap-1">
-            <div className="w-1 h-1 bg-blue-400 rounded-full animate-pulse"></div>
-            <span className="text-xs text-blue-400">Procesando...</span>
+          <div className='flex items-center gap-1'>
+            <div className='w-1 h-1 bg-blue-400 rounded-full animate-pulse'></div>
+            <span className='text-xs text-blue-400'>Procesando...</span>
           </div>
         )}
       </motion.div>
@@ -112,18 +117,21 @@ export const AnalysisStatus: React.FC<AnalysisStatusProps> = ({
       transition={{ duration: 0.5 }}
       className={`bg-white/5 rounded-xl p-4 backdrop-blur-sm border border-white/10 ${className}`}
     >
-      <h3 className="text-base font-semibold text-white mb-3">
+      <h3 className='text-base font-semibold text-white mb-3'>
         Estado del Análisis
       </h3>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
-        {statusItems.map((item) => {
+      <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3'>
+        {statusItems.map(item => {
           const Icon = item.icon;
           return (
-            <div key={item.id} className="flex items-center gap-2 p-2 bg-white/5 rounded-lg">
+            <div
+              key={item.id}
+              className='flex items-center gap-2 p-2 bg-white/5 rounded-lg'
+            >
               <Icon className={cn('h-4 w-4', item.color)} />
               <div>
-                <p className="text-xs font-medium text-white">{item.label}</p>
-                <p className="text-xs text-white/60">{item.status}</p>
+                <p className='text-xs font-medium text-white'>{item.label}</p>
+                <p className='text-xs text-white/60'>{item.status}</p>
               </div>
             </div>
           );

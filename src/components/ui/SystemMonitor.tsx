@@ -14,7 +14,7 @@ const Tooltip: React.FC<TooltipProps> = ({ content, children }) => {
 
   return (
     <div
-      className="relative inline-block"
+      className='relative inline-block'
       onMouseEnter={() => setIsVisible(true)}
       onMouseLeave={() => setIsVisible(false)}
     >
@@ -25,10 +25,10 @@ const Tooltip: React.FC<TooltipProps> = ({ content, children }) => {
           animate={{ opacity: 1, y: -8, scale: 1 }}
           exit={{ opacity: 0, y: -10, scale: 0.95 }}
           transition={{ duration: 0.2 }}
-          className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-black/90 text-white text-xs rounded-md whitespace-nowrap z-50 border border-white/20"
+          className='absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-black/90 text-white text-xs rounded-md whitespace-nowrap z-50 border border-white/20'
         >
           {content}
-          <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-black/90"></div>
+          <div className='absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-black/90'></div>
         </motion.div>
       )}
     </div>
@@ -56,7 +56,9 @@ interface SystemMonitorProps {
  * Muestra métricas en tiempo real del uso de recursos de la aplicación
  * de forma minimalista en el footer.
  */
-export const SystemMonitor: React.FC<SystemMonitorProps> = ({ className = '' }) => {
+export const SystemMonitor: React.FC<SystemMonitorProps> = ({
+  className = '',
+}) => {
   const [metrics, setMetrics] = useState<SystemMetrics | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -100,8 +102,8 @@ export const SystemMonitor: React.FC<SystemMonitorProps> = ({ className = '' }) 
   if (isLoading) {
     return (
       <div className={`flex items-center gap-2 ${className}`}>
-        <Monitor className="h-3 w-3 text-white/40 animate-pulse" />
-        <span className="text-xs text-white/40">Cargando...</span>
+        <Monitor className='h-3 w-3 text-white/40 animate-pulse' />
+        <span className='text-xs text-white/40'>Cargando...</span>
       </div>
     );
   }
@@ -109,13 +111,14 @@ export const SystemMonitor: React.FC<SystemMonitorProps> = ({ className = '' }) 
   if (error || !metrics) {
     return (
       <div className={`flex items-center gap-2 ${className}`}>
-        <Monitor className="h-3 w-3 text-red-400" />
-        <span className="text-xs text-red-400">Error</span>
+        <Monitor className='h-3 w-3 text-red-400' />
+        <span className='text-xs text-red-400'>Error</span>
       </div>
     );
   }
 
-  const memoryUsagePercent = (metrics.memory_usage_mb / metrics.total_memory_mb) * 100;
+  const memoryUsagePercent =
+    (metrics.memory_usage_mb / metrics.total_memory_mb) * 100;
 
   return (
     <motion.div
@@ -125,20 +128,28 @@ export const SystemMonitor: React.FC<SystemMonitorProps> = ({ className = '' }) 
       className={`flex items-center gap-3 ${className}`}
     >
       {/* 💾 Memoria */}
-      <Tooltip content={`Memoria RAM utilizada por eFlood² (${memoryUsagePercent.toFixed(1)}% del total)`}>
-        <div className="flex items-center gap-1 cursor-help">
-          <MemoryStick className="h-3 w-3 text-white/60" />
-          <span className={`text-xs font-mono ${getUsageColor(memoryUsagePercent)}`}>
+      <Tooltip
+        content={`Memoria RAM utilizada por eFlood² (${memoryUsagePercent.toFixed(1)}% del total)`}
+      >
+        <div className='flex items-center gap-1 cursor-help'>
+          <MemoryStick className='h-3 w-3 text-white/60' />
+          <span
+            className={`text-xs font-mono ${getUsageColor(memoryUsagePercent)}`}
+          >
             {formatMemory(metrics.memory_usage_mb)}
           </span>
         </div>
       </Tooltip>
 
       {/* 🔧 CPU */}
-      <Tooltip content={`Uso del procesador por el sistema (${metrics.cpu_cores} núcleos)`}>
-        <div className="flex items-center gap-1 cursor-help">
-          <Cpu className="h-3 w-3 text-white/60" />
-          <span className={`text-xs font-mono ${getUsageColor(metrics.cpu_usage_percent)}`}>
+      <Tooltip
+        content={`Uso del procesador por el sistema (${metrics.cpu_cores} núcleos)`}
+      >
+        <div className='flex items-center gap-1 cursor-help'>
+          <Cpu className='h-3 w-3 text-white/60' />
+          <span
+            className={`text-xs font-mono ${getUsageColor(metrics.cpu_usage_percent)}`}
+          >
             {metrics.cpu_usage_percent.toFixed(0)}%
           </span>
         </div>
@@ -146,10 +157,12 @@ export const SystemMonitor: React.FC<SystemMonitorProps> = ({ className = '' }) 
 
       {/* 🎮 GPU (si está disponible) */}
       {metrics.gpu_usage_percent > 0 && (
-        <Tooltip content="Uso de la tarjeta gráfica (GPU)">
-          <div className="flex items-center gap-1 cursor-help">
-            <HardDrive className="h-3 w-3 text-white/60" />
-            <span className={`text-xs font-mono ${getUsageColor(metrics.gpu_usage_percent)}`}>
+        <Tooltip content='Uso de la tarjeta gráfica (GPU)'>
+          <div className='flex items-center gap-1 cursor-help'>
+            <HardDrive className='h-3 w-3 text-white/60' />
+            <span
+              className={`text-xs font-mono ${getUsageColor(metrics.gpu_usage_percent)}`}
+            >
               {metrics.gpu_usage_percent.toFixed(0)}%
             </span>
           </div>
@@ -157,9 +170,9 @@ export const SystemMonitor: React.FC<SystemMonitorProps> = ({ className = '' }) 
       )}
 
       {/* 📊 Indicador visual de estado */}
-      <Tooltip content="Sistema funcionando correctamente">
-        <div className="flex items-center cursor-help">
-          <div className="w-1 h-1 bg-green-400 rounded-full animate-pulse"></div>
+      <Tooltip content='Sistema funcionando correctamente'>
+        <div className='flex items-center cursor-help'>
+          <div className='w-1 h-1 bg-green-400 rounded-full animate-pulse'></div>
         </div>
       </Tooltip>
     </motion.div>
