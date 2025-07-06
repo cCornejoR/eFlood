@@ -1,4 +1,4 @@
-# Commit Guidelines for eFlow
+# Commit Guidelines for eFlood2
 
 ## Commit Message Format
 

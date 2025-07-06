@@ -1,7 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Loader2 } from 'lucide-react';
-import { cn } from '../../utils/cn';
+import { cn } from '@/utils/cn';
 
 interface ModernButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement> {
@@ -41,7 +41,7 @@ const ModernButton: React.FC<ModernButtonProps> = ({
     success:
       'bg-gradient-to-r from-green-600/80 to-green-700/80 text-white border border-green-400/30 hover:from-green-600 hover:to-green-700 focus:ring-green-400 shadow-lg shadow-green-500/25',
     gradient:
-      'bg-gradient-to-r from-blue-600/80 via-purple-600/80 to-cyan-600/80 text-white border border-blue-400/30 hover:from-blue-600 hover:via-purple-600 hover:to-cyan-600 focus:ring-blue-400 shadow-lg shadow-blue-500/25',
+      'bg-gradient-to-r from-blue-500/30 to-cyan-400/30 text-white border border-blue-400/20 hover:from-blue-500/40 hover:to-cyan-400/40 focus:ring-blue-400 shadow-lg shadow-blue-500/25',
   };
 
   const disabledClasses = 'opacity-50 cursor-not-allowed';

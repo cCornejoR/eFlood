@@ -1,8 +1,8 @@
-# eFlow - Hydraulic Analysis Tool
+# eFlood² - Hydraulic Analysis Tool
 
 <div align="center">
-  <img src="frontend/src/assets/logo.svg" alt="eFlow Logo" width="120" height="120">
-  <h1 style="font-family: 'Allenoire', serif; font-size: 3rem; margin: 0;">eFlow</h1>
+  <img src="frontend/src/assets/logo.svg" alt="eFlood² Logo" width="120" height="120">
+  <h1 style="font-family: 'Allenoire', serif; font-size: 3rem; margin: 0;">eFlood²</h1>
   <p><strong>Advanced Hydraulic Analysis Tool for HEC-RAS 2D Model Analysis & Visualization</strong></p>
 </div>
 
@@ -10,7 +10,7 @@
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Version](https://img.shields.io/badge/version-1.0.0-green.svg)](package.json)
 
-Built with Tauri + React + TypeScript + Python, eFlow provides comprehensive hydraulic analysis capabilities for civil engineers and water resources professionals.
+Built with Tauri + React + TypeScript + Python, eFlood2 provides comprehensive hydraulic analysis capabilities for civil engineers and water resources professionals.
 
 ## 🚀 Features
 
@@ -125,7 +125,7 @@ export-tools         # Data export utilities
 ## 🏗️ Project Structure
 
 ```
-eFlow/
+eFlood2/
 ├── frontend/                 # React frontend application
 │   ├── src/
 │   │   ├── components/       # React components
@@ -187,7 +187,7 @@ Additional documentation available in the `/docs` directory:
 ```bash
 # Clone the repository
 git clone https://github.com/cCornejoR/eFlow.git
-cd eFlow
+cd eFlood2
 
 # Setup development environment (Windows)
 .\scripts\setup-hooks.ps1
@@ -285,9 +285,9 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ---
 
 <div align="center">
-  <strong>eFlow</strong> - Empowering hydraulic analysis through modern technology
+  <strong>eFlood2</strong> - Empowering hydraulic analysis through modern technology
   <br>
   Built with ❤️ for the civil engineering community
   <br><br>
-  © 2024 eFlow Team. Built with Tauri + React + Python.
+  © 2024 eFlood2 Team. Built with Tauri + React + Python.
 </div>

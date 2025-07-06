@@ -15,7 +15,15 @@
       "Bash(test:*)",
       "Bash(npm run type-check:*)",
       "WebFetch(domain:raw.githubusercontent.com)",
-      "WebFetch(domain:psu-efd.github.io)"
+      "WebFetch(domain:psu-efd.github.io)",
+      "Bash(npm install:*)",
+      "Bash(npm run format:check:*)",
+      "Bash(npm run format:*)",
+      "Bash(rg:*)",
+      "WebFetch(domain:v2.tauri.app)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:ellie.wtf)",
+      "WebFetch(domain:blog.elijahlopez.ca)"
     ],
     "deny": []
   }

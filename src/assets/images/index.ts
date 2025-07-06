@@ -1,13 +1,13 @@
 // 🖼️ Configuración centralizada de imágenes
 // Este archivo facilita la gestión de todas las imágenes de assets
 
-// Importar todas las imágenes disponibles
-import demImage from './dem.png';
-import flood2Image from './flood2.png';
-import hidrographImage from './hidrograph.png';
-import meandroImage from './meandro.png';
-import meshImage from './mesh.png';
-import workingImage from './working.png';
+// Importar todas las imágenes disponibles (formato WebP optimizado)
+import demImage from './dem.webp';
+import flood2Image from './flood2.webp';
+import hidrographImage from './hidrograph.webp';
+import meandroImage from './meandro.webp';
+import meshImage from './mesh.webp';
+import workingImage from './working.webp';
 
 // Array de todas las imágenes disponibles (6 imágenes perfectas!)
 export const assetImages = [

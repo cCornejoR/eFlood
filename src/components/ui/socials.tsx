@@ -15,7 +15,7 @@ interface AnimatedSocialLinksProps
 const AnimatedSocialLinks = React.forwardRef<
   HTMLDivElement,
   AnimatedSocialLinksProps
->(({ socials, className, ...props }, ref) => {
+>(({ socials, className: _className, ...props }, ref) => {
   const [hoveredSocial, setHoveredSocial] = useState<string | null>(null);
   const [rotation, setRotation] = useState<number>(0);
   const [cliked, setCliked] = useState<boolean>(false);

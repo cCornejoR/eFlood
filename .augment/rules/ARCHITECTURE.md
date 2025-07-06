@@ -2,7 +2,7 @@
 type: "always_apply"
 ---
 
-# 📐 Arquitectura General - Proyecto eFlow
+# 📐 Arquitectura General - Proyecto eFlood2
 
 ## Objetivo del proyecto
 
@@ -32,14 +32,14 @@ Aplicación de escritorio hidráulico-GIS con:
 
 ## Estructura del Proyecto
 
-eflow-app/
+eflood2-app/
 ├── frontend/ # React + Tailwind (UI)
 ├── src-tauri/ # Tauri (Rust bridge)
 │ └── src/main.rs
 ├── backend-python/
 │ ├── pyproject.toml # uv + editable install
 │ ├── scripts/ # CLI invocados desde Rust
-│ └── src/eflow/ # Lógica hidráulica y GIS
+│ └── src/eflood2/ # Lógica hidráulica y GIS
 │ ├── hdf_reader.py
 │ ├── section_tools.py
 │ ├── hydraulic_calc.py

@@ -1,3 +1,5 @@
+'use client';
+
 import { ComponentProps, useCallback, useEffect, useRef } from 'react';
 
 import { cn } from '@/lib/utils';

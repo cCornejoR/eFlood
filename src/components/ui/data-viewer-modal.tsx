@@ -10,8 +10,8 @@ import {
   FileText,
   TrendingUp,
 } from 'lucide-react';
-import { useOutsideClick } from '../../hooks/useOutsideClick';
-import { useToast } from './toast';
+import { useOutsideClick } from '@/hooks/useOutsideClick';
+import { useToast } from '@/components/ui/toast';
 import { invoke } from '@tauri-apps/api/core';
 
 interface DataViewerModalProps {
@@ -747,7 +747,7 @@ export const DataViewerModal: React.FC<DataViewerModalProps> = ({
                         CSV
                       </button>
                       <button
-                        className='flex items-center gap-1 px-3 py-1.5 text-xs bg-gradient-to-r from-purple-500/30 to-pink-400/30 border border-purple-400/20 text-white rounded hover:from-purple-500/40 hover:to-pink-400/40 transition-all duration-200 backdrop-blur-sm'
+                        className='flex items-center gap-1 px-3 py-1.5 text-xs bg-gradient-to-r from-blue-500/30 to-cyan-400/30 border border-blue-400/20 text-white rounded hover:from-blue-500/40 hover:to-cyan-400/40 transition-all duration-200 backdrop-blur-sm'
                         onClick={() => handleExport('json')}
                         title='Exportar JSON'
                       >

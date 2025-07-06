@@ -1,16 +1,16 @@
-# eFlow User Guide
+# eFlood2 User Guide
 
 ## Introduction
 
-eFlow is a comprehensive desktop application for analyzing HEC-RAS 2D hydraulic models. It provides tools for reading HDF files, performing hydraulic calculations, creating geometry, analyzing cross-sections, and exporting results.
+eFlood2 is a comprehensive desktop application for analyzing HEC-RAS 2D hydraulic models. It provides tools for reading HDF files, performing hydraulic calculations, creating geometry, analyzing cross-sections, and exporting results.
 
 ## Getting Started
 
 ### Installation
 
-1. Download the eFlow installer for your operating system
+1. Download the eFlood2 installer for your operating system
 2. Run the installer and follow the setup wizard
-3. Launch eFlow from your applications menu
+3. Launch eFlood2 from your applications menu
 
 ### First Launch
 
@@ -247,4 +247,4 @@ Export your analysis results in professional formats.
 - **Storage**: 2 GB free space
 - **Display**: 1920x1080 or higher resolution
 
-This user guide provides comprehensive instructions for using all features of the eFlow hydraulic analysis application. For technical support or advanced usage questions, consult the development team or hydraulic engineering professionals.
+This user guide provides comprehensive instructions for using all features of the eFlood2 hydraulic analysis application. For technical support or advanced usage questions, consult the development team or hydraulic engineering professionals.

@@ -83,8 +83,8 @@ npm run tauri build -- --target x86_64-pc-windows-msvc
 **Output Location**: `src-tauri/target/release/bundle/msi/`
 
 **Files Created**:
-- `eFlow_1.0.0_x64_en-US.msi` - Main installer
-- `eFlow_1.0.0_x64_en-US.msi.zip` - Compressed installer
+- `eFlood²_1.0.0_x64_en-US.msi` - Main installer
+- `eFlood²_1.0.0_x64_en-US.msi.zip` - Compressed installer
 
 #### Configuration
 Edit `src-tauri/tauri.conf.json`:
@@ -172,7 +172,7 @@ Edit `src-tauri/tauri.conf.json`:
 ```json
 {
   "package": {
-    "productName": "eFlow",
+    "productName": "eFlood²",
     "version": "1.0.0"
   },
   "tauri": {

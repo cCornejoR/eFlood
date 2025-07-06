@@ -1,4 +1,4 @@
-# Simple validation script for eFlow
+# Simple validation script for eFlood2
 Write-Host "Running simple validation..." -ForegroundColor Cyan
 
 $ErrorCount = 0

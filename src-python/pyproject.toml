@@ -1,26 +1,28 @@
 [project]
-name = "eflow-backend"
+name = "eflood2-backend"
 version = "0.1.0"
-description = "Python backend for eFlow hydraulic analysis application"
+description = "Python backend for eFlood2 hydraulic analysis application"
 authors = [
-    {name = "eFlow Tecnologies", email = "team@eflow.com"}
+    {name = "eFlood2 Technologies", email = "team@eflood2.com"}
 ]
 requires-python = ">=3.11"
 dependencies = [
     "h5py>=3.10.0",
-    "numpy>=1.24.0",
+    "numpy>=1.24.0,<2.0",
     "scipy>=1.11.0",
     "pandas>=2.0.0",
-    "matplotlib>=3.7.0",
+    "matplotlib>=3.10.3",
     "seaborn>=0.12.0",
     "xlsxwriter>=3.1.0",
     "reportlab>=4.0.0",
     "Pillow>=11.3.0",
-    "rasterio>=1.3.0",
-    "pyproj>=3.6.0",
-    "shapely>=2.0.0",
+    "rasterio>=1.4.3",
+    "pyproj>=3.7.1",
+    "shapely>=2.1.1",
     "tabulate>=0.9.0",
     "pyhmt2d>=1.0.6",
+    "meshio>=5.3.5",
+    "gdal @ file:///D:/DevMode/eFlow/src-python/gdal-whl/gdal-3.11.1-cp311-cp311-win_amd64.whl",
 ]
 
 [project.optional-dependencies]
@@ -37,6 +39,9 @@ dev = [
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
+
+[tool.hatch.metadata]
+allow-direct-references = true
 
 [tool.hatch.build.targets.wheel]
 packages = ["."]
@@ -63,7 +68,7 @@ extend-exclude = '''
 profile = "black"
 multi_line_output = 3
 line_length = 88
-known_first_party = ["eflow_backend"]
+known_first_party = ["eflood2_backend"]
 
 [tool.mypy]
 python_version = "3.11"
@@ -96,3 +101,4 @@ geometry-tools = "geometry_tools:main"
 section-tools = "section_tools:main"
 hydraulic-calc = "hydraulic_calc:main"
 export-tools = "export_tools:main"
+hecras-processor = "HECRAS-HDF.hecras_processor:main"

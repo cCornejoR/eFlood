@@ -13,7 +13,7 @@
   font-display: swap;
 }
 
-/* Custom styles for eFlow application */
+/* Custom styles for eFlood² application */
 
 /* Set Allenoire as default font family */
 body {
@@ -29,7 +29,7 @@ body {
   color: #ffffff;
 }
 
-/* eFlow branding - use Allenoire font for app name */
+/* eFlood² branding - use Allenoire font for app name */
 .eflow-brand {
   font-family: 'Allenoire', serif;
   font-weight: 400;
@@ -137,4 +137,372 @@ span,
 div {
   font-family: 'Inter', sans-serif;
   font-weight: 400;
+}
+
+/* Estilos para titlebar nativo fijo */
+.titlebar-fixed {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  z-index: 9999 !important;
+  pointer-events: auto !important;
+  /* Asegurar que el scrollbar no pase por encima */
+  margin-right: 0 !important;
+  width: 100vw !important;
+}
+
+/* Asegurar que el contenido no se superponga con el titlebar */
+.content-with-titlebar {
+  padding-top: 48px; /* Altura del titlebar */
+}
+
+/* Ocultar scrollbars del titlebar */
+.titlebar-fixed::-webkit-scrollbar {
+  display: none;
+}
+
+/* Safe Area Styles */
+.safe-area-container {
+  /* Asegurar que el scrollbar no interfiera con elementos fijos */
+  box-sizing: border-box;
+}
+
+.safe-area-container::-webkit-scrollbar {
+  width: 8px;
+}
+
+.safe-area-container::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 4px;
+  margin-top: 4px;
+  margin-bottom: 4px;
+}
+
+.safe-area-container::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+  transition: background 0.2s ease;
+}
+
+.safe-area-container::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+/* 📱 Responsive Design Utilities */
+@media (max-width: 640px) {
+  .safe-area-container {
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+  }
+
+  .titlebar-fixed {
+    font-size: 0.875rem;
+  }
+}
+
+@media (min-width: 641px) and (max-width: 768px) {
+  .safe-area-container {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+}
+
+@media (min-width: 769px) {
+  .safe-area-container {
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+  }
+}
+
+/* 🎯 Touch-friendly interactions */
+@media (hover: none) and (pointer: coarse) {
+  .safe-area-container {
+    /* Mejor scroll en dispositivos táctiles */
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+  }
+
+  /* Botones más grandes en dispositivos táctiles */
+  button {
+    min-height: 44px;
+    min-width: 44px;
+  }
+}
+
+/* 🎨 Smooth scrolling global */
+html {
+  scroll-behavior: smooth;
+}
+
+/* 📱 Sistema de layout base - SIN deformaciones */
+html, body {
+  overflow-x: hidden;
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
+  width: 100% !important;
+  max-width: 100vw !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  box-sizing: border-box !important;
+}
+
+html::-webkit-scrollbar,
+body::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+
+/* Box-sizing global pero SIN restricción de ancho para elementos de fondo */
+*, *::before, *::after {
+  box-sizing: border-box !important;
+}
+
+/* 🎨 SISTEMA DE LAYOUT DUAL: Fondo vs Contenido */
+
+/* Contenedores de fondo - ANCHO COMPLETO sin márgenes */
+.background-layer {
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100vw !important;
+  height: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  z-index: 0 !important;
+}
+
+/* Contenedores de contenido - CON márgenes apropiados */
+.content-layer {
+  position: relative !important;
+  z-index: 10 !important;
+  width: 100% !important;
+  max-width: 100vw !important;
+  padding-left: 1rem !important;
+  padding-right: 1rem !important;
+}
+
+/* Responsive padding para contenido */
+@media (min-width: 640px) {
+  .content-layer {
+    padding-left: 1.5rem !important;
+    padding-right: 1.5rem !important;
+  }
+}
+
+@media (min-width: 768px) {
+  .content-layer {
+    padding-left: 2rem !important;
+    padding-right: 2rem !important;
+  }
+}
+
+@media (min-width: 1024px) {
+  .content-layer {
+    padding-left: 3rem !important;
+    padding-right: 3rem !important;
+  }
+}
+
+/* 🔧 Utility classes */
+.no-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* 🏠 Homepage específico - Sistema de capas mejorado */
+.homepage-container {
+  /* Contenedor principal - altura completa */
+  position: relative !important;
+  width: 100% !important;
+  height: 100% !important;
+  min-height: 100vh !important;
+  /* Sin scroll en el contenedor principal */
+  overflow: hidden !important;
+  /* Sin márgenes ni padding */
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+/* Contenido del homepage con scroll */
+.homepage-content {
+  /* Layout flex para footer automático */
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  /* Altura mínima para scroll automático */
+  min-height: 100vh;
+  /* Scroll cuando sea necesario */
+  overflow-y: auto;
+  overflow-x: hidden;
+  /* Scrollbars invisibles */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  /* Padding superior para evitar que el contenido se pegue arriba */
+  padding-top: 2rem;
+  padding-bottom: 1rem;
+}
+
+.homepage-content::-webkit-scrollbar {
+  display: none !important;
+}
+
+/* Hero section centrado y responsive */
+.homepage-hero {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* Altura mínima para centrado */
+  min-height: calc(100vh - 300px);
+  /* Padding responsive */
+  padding: 2rem 0;
+}
+
+/* Footer con espaciado mejorado */
+.homepage-footer {
+  margin-top: auto;
+  flex-shrink: 0;
+  /* Asegurar que se vea completamente */
+  margin-bottom: 1rem;
+}
+
+/* BounceCards responsive */
+.custom-bounceCards {
+  width: 100% !important;
+  max-width: 100% !important;
+  overflow: visible !important;
+}
+
+/* Responsive breakpoints para BounceCards */
+@media (max-width: 768px) {
+  .custom-bounceCards {
+    transform: scale(0.85);
+    transform-origin: center;
+  }
+}
+
+@media (max-width: 640px) {
+  .custom-bounceCards {
+    transform: scale(0.75);
+    transform-origin: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .custom-bounceCards {
+    transform: scale(0.65);
+    transform-origin: center;
+  }
+}
+
+@media (max-width: 360px) {
+  .custom-bounceCards {
+    transform: scale(0.55);
+    transform-origin: center;
+  }
+}
+
+/* 🎨 Scrollbars Invisibles GLOBALMENTE */
+* {
+  /* Firefox */
+  scrollbar-width: none;
+  /* IE/Edge */
+  -ms-overflow-style: none;
+}
+
+*::-webkit-scrollbar {
+  /* Chrome/Safari/Webkit */
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+
+/* Clase específica para scrollbars invisibles */
+.scrollbar-none {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
+/* Scrollbars personalizados para casos específicos */
+.scrollbar-custom::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.scrollbar-custom::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 3px;
+}
+
+.scrollbar-custom::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 3px;
+  transition: background 0.2s ease;
+}
+
+.scrollbar-custom::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+.scrollbar-custom::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+/* Estilos para slider personalizado */
+.slider {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 8px;
+  border-radius: 4px;
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+.slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+  cursor: pointer;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+  transition: all 0.2s ease;
+}
+
+.slider::-webkit-slider-thumb:hover {
+  transform: scale(1.1);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.5);
+  border-color: rgba(255, 255, 255, 0.4);
+}
+
+.slider::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+  cursor: pointer;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+  transition: all 0.2s ease;
+}
+
+.slider::-moz-range-thumb:hover {
+  transform: scale(1.1);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.5);
+  border-color: rgba(255, 255, 255, 0.4);
 }

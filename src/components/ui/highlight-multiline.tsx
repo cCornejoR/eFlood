@@ -24,7 +24,7 @@ function HighlightMultiline({
   className,
   inView = false,
   inViewMargin = '0px',
-  transition = { duration: 2, ease: 'easeInOut' },
+  transition: _transition = { duration: 2, ease: 'easeInOut' },
   words = [],
   ...props
 }: HighlightMultilineProps) {

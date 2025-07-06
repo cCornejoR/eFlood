@@ -1,9 +1,10 @@
 import { motion } from 'framer-motion';
 import Threads from './ui/Threads';
 import BounceCards from './ui/BounceCards';
-import { StarBorder } from './ui/star-border';
 import { HighlightMultiline } from './ui/highlight-multiline';
 import AnimatedSocialLinks from './ui/socials';
+import { Button } from './ui/Button';
+import { Play } from 'lucide-react';
 import logoImage from '@/assets/logo.svg';
 
 // 🖼️ Importar sistema de gestión de imágenes
@@ -20,13 +21,11 @@ const images = getImages(6);
 const socialLinks = [
   {
     name: 'GitHub',
-    image:
-      'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/github/github-original-wordmark.svg',
+    image: 'https://cdn-icons-png.flaticon.com/512/25/25231.png',
   },
   {
     name: 'LinkedIn',
-    image:
-      'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/linkedin/linkedin-original.svg',
+    image: 'https://cdn-icons-png.flaticon.com/512/1384/1384014.png',
   },
   {
     name: 'Docs',
@@ -50,9 +49,9 @@ const transformStyles = [
 
 export default function Homepage({ onNavigate }: HomepageProps) {
   return (
-    <div className='min-h-screen relative bg-dark'>
-      {/* Fondo con Threads */}
-      <div className='fixed inset-0 z-0'>
+    <div className='homepage-container relative bg-[#131414] w-full h-full'>
+      {/* CAPA DE FONDO - Ancho completo SIN márgenes */}
+      <div className='background-layer'>
         <Threads
           amplitude={1}
           distance={0}
@@ -61,27 +60,27 @@ export default function Homepage({ onNavigate }: HomepageProps) {
         />
       </div>
 
-      {/* Contenido principal */}
-      <div className='relative z-10'>
-        {/* Hero Section - Centrado */}
-        <div className='flex items-center justify-center min-h-screen'>
-          <div className='text-center px-4 sm:px-6 lg:px-8'>
+      {/* CAPA DE CONTENIDO - CON márgenes apropiados */}
+      <div className='content-layer homepage-content'>
+        {/* Hero Section - Centrado automático */}
+        <div className='homepage-hero'>
+          <div className='text-center w-full max-w-6xl mx-auto'>
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8 }}
             >
-              <div className='flex items-center justify-center mb-6'>
+              <div className='flex items-center justify-center mb-6 sm:mb-8 lg:mb-10'>
                 <img
                   src={logoImage}
-                  alt='eFlow Logo'
-                  className='h-16 md:h-20 w-16 md:w-20 object-contain'
+                  alt='eFlood² Logo'
+                  className='h-12 sm:h-16 md:h-20 lg:h-24 w-12 sm:w-16 md:w-20 lg:w-24 object-contain'
                 />
-                <h1 className='text-6xl md:text-8xl font-bold text-white eflow-brand ml-4'>
-                  eFlow
+                <h1 className='text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-bold text-white eflow-brand'>
+                  eFlood²
                 </h1>
               </div>
-              <div className='text-xl md:text-2xl text-white/90 mb-8 max-w-3xl mx-auto leading-relaxed'>
+              <div className='text-lg sm:text-xl md:text-2xl lg:text-3xl text-white/90 mb-6 sm:mb-8 lg:mb-10 max-w-4xl mx-auto leading-relaxed'>
                 <div className='text-center'>
                   <HighlightMultiline
                     text='Explora , Analiza y Comprende'
@@ -102,38 +101,24 @@ export default function Homepage({ onNavigate }: HomepageProps) {
                 </div>
               </div>
 
-              {/* BounceCards */}
-              <div className='flex justify-center mb-12'>
-                <BounceCards
-                  className='custom-bounceCards'
-                  images={images}
-                  containerWidth={600}
-                  containerHeight={250}
-                  animationDelay={0.3}
-                  animationStagger={0.05}
-                  easeType='elastic.out(1, 0.5)'
-                  transformStyles={transformStyles}
-                  enableHover={false}
-                />
+              {/* BounceCards - Responsive */}
+              <div className='flex justify-center mb-8 sm:mb-10 lg:mb-12 w-full'>
+                <div className='w-full max-w-xs sm:max-w-md md:max-w-lg lg:max-w-2xl'>
+                  <BounceCards
+                    className='custom-bounceCards w-full'
+                    images={images}
+                    containerWidth={Math.min(600, typeof window !== 'undefined' ? window.innerWidth - 64 : 600)}
+                    containerHeight={200}
+                    animationDelay={0.3}
+                    animationStagger={0.3}
+                    easeType='elastic.out(1, 0.5)'
+                    transformStyles={transformStyles}
+                    enableHover={false}
+                  />
+                </div>
               </div>
 
-              <div className='flex flex-col sm:flex-row gap-6 justify-center'>
-                <motion.div
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  <StarBorder
-                    onClick={() => onNavigate?.('hdf')}
-                    color='rgba(59, 130, 246, 1)'
-                    speed='3s'
-                    className='cursor-pointer'
-                  >
-                    <span className='text-white font-semibold text-lg px-6 py-2'>
-                      Análisis HDF
-                    </span>
-                  </StarBorder>
-                </motion.div>
-                
+              <div className='flex justify-center'>
                 <motion.div
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
@@ -141,25 +126,24 @@ export default function Homepage({ onNavigate }: HomepageProps) {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.6, delay: 0.3 }}
                 >
-                  <StarBorder
-                    onClick={() => onNavigate?.('postprocessing')}
-                    color='rgba(168, 85, 247, 1)'
-                    speed='4s'
-                    className='cursor-pointer'
+                  <Button
+                    onClick={() => onNavigate?.('hecras')}
+                    variant='default'
+                    size='lg'
+                    className='text-lg font-semibold'
                   >
-                    <span className='text-white font-semibold text-lg px-6 py-2'>
-                      Postprocesamiento
-                    </span>
-                  </StarBorder>
+                    <Play className='w-5 h-5' />
+                    Analizar
+                  </Button>
                 </motion.div>
               </div>
             </motion.div>
           </div>
         </div>
 
-        {/* Footer */}
-        <footer className='absolute bottom-0 left-0 right-0 py-6'>
-          <div className='text-center text-white/60 space-y-4'>
+        {/* Footer - Con espaciado correcto y márgenes apropiados */}
+        <footer className='homepage-footer mt-12 py-8 bg-[#131414]/90 backdrop-blur-sm border-t border-white/10'>
+          <div className='text-center text-white/60 space-y-6 max-w-6xl mx-auto'>
             {/* Redes Sociales */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -175,8 +159,9 @@ export default function Homepage({ onNavigate }: HomepageProps) {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ duration: 0.8, delay: 1.8 }}
+              className='text-sm text-white/50 pb-4'
             >
-              &copy; 2025 <span className='eflow-brand'>eFlow</span> -
+              &copy; 2025 <span className='eflow-brand'>eFlood²</span> -
               Herramienta de Análisis Hidráulico.
             </motion.p>
           </div>

@@ -1,8 +1,8 @@
-# eFlow Architecture Documentation
+# eFlood2 Architecture Documentation
 
 ## Overview
 
-eFlow is a desktop application built with a modern three-tier architecture that combines the best of web technologies, systems programming, and scientific computing.
+eFlood2 is a desktop application built with a modern three-tier architecture that combines the best of web technologies, systems programming, and scientific computing.
 
 ## Architecture Layers
 

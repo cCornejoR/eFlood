@@ -11,6 +11,7 @@ import {
   BarChart3,
   Copy,
 } from 'lucide-react';
+import { IconButton } from './IconButton';
 import { AnimatePresence, motion } from 'framer-motion';
 import {
   ContextMenu,
@@ -198,12 +199,14 @@ export function FilesystemItem({
           <div className='flex items-center gap-2 py-1.5 text-sm hover:bg-white/5 rounded-md px-2 transition-colors group'>
             {/* Chevron button for expandable items */}
             {node.nodes && node.nodes.length > 0 && (
-              <button
+              <IconButton
                 onClick={() => setIsOpen(!isOpen)}
-                className='p-1 -m-1 hover:bg-white/10 rounded'
-              >
-                <ChevronIcon />
-              </button>
+                variant='minimal'
+                size='sm'
+                icon={<ChevronIcon />}
+                className='-m-1 hover:bg-white/10'
+                animate={false}
+              />
             )}
 
             {/* Icon */}
