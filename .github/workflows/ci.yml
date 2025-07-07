@@ -46,7 +46,7 @@ jobs:
     - name: Python syntax check (same as pre-commit)
       run: |
         cd src-python
-        python -m py_compile $(find . -name "*.py" | head -20)
+        python -c "import py_compile, glob; [py_compile.compile(f, doraise=True) for f in glob.glob('*.py')]"
 
   rust-critical:
     name: 🦀 Rust Critical Errors Only

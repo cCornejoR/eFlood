@@ -1,14 +1,16 @@
-<p align="center">
-  <img src="src/assets/Logo.png" alt="eFlood² logo" width="120">
-</p>
-<p align="center">Análisis hidráulico avanzado para modelos HEC-RAS 2D</p>
-<p align="center">
-  <a href="https://github.com/cCornejoR/eFlood/releases"><img alt="Version" src="https://img.shields.io/github/v/release/cCornejoR/eFlood?style=flat-square&label=version" /></a>
-  <a href="https://github.com/cCornejoR/eFlood/actions/workflows/quality-analysis.yml"><img alt="Build Status" src="https://img.shields.io/github/actions/workflow/status/cCornejoR/eFlood/quality-analysis.yml?style=flat-square&branch=main" /></a>
-  <a href="https://github.com/cCornejoR/eFlood/actions/workflows/quality-analysis.yml"><img alt="Tests" src="https://img.shields.io/github/actions/workflow/status/cCornejoR/eFlood/quality-analysis.yml?style=flat-square&label=tests&branch=main" /></a>
-  <a href="https://github.com/cCornejoR/eFlood/issues"><img alt="Issues" src="https://img.shields.io/github/issues/cCornejoR/eFlood?style=flat-square" /></a>
-  <a href="https://github.com/cCornejoR/eFlood/blob/main/LICENSE"><img alt="License" src="https://img.shields.io/github/license/cCornejoR/eFlood?style=flat-square" /></a>
-</p>
+<div align="center">
+
+<img src="https://raw.githubusercontent.com/cCornejoR/eFlood/main/Page/assets/logo.svg" alt="eFlood² logo" width="120"> eFlood²
+
+**Análisis hidráulico avanzado para modelos HEC-RAS 2D**
+
+[![Version](https://img.shields.io/github/v/release/cCornejoR/eFlood?style=flat-square&label=version)](https://github.com/cCornejoR/eFlood/releases)
+[![Build Status](https://img.shields.io/github/actions/workflow/status/cCornejoR/eFlood/ci.yml?style=flat-square&branch=main)](https://github.com/cCornejoR/eFlood/actions/workflows/ci.yml)
+[![Quality Analysis](https://img.shields.io/github/actions/workflow/status/cCornejoR/eFlood/quality-analysis.yml?style=flat-square&label=quality&branch=main)](https://github.com/cCornejoR/eFlood/actions/workflows/quality-analysis.yml)
+[![Issues](https://img.shields.io/github/issues/cCornejoR/eFlood?style=flat-square)](https://github.com/cCornejoR/eFlood/issues)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](https://github.com/cCornejoR/eFlood/blob/main/LICENCE)
+
+</div>
 
 [![eFlood² Screenshot](src/assets/Program.png)](https://github.com/cCornejoR/eFlood)
 
