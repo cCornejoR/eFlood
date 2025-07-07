@@ -36,7 +36,11 @@
       "Bash(cargo check:*)",
       "Bash(git add:*)",
       "Bash(git commit:*)",
-      "Bash(git reset:*)"
+      "Bash(git reset:*)",
+      "Bash(npm audit:*)",
+      "Bash(npm outdated)",
+      "Bash(node:*)",
+      "Bash(npm:*)"
     ],
     "deny": []
   }

@@ -1,14 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import {
-  Waves,
-  TrendingUp,
-  BarChart3,
-  Download,
-  Eye,
-  Info,
-  Activity,
-} from 'lucide-react';
+import { Waves, TrendingUp, BarChart3, Info, Activity } from 'lucide-react';
 import { HecRasState } from '../../index';
 import { HydrographChart } from './HydrographChart';
 

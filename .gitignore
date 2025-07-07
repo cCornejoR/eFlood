@@ -258,3 +258,5 @@ src/assets/images/dem.png
 # Keep essential small images
 !src/assets/logo.svg
 !src/assets/favicon.ico
+
+warnings-report.md

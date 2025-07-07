@@ -1,0 +1,146 @@
+# 🗂️ Git LFS Configuration for eFlood²
+# Configuración para manejar archivos grandes con Git LFS
+
+# ========================================
+# 🌍 ARCHIVOS GDAL Y GIS
+# ========================================
+# Archivos GDAL wheel y binarios
+*.whl filter=git-lfs diff=git-lfs merge=git-lfs -text
+gdal-whl/** filter=git-lfs diff=git-lfs merge=git-lfs -text
+
+# Archivos GeoTIFF y raster
+*.tif filter=git-lfs diff=git-lfs merge=git-lfs -text
+*.tiff filter=git-lfs diff=git-lfs merge=git-lfs -text
+*.geotiff filter=git-lfs diff=git-lfs merge=git-lfs -text
+*.asc filter=git-lfs diff=git-lfs merge=git-lfs -text
+*.dem filter=git-lfs diff=git-lfs merge=git-lfs -text
+*.bil filter=git-lfs diff=git-lfs merge=git-lfs -text
+*.bip filter=git-lfs diff=git-lfs merge=git-lfs -text
+*.bsq filter=git-lfs diff=git-lfs merge=git-lfs -text
+
+# Archivos shapefile
+*.shp filter=git-lfs diff=git-lfs merge=git-lfs -text
+*.shx filter=git-lfs diff=git-lfs merge=git-lfs -text
+*.dbf filter=git-lfs diff=git-lfs merge=git-lfs -text
+
+# ========================================
+# 📊 ARCHIVOS HDF Y DATOS CIENTÍFICOS
+# ========================================
+# Archivos HDF5 y HEC-RAS
+*.hdf filter=git-lfs diff=git-lfs merge=git-lfs -text
+*.hdf5 filter=git-lfs diff=git-lfs merge=git-lfs -text
+*.h5 filter=git-lfs diff=git-lfs merge=git-lfs -text
+*.nc filter=git-lfs diff=git-lfs merge=git-lfs -text
+*.netcdf filter=git-lfs diff=git-lfs merge=git-lfs -text
+
+# Archivos de datos grandes
+*.dat filter=git-lfs diff=git-lfs merge=git-lfs -text
+*.bin filter=git-lfs diff=git-lfs merge=git-lfs -text
+*.raw filter=git-lfs diff=git-lfs merge=git-lfs -text
+
+# ========================================
+# 🖼️ IMÁGENES Y MULTIMEDIA
+# ========================================
+# Imágenes de alta resolución
+*.png filter=git-lfs diff=git-lfs merge=git-lfs -text
+*.jpg filter=git-lfs diff=git-lfs merge=git-lfs -text
+*.jpeg filter=git-lfs diff=git-lfs merge=git-lfs -text
+*.webp filter=git-lfs diff=git-lfs merge=git-lfs -text
+*.bmp filter=git-lfs diff=git-lfs merge=git-lfs -text
+*.gif filter=git-lfs diff=git-lfs merge=git-lfs -text
+
+# Videos y animaciones
+*.mp4 filter=git-lfs diff=git-lfs merge=git-lfs -text
+*.avi filter=git-lfs diff=git-lfs merge=git-lfs -text
+*.mov filter=git-lfs diff=git-lfs merge=git-lfs -text
+*.wmv filter=git-lfs diff=git-lfs merge=git-lfs -text
+*.webm filter=git-lfs diff=git-lfs merge=git-lfs -text
+
+# ========================================
+# 📦 ARCHIVOS COMPRIMIDOS Y PAQUETES
+# ========================================
+# Archivos comprimidos
+*.zip filter=git-lfs diff=git-lfs merge=git-lfs -text
+*.rar filter=git-lfs diff=git-lfs merge=git-lfs -text
+*.7z filter=git-lfs diff=git-lfs merge=git-lfs -text
+*.tar.gz filter=git-lfs diff=git-lfs merge=git-lfs -text
+*.tar.bz2 filter=git-lfs diff=git-lfs merge=git-lfs -text
+
+# Instaladores y ejecutables
+*.exe filter=git-lfs diff=git-lfs merge=git-lfs -text
+*.msi filter=git-lfs diff=git-lfs merge=git-lfs -text
+*.dmg filter=git-lfs diff=git-lfs merge=git-lfs -text
+*.pkg filter=git-lfs diff=git-lfs merge=git-lfs -text
+*.deb filter=git-lfs diff=git-lfs merge=git-lfs -text
+*.rpm filter=git-lfs diff=git-lfs merge=git-lfs -text
+
+# ========================================
+# 🔬 ARCHIVOS CIENTÍFICOS Y MODELOS
+# ========================================
+# Archivos VTK y visualización 3D
+*.vtk filter=git-lfs diff=git-lfs merge=git-lfs -text
+*.vtu filter=git-lfs diff=git-lfs merge=git-lfs -text
+*.vtp filter=git-lfs diff=git-lfs merge=git-lfs -text
+*.vtr filter=git-lfs diff=git-lfs merge=git-lfs -text
+*.vts filter=git-lfs diff=git-lfs merge=git-lfs -text
+
+# Modelos 3D
+*.obj filter=git-lfs diff=git-lfs merge=git-lfs -text
+*.fbx filter=git-lfs diff=git-lfs merge=git-lfs -text
+*.dae filter=git-lfs diff=git-lfs merge=git-lfs -text
+*.3ds filter=git-lfs diff=git-lfs merge=git-lfs -text
+*.blend filter=git-lfs diff=git-lfs merge=git-lfs -text
+
+# ========================================
+# 📈 ARCHIVOS DE DATOS Y DOCUMENTOS
+# ========================================
+# Hojas de cálculo grandes
+*.xlsx filter=git-lfs diff=git-lfs merge=git-lfs -text
+*.xls filter=git-lfs diff=git-lfs merge=git-lfs -text
+*.ods filter=git-lfs diff=git-lfs merge=git-lfs -text
+
+# PDFs grandes (reportes, manuales)
+*.pdf filter=git-lfs diff=git-lfs merge=git-lfs -text
+
+# Bases de datos
+*.db filter=git-lfs diff=git-lfs merge=git-lfs -text
+*.sqlite filter=git-lfs diff=git-lfs merge=git-lfs -text
+*.sqlite3 filter=git-lfs diff=git-lfs merge=git-lfs -text
+
+# ========================================
+# 🚫 EXCLUSIONES ESPECÍFICAS
+# ========================================
+# Archivos pequeños que NO deben usar LFS
+*.svg -filter
+*.ico -filter
+*.md -filter
+*.txt -filter
+*.json -filter
+*.yaml -filter
+*.yml -filter
+*.toml -filter
+*.ini -filter
+*.cfg -filter
+
+# Archivos de código fuente
+*.js -filter
+*.ts -filter
+*.tsx -filter
+*.jsx -filter
+*.py -filter
+*.rs -filter
+*.css -filter
+*.scss -filter
+*.html -filter
+
+# ========================================
+# 📝 CONFIGURACIÓN ADICIONAL
+# ========================================
+# Archivos de configuración de línea de comandos
+* text=auto eol=lf
+
+# Archivos específicos del proyecto
+src-python/gdal-whl/** filter=git-lfs diff=git-lfs merge=git-lfs -text
+test-data/** filter=git-lfs diff=git-lfs merge=git-lfs -text
+sample-data/** filter=git-lfs diff=git-lfs merge=git-lfs -text
+assets/large/** filter=git-lfs diff=git-lfs merge=git-lfs -text

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import {
   LineChart,
@@ -21,9 +21,18 @@ import {
   EyeOff,
 } from 'lucide-react';
 
+interface TimeSeriesDataItem {
+  data: number[];
+  [key: string]: unknown;
+}
+
+interface TimeSeriesData {
+  [key: string]: TimeSeriesDataItem;
+}
+
 interface HydrographChartProps {
-  boundaryConditions: any[];
-  timeSeriesData: any;
+  boundaryConditions: unknown[];
+  timeSeriesData: TimeSeriesData;
   selectedBoundary: string | null;
 }
 
@@ -41,13 +50,7 @@ export const HydrographChart: React.FC<HydrographChartProps> = ({
   const [visibleSeries, setVisibleSeries] = useState<Set<string>>(new Set());
   const [chartType, setChartType] = useState<'line' | 'area'>('line');
 
-  useEffect(() => {
-    if (timeSeriesData && Object.keys(timeSeriesData).length > 0) {
-      generateChartData();
-    }
-  }, [timeSeriesData, selectedBoundary]);
-
-  const generateChartData = () => {
+  const generateChartData = useCallback(() => {
     const data: ChartDataPoint[] = [];
     const seriesNames = new Set<string>();
 
@@ -94,7 +97,13 @@ export const HydrographChart: React.FC<HydrographChartProps> = ({
 
     setChartData(data);
     setVisibleSeries(new Set(Array.from(seriesNames).slice(0, 3))); // Mostrar máximo 3 series por defecto
-  };
+  }, [timeSeriesData, selectedBoundary]);
+
+  useEffect(() => {
+    if (timeSeriesData && Object.keys(timeSeriesData).length > 0) {
+      generateChartData();
+    }
+  }, [timeSeriesData, selectedBoundary, generateChartData]);
 
   const toggleSeriesVisibility = (seriesName: string) => {
     const newVisible = new Set(visibleSeries);

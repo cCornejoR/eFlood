@@ -352,11 +352,6 @@ html {
   bottom: 0;
   opacity: 0.025;
   background-image:
-<<<<<<< Updated upstream
-    radial-gradient(circle at 20% 80%, rgba(120, 120, 120, 0.3) 0%, transparent 50%),
-    radial-gradient(circle at 80% 20%, rgba(120, 120, 120, 0.3) 0%, transparent 50%),
-    radial-gradient(circle at 40% 40%, rgba(120, 120, 120, 0.2) 0%, transparent 50%),
-=======
     radial-gradient(
       circle at 20% 80%,
       rgba(120, 120, 120, 0.3) 0%,
@@ -372,7 +367,6 @@ html {
       rgba(120, 120, 120, 0.2) 0%,
       transparent 50%
     ),
->>>>>>> Stashed changes
     linear-gradient(90deg, transparent 50%, rgba(255, 255, 255, 0.03) 50%),
     linear-gradient(transparent 50%, rgba(255, 255, 255, 0.03) 50%);
   background-size:
@@ -450,17 +444,6 @@ html {
   bottom: 0;
   opacity: 0.045;
   background-image:
-<<<<<<< Updated upstream
-    radial-gradient(circle at 20% 80%, rgba(140, 140, 140, 0.6) 0%, transparent 45%),
-    radial-gradient(circle at 80% 20%, rgba(140, 140, 140, 0.6) 0%, transparent 45%),
-    radial-gradient(circle at 40% 40%, rgba(140, 140, 140, 0.5) 0%, transparent 45%),
-    radial-gradient(circle at 60% 60%, rgba(120, 120, 120, 0.4) 0%, transparent 40%),
-    linear-gradient(90deg, transparent 48%, rgba(255, 255, 255, 0.08) 50%, transparent 52%),
-    linear-gradient(transparent 48%, rgba(255, 255, 255, 0.08) 50%, transparent 52%),
-    linear-gradient(45deg, transparent 49%, rgba(200, 200, 200, 0.06) 50%, transparent 51%);
-  background-size: 80px 80px, 120px 120px, 200px 200px, 150px 150px, 3px 3px, 3px 3px, 6px 6px;
-  background-position: 0 0, 40px 40px, 80px 80px, 20px 60px, 0 0, 0 0, 0 0;
-=======
     radial-gradient(
       circle at 20% 80%,
       rgba(140, 140, 140, 0.6) 0%,
@@ -514,7 +497,6 @@ html {
     0 0,
     0 0,
     0 0;
->>>>>>> Stashed changes
   animation: globalNoise 12s infinite linear;
   pointer-events: none;
   z-index: 0;
@@ -598,15 +580,6 @@ html {
   bottom: 0;
   opacity: 0.055;
   background-image:
-<<<<<<< Updated upstream
-    radial-gradient(circle at 25% 75%, rgba(130, 130, 130, 0.5) 0%, transparent 45%),
-    radial-gradient(circle at 75% 25%, rgba(130, 130, 130, 0.5) 0%, transparent 45%),
-    radial-gradient(circle at 50% 50%, rgba(110, 110, 110, 0.4) 0%, transparent 40%),
-    linear-gradient(90deg, transparent 48%, rgba(255, 255, 255, 0.07) 50%, transparent 52%),
-    linear-gradient(transparent 48%, rgba(255, 255, 255, 0.07) 50%, transparent 52%),
-    linear-gradient(135deg, transparent 49%, rgba(180, 180, 180, 0.05) 50%, transparent 51%);
-  background-size: 60px 60px, 90px 90px, 120px 120px, 2px 2px, 2px 2px, 4px 4px;
-=======
     radial-gradient(
       circle at 25% 75%,
       rgba(130, 130, 130, 0.5) 0%,
@@ -646,7 +619,6 @@ html {
     2px 2px,
     2px 2px,
     4px 4px;
->>>>>>> Stashed changes
   animation: localNoise 6s infinite linear;
   pointer-events: none;
   z-index: 1;
@@ -704,8 +676,4 @@ html {
   .hidden-lg {
     display: none;
   }
-<<<<<<< Updated upstream
 }
-=======
-}
->>>>>>> Stashed changes

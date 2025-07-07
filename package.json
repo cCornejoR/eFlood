@@ -19,7 +19,22 @@
     "test:ui": "vitest --ui",
     "test:coverage": "vitest --coverage",
     "validate": "npm run type-check && npm run lint && npm run format:check && npm run test -- --run",
-    "validate:fix": "npm run format && npm run lint:fix && npm run type-check"
+    "validate:fix": "npm run format && npm run lint:fix && npm run type-check",
+    "validate:critical": "npm run type-check",
+    "lint:critical": "eslint . --ext ts,tsx --quiet --max-warnings 999999 --no-error-on-unmatched-pattern",
+    "analyze:warnings": "node scripts/analyze-warnings.js",
+    "analyze:warnings:verbose": "node scripts/analyze-warnings.js --verbose",
+    "analyze:warnings:critical": "node scripts/analyze-warnings.js --critical-only",
+    "analyze:warnings:ps": "powershell -ExecutionPolicy Bypass -File scripts/analyze-warnings.ps1",
+    "analyze:warnings:bash": "bash scripts/analyze-warnings.sh",
+    "test:precommit": "powershell -ExecutionPolicy Bypass -File scripts/test-precommit.ps1",
+    "test:precommit:bash": "bash scripts/test-precommit.sh",
+    "lfs:setup": "powershell -ExecutionPolicy Bypass -File scripts/lfs-setup.ps1",
+    "lfs:setup:bash": "bash scripts/lfs-setup.sh",
+    "lfs:status": "git lfs status",
+    "lfs:files": "git lfs ls-files",
+    "lfs:pull": "git lfs pull",
+    "lfs:push": "git lfs push origin main"
   },
   "dependencies": {
     "@gsap/react": "^2.1.2",

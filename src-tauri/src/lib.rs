@@ -255,84 +255,7 @@ async fn generate_cross_sections(
     Ok(result)
 }
 
-// Tauri commands for hydraulic calculations
-#[tauri::command]
-async fn calculate_normal_depth(
-    discharge: f64,
-    slope: f64,
-    manning_n: f64,
-    width: f64,
-) -> Result<PythonResult, String> {
-    let args = vec![
-        "normal".to_string(),
-        discharge.to_string(),
-        slope.to_string(),
-        manning_n.to_string(),
-        width.to_string(),
-    ];
-    let result = execute_python_script("hydraulic_calc.py", args);
-    Ok(result)
-}
-
-#[tauri::command]
-async fn calculate_critical_depth(discharge: f64, width: f64) -> Result<PythonResult, String> {
-    let args = vec![
-        "critical".to_string(),
-        discharge.to_string(),
-        width.to_string(),
-    ];
-    let result = execute_python_script("hydraulic_calc.py", args);
-    Ok(result)
-}
-
-#[tauri::command]
-async fn analyze_flow_conditions(
-    discharge: f64,
-    depth: f64,
-    velocity: f64,
-    slope: f64,
-    manning_n: f64,
-    width: f64,
-) -> Result<PythonResult, String> {
-    let args = vec![
-        "analyze".to_string(),
-        discharge.to_string(),
-        depth.to_string(),
-        velocity.to_string(),
-        slope.to_string(),
-        manning_n.to_string(),
-        width.to_string(),
-    ];
-    let result = execute_python_script("hydraulic_calc.py", args);
-    Ok(result)
-}
-
-#[tauri::command]
-async fn calculate_scour_depth(
-    velocity: f64,
-    depth: f64,
-    d50: f64,
-) -> Result<PythonResult, String> {
-    let args = vec![
-        "scour".to_string(),
-        velocity.to_string(),
-        depth.to_string(),
-        d50.to_string(),
-    ];
-    let result = execute_python_script("hydraulic_calc.py", args);
-    Ok(result)
-}
-
-#[tauri::command]
-async fn calculate_froude_number(velocity: f64, depth: f64) -> Result<PythonResult, String> {
-    let args = vec![
-        "froude".to_string(),
-        velocity.to_string(),
-        depth.to_string(),
-    ];
-    let result = execute_python_script("hydraulic_calc.py", args);
-    Ok(result)
-}
+// NOTE: Hydraulic calculation functions removed - functionality moved to work in progress status
 
 // New Tauri commands for HDF data extraction and visualization
 #[tauri::command]
@@ -732,8 +655,16 @@ async fn get_system_metrics() -> Result<SystemMetrics, String> {
         0.0
     };
 
-    // Calculate CPU usage (average across all cores)
-    let cpu_usage_percent = system.global_cpu_info().cpu_usage() as f64;
+    // Calculate CPU usage specific to this application
+    let cpu_usage_percent = if let Some(proc) = process {
+        let num_cores = system.cpus().len() as f64;
+        // proc.cpu_usage() returns usage per core, divide by total cores for percentage of total system
+        let process_cpu = proc.cpu_usage() as f64;
+        let normalized_cpu = process_cpu / num_cores;
+        normalized_cpu.min(100.0).max(0.0)
+    } else {
+        0.0
+    };
 
     // Get total and available memory
     let total_memory_mb = system.total_memory() as f64 / 1024.0 / 1024.0;
@@ -781,11 +712,7 @@ pub fn run() {
             get_raster_info,
             create_spline_from_points,
             generate_cross_sections,
-            calculate_normal_depth,
-            calculate_critical_depth,
-            calculate_scour_depth,
-            calculate_froude_number,
-            analyze_flow_conditions,
+            // Hydraulic calculation functions removed
             extract_hdf_dataset,
             create_time_series_plot,
             create_hydrograph,

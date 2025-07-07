@@ -219,6 +219,7 @@ export const DataAnalyzer: React.FC<DataAnalyzerProps> = ({
     ) {
       handleStartAnalysis();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // Solo ejecutar una vez al montar el componente
 
   /**
@@ -479,32 +480,32 @@ export const DataAnalyzer: React.FC<DataAnalyzerProps> = ({
   return (
     <div className='space-y-4'>
       {/* 🔄 Panel de análisis */}
-      <div className='bg-white/5 rounded-2xl px-8 backdrop-blur-sm border border-white/10'>
-        {state.isAnalyzing ? (
-          <div className='flex flex-col items-center justify-center min-h-[60vh] space-y-8'>
-            {/* DotFlow centrado con animaciones dinámicas */}
-            <DotFlow
-              items={getAnalysisItems()}
-              backgroundColor='bg-[#131414]/80'
-              className='scale-110 shadow-lg'
-            />
+      {state.isAnalyzing ? (
+        <div className='fixed inset-0 z-50 flex flex-col items-center justify-center space-y-8'>
+          {/* DotFlow centrado con animaciones dinámicas */}
+          <DotFlow
+            items={getAnalysisItems()}
+            backgroundColor='bg-[#131414]/80'
+            className='scale-110 shadow-lg'
+          />
 
-            {/* Progreso */}
-            <div className='text-center space-y-2'>
-              <div className='text-white/40 text-sm'>
-                {analysisProgress}% completado
-              </div>
-              <div className='w-64 bg-white/10 rounded-full h-1'>
-                <motion.div
-                  className='bg-gradient-to-r from-blue-500 to-cyan-400 h-1 rounded-full'
-                  initial={{ width: 0 }}
-                  animate={{ width: `${analysisProgress}%` }}
-                  transition={{ duration: 0.5 }}
-                />
-              </div>
+          {/* Progreso */}
+          <div className='text-center space-y-2'>
+            <div className='text-white/40 text-sm'>
+              {analysisProgress}% completado
+            </div>
+            <div className='w-64 bg-white/10 rounded-full h-1'>
+              <motion.div
+                className='bg-gradient-to-r from-blue-500 to-cyan-400 h-1 rounded-full'
+                initial={{ width: 0 }}
+                animate={{ width: `${analysisProgress}%` }}
+                transition={{ duration: 0.5 }}
+              />
             </div>
           </div>
-        ) : analysisError ? (
+        </div>
+      ) : analysisError ? (
+        <div className='bg-white/5 rounded-2xl px-8 backdrop-blur-sm border border-white/10'>
           <div className='flex flex-col items-center justify-center space-y-4'>
             <AlertCircle className='h-12 w-12 text-red-400' />
             <div className='text-center'>
@@ -514,43 +515,36 @@ export const DataAnalyzer: React.FC<DataAnalyzerProps> = ({
               <p className='text-red-200 text-sm'>{analysisError}</p>
             </div>
           </div>
-        ) : state.hdfData ? (
-          <div className='flex items-center justify-center gap-2'>
-            <CheckCircle className='h-4 w-4 text-green-400' />
-            <span className='text-green-400 text-sm font-medium'>
-              Completado
-            </span>
-          </div>
-        ) : !analysisResults ? (
-          <div className='flex flex-col items-center justify-center space-y-4'>
-            <Play className='h-12 w-12 text-blue-400' />
-            <div className='text-center'>
-              <h3 className='text-lg font-semibold text-white mb-2'>
-                Listo para Analizar
-              </h3>
-              <p className='text-white/60 text-sm mb-4'>
-                Haz clic en el botón para iniciar el análisis del archivo HDF
-              </p>
-              <Button
-                onClick={handleStartAnalysis}
-                variant='default'
-                size='lg'
-                className='font-semibold'
-              >
-                <Play className='w-4 h-4 mr-2' />
-                Iniciar Análisis
-              </Button>
+        </div>
+      ) : state.hdfData ? (
+        <div className='fixed top-4 right-4 z-50 flex items-center gap-2 bg-green-500/20 border border-green-500/50 rounded-lg px-4 py-2 backdrop-blur-sm'>
+          <CheckCircle className='h-4 w-4 text-green-400' />
+          <span className='text-green-400 text-sm font-medium'>Completado</span>
+        </div>
+      ) : !analysisResults ? (
+        <div className='fixed inset-0 z-40 flex items-center justify-center'>
+          <div className='text-center space-y-4'>
+            <div className='flex items-center justify-center gap-3 text-white/70 text-base mb-6'>
+              <Play className='h-5 w-5' />
+              <span>Cargar Datos para Analizar</span>
             </div>
+            <Button
+              onClick={handleStartAnalysis}
+              variant='default'
+              size='default'
+              className='font-medium bg-blue-600/20 hover:bg-blue-600/30 border border-blue-500/30 text-blue-300 px-6 py-3'
+            >
+              <Play className='w-4 h-4 mr-2' />
+              Comenzar Análisis
+            </Button>
           </div>
-        ) : (
-          <div className='flex items-center justify-center gap-2'>
-            <CheckCircle className='h-4 w-4 text-green-400' />
-            <span className='text-green-400 text-sm font-medium'>
-              Completado
-            </span>
-          </div>
-        )}
-      </div>
+        </div>
+      ) : (
+        <div className='fixed top-4 right-4 z-50 flex items-center gap-2 bg-green-500/20 border border-green-500/50 rounded-lg px-4 py-2 backdrop-blur-sm'>
+          <CheckCircle className='h-4 w-4 text-green-400' />
+          <span className='text-green-400 text-sm font-medium'>Completado</span>
+        </div>
+      )}
 
       {/* ⚠️ Error message */}
       {analysisError && (

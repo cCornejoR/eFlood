@@ -38,6 +38,13 @@ interface ManningZone {
   landCoverType?: string;
 }
 
+interface ManningZoneData {
+  name?: string;
+  value?: number;
+  description?: string;
+  land_cover_type?: string;
+}
+
 // Column helper for type safety
 const columnHelper = createColumnHelper<ManningZone>();
 
@@ -81,23 +88,24 @@ export const SimpleManningTable: React.FC<SimpleManningTableProps> = ({
       : 0,
   });
 
-  const manningZones = manningData?.manning_data?.manning_zones || {};
   const totalZones = manningData?.manning_data?.total_zones || 0;
 
   // Convert zones to array for table display
-  const zonesArray: ManningZone[] = useMemo(
-    () =>
-      Object.entries(manningZones)
-        .map(([id, zone]: [string, any]) => ({
+  const zonesArray: ManningZone[] = useMemo(() => {
+    const manningZones = manningData?.manning_data?.manning_zones || {};
+    return Object.entries(manningZones)
+      .map(([id, zone]) => {
+        const zoneData = zone as ManningZoneData;
+        return {
           id: parseInt(id),
-          name: zone.name || `Zona ${id}`,
-          value: zone.value || 0,
-          description: zone.description || '',
-          landCoverType: zone.land_cover_type || 'No especificado',
-        }))
-        .sort((a: any, b: any) => a.value - b.value), // Sort by Manning value
-    [manningZones]
-  );
+          name: zoneData.name || `Zona ${id}`,
+          value: zoneData.value || 0,
+          description: zoneData.description || '',
+          landCoverType: zoneData.land_cover_type || 'No especificado',
+        };
+      })
+      .sort((a: ManningZone, b: ManningZone) => a.value - b.value);
+  }, [manningData?.manning_data?.manning_zones]);
 
   // Define table columns
   const columns = useMemo(
@@ -187,15 +195,9 @@ export const SimpleManningTable: React.FC<SimpleManningTableProps> = ({
           </h3>
         </div>
 
-<<<<<<< Updated upstream
-        <div className="text-center py-8">
-          <TreePine className="h-12 w-12 text-gray-600 mx-auto mb-4" />
-          <p className="text-white/60 text-sm mb-2">
-=======
         <div className='text-center py-8'>
           <TreePine className='h-12 w-12 text-gray-600 mx-auto mb-4' />
           <p className='text-white/60 text-sm mb-2'>
->>>>>>> Stashed changes
             No hay valores de Manning disponibles. Ejecuta el análisis primero.
           </p>
           {manningData && !manningData.success && (

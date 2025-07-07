@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>eFlood² - Herramienta Avanzada de Análisis Hidráulico</title>
+
+    <!-- Google Fonts - Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+    <!-- GSAP CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/ScrollTrigger.min.js"></script>
+
+    <!-- GSAP Premium Plugins (Club GreenSock) -->
+    <script src="https://assets.codepen.io/16327/SplitText3.min.js"></script>
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="css/main.css">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="nav">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <img src="assets/logo.svg" alt="eFlood² Logo" class="nav-logo">
+                <span class="nav-title">eFlood²</span>
+            </div>
+            <div class="nav-links">
+                <a href="#home" class="nav-link">Inicio</a>
+                <a href="docs/index.html" class="nav-link">Docs</a>
+                <a href="#features" class="nav-link">Características</a>
+                <a href="#download" class="nav-link">Descargar</a>
+                <a href="https://github.com/cCornejoR/eFlow" class="nav-link" target="_blank">GitHub</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section id="home" class="hero">
+        <div class="hero-background"></div>
+        <div class="hero-container">
+            <div class="hero-content">
+                <h1 class="hero-title split">La Herramienta de Análisis Hidráulico</h1>
+                <p class="hero-subtitle split">
+                    Construido para hacer análisis hidráulicos extraordinariamente precisos, eFlood² es la mejor manera de trabajar con modelos HEC-RAS 2D.
+                </p>
+                <div class="hero-actions">
+                    <button class="btn btn-primary" id="getStartedBtn">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                            <polyline points="7,10 12,15 17,10"></polyline>
+                            <line x1="12" y1="15" x2="12" y2="3"></line>
+                        </svg>
+                        <span>Descargar para Windows</span>
+                    </button>
+                    <button class="btn btn-secondary" id="docsBtn">
+                        <span>Todas las Descargas</span>
+                    </button>
+                </div>
+            </div>
+            <div class="hero-visual">
+                <div class="hero-screenshot">
+                    <div class="image-stack">
+                        <img src="assets/Program.png" alt="eFlood² Interface" class="app-interface active" data-image="1">
+                        <img src="assets/images/flood2.webp" alt="Análisis de Inundación" class="app-interface" data-image="2">
+                        <img src="assets/images/hidrograph.webp" alt="Hidrograma" class="app-interface" data-image="3">
+                        <img src="assets/images/mesh.webp" alt="Malla Computacional" class="app-interface" data-image="4">
+                        <img src="assets/images/dem.webp" alt="Modelo Digital de Elevación" class="app-interface" data-image="5">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features" class="features">
+        <div class="features-container">
+            <div class="features-header">
+                <h2 class="features-title split">Potencia tu análisis hidráulico</h2>
+                <p class="features-subtitle split">
+                    Herramientas profesionales para modelado HEC-RAS 2D
+                </p>
+            </div>
+            <div class="features-grid">
+                <div class="feature-item">
+                    <div class="feature-content">
+                        <div class="feature-badge">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                                <polyline points="3.27,6.96 12,12.01 20.73,6.96"></polyline>
+                                <line x1="12" y1="22.08" x2="12" y2="12"></line>
+                            </svg>
+                        </div>
+                        <h3 class="feature-title split">Análisis HEC-RAS 2D</h3>
+                        <p class="feature-description split">
+                            Procesamiento avanzado de archivos HDF con soporte completo hasta HEC-RAS v6.7
+                        </p>
+                    </div>
+                </div>
+
+                <div class="feature-item">
+                    <div class="feature-content">
+                        <div class="feature-badge">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="22,12 18,12 15,21 9,3 6,12 2,12"></polyline>
+                            </svg>
+                        </div>
+                        <h3 class="feature-title split">Visualización Interactiva</h3>
+                        <p class="feature-description split">
+                            Mapas de profundidad, velocidad y análisis de zonas de riesgo en tiempo real
+                        </p>
+                    </div>
+                </div>
+
+                <div class="feature-item">
+                    <div class="feature-content">
+                        <div class="feature-badge">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                                <circle cx="9" cy="9" r="2"></circle>
+                                <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"></path>
+                            </svg>
+                        </div>
+                        <h3 class="feature-title split">Exportación Múltiple</h3>
+                        <p class="feature-description split">
+                            Exporta a VTK, PDF, Excel y GeoTIFF para integración con otros software
+                        </p>
+                    </div>
+                </div>
+
+                <div class="feature-item">
+                    <div class="feature-content">
+                        <div class="feature-badge">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path>
+                            </svg>
+                        </div>
+                        <h3 class="feature-title split">Cálculos Automatizados</h3>
+                        <p class="feature-description split">
+                            Tirantes, socavación, número de Froude y curvas de remanso automáticos
+                        </p>
+                    </div>
+                </div>
+
+                <div class="feature-item">
+                    <div class="feature-content">
+                        <div class="feature-badge">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="3"></circle>
+                                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1 1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+                            </svg>
+                        </div>
+                        <h3 class="feature-title split">Interfaz Moderna</h3>
+                        <p class="feature-description split">
+                            Aplicación de escritorio construida con Tauri, React y Python
+                        </p>
+                    </div>
+                </div>
+
+                <div class="feature-item">
+                    <div class="feature-content">
+                        <div class="feature-badge">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path>
+                            </svg>
+                        </div>
+                        <h3 class="feature-title split">Código Abierto</h3>
+                        <p class="feature-description split">
+                            Desarrollo activo y comunidad de usuarios en constante crecimiento
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Download Section -->
+    <section id="download" class="download">
+        <div class="download-container">
+            <div class="download-header">
+                <h2 class="download-title split">Descarga eFlood²</h2>
+                <p class="download-subtitle split">
+                    Elige tu plataforma para descargar la última versión de eFlood²
+                </p>
+            </div>
+
+            <div class="version-section">
+                <h3 class="version-title split">Última Versión (alpha 0.1.0)</h3>
+            </div>
+
+            <div class="download-grid">
+                <div class="download-card">
+                    <div class="download-card-content">
+                        <h4 class="platform-name split">macOS</h4>
+                        <p class="platform-desc">Mac Universal</p>
+                    </div>
+                    <button class="download-btn">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                            <polyline points="7,10 12,15 17,10"></polyline>
+                            <line x1="12" y1="15" x2="12" y2="3"></line>
+                        </svg>
+                    </button>
+                </div>
+
+                <div class="download-card">
+                    <div class="download-card-content">
+                        <h4 class="platform-name split">macOS</h4>
+                        <p class="platform-desc">Mac Arm64</p>
+                    </div>
+                    <button class="download-btn">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                            <polyline points="7,10 12,15 17,10"></polyline>
+                            <line x1="12" y1="15" x2="12" y2="3"></line>
+                        </svg>
+                    </button>
+                </div>
+
+                <div class="download-card">
+                    <div class="download-card-content">
+                        <h4 class="platform-name split">macOS</h4>
+                        <p class="platform-desc">Mac x64</p>
+                    </div>
+                    <button class="download-btn">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                            <polyline points="7,10 12,15 17,10"></polyline>
+                            <line x1="12" y1="15" x2="12" y2="3"></line>
+                        </svg>
+                    </button>
+                </div>
+
+                <div class="download-card">
+                    <div class="download-card-content">
+                        <h4 class="platform-name split">Windows</h4>
+                        <p class="platform-desc">Windows 10/11 (x64)</p>
+                    </div>
+                    <button class="download-btn">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                            <polyline points="7,10 12,15 17,10"></polyline>
+                            <line x1="12" y1="15" x2="12" y2="3"></line>
+                        </svg>
+                    </button>
+                </div>
+
+                <div class="download-card">
+                    <div class="download-card-content">
+                        <h4 class="platform-name split">Windows</h4>
+                        <p class="platform-desc">Windows 10/11 (Arm64)</p>
+                    </div>
+                    <button class="download-btn">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                            <polyline points="7,10 12,15 17,10"></polyline>
+                            <line x1="12" y1="15" x2="12" y2="3"></line>
+                        </svg>
+                    </button>
+                </div>
+
+                <div class="download-card">
+                    <div class="download-card-content">
+                        <h4 class="platform-name split">Linux</h4>
+                        <p class="platform-desc">AppImage (x64)</p>
+                    </div>
+                    <button class="download-btn">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                            <polyline points="7,10 12,15 17,10"></polyline>
+                            <line x1="12" y1="15" x2="12" y2="3"></line>
+                        </svg>
+                    </button>
+                </div>
+
+                <div class="download-card">
+                    <div class="download-card-content">
+                        <h4 class="platform-name split">Linux</h4>
+                        <p class="platform-desc">AppImage (Arm64)</p>
+                    </div>
+                    <button class="download-btn">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                            <polyline points="7,10 12,15 17,10"></polyline>
+                            <line x1="12" y1="15" x2="12" y2="3"></line>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-container">
+            <div class="footer-content">
+                <div class="footer-brand">
+                    <img src="assets/logo.svg" alt="eFlood² Logo" class="footer-logo">
+                    <span class="footer-title">eFlood²</span>
+                    <p class="footer-description">
+                        Herramienta avanzada de análisis hidráulico para modelos HEC-RAS 2D
+                    </p>
+                </div>
+                <div class="footer-links">
+                    <div class="footer-section">
+                        <h4>Producto</h4>
+                        <a href="docs/index.html">Documentación</a>
+                        <a href="#features">Características</a>
+                        <a href="#download">Descargar</a>
+                    </div>
+                    <div class="footer-section">
+                        <h4>Comunidad</h4>
+                        <a href="https://github.com/cCornejoR/eFlow" target="_blank">GitHub</a>
+                        <a href="https://linkedin.com/in/crhistian-cornejo" target="_blank">LinkedIn</a>
+                        <a href="mailto:crhistian.cornejo03@gmail.com">Contacto</a>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 eFlood². Todos los derechos reservados.</p>
+                <p>Versión alpha 0.1.0</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="js/main.js"></script>
+</body>
+</html>

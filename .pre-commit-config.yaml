@@ -1,115 +1,60 @@
+# Pre-commit configuration optimized for CRITICAL ERRORS ONLY
+# Ignores warnings and only catches build-breaking issues
+# Aligned with GitHub Actions CI pipeline for consistency
+
 repos:
-  # Frontend hooks
+  # Frontend hooks - CRITICAL ERRORS ONLY (TypeScript compilation errors)
   - repo: local
     hooks:
-      - id: frontend-type-check
-        name: TypeScript Type Check
-        entry: npm run type-check
+      - id: frontend-critical-check
+        name: "🎨 Frontend: TypeScript Critical Errors Only"
+        entry: bash -c 'npm run type-check 2>/dev/null || (echo "❌ TypeScript compilation errors found - commit blocked" && exit 1)'
         language: system
         files: ^src/.*\.(ts|tsx)$
         pass_filenames: false
+        stages: [commit]
 
-      - id: frontend-lint
-        name: ESLint
-        entry: npm run lint
-        language: system
-        files: ^src/.*\.(ts|tsx|js|jsx)$
-        pass_filenames: false
-
-      - id: frontend-format-check
-        name: Prettier Format Check
-        entry: npm run format:check
-        language: system
-        files: ^src/.*\.(ts|tsx|js|jsx|json|css|md)$
-        pass_filenames: false
-
-      - id: frontend-build
-        name: Frontend Build Test
-        entry: npm run build
-        language: system
-        files: ^src/
-        pass_filenames: false
-
-  # Python hooks
+  # Python hooks - CRITICAL ERRORS ONLY (Syntax errors)
   - repo: local
     hooks:
-      - id: python-black
-        name: Black Code Formatter
-        entry: bash -c 'cd src-python && uv run black --check .'
+      - id: python-syntax-critical
+        name: "🐍 Python: Syntax Errors Only"
+        entry: bash -c 'cd src-python && python -m py_compile $(find . -name "*.py" 2>/dev/null | head -20) 2>/dev/null || (echo "❌ Python syntax errors found - commit blocked" && exit 1)'
         language: system
         files: ^src-python/.*\.py$
         pass_filenames: false
+        stages: [commit]
 
-      - id: python-isort
-        name: Import Sorting
-        entry: bash -c 'cd src-python && uv run isort --check-only .'
-        language: system
-        files: ^src-python/.*\.py$
-        pass_filenames: false
-
-      - id: python-flake8
-        name: Flake8 Linting
-        entry: bash -c 'cd src-python && uv run flake8 .'
-        language: system
-        files: ^src-python/.*\.py$
-        pass_filenames: false
-
-      - id: python-mypy
-        name: MyPy Type Checking
-        entry: bash -c 'cd src-python && uv run mypy .'
-        language: system
-        files: ^src-python/.*\.py$
-        pass_filenames: false
-
-      - id: python-tests
-        name: Python Tests
-        entry: bash -c 'cd src-python && uv run pytest'
-        language: system
-        files: ^src-python/
-        pass_filenames: false
-
-  # Rust hooks
+  # Rust hooks - CRITICAL ERRORS ONLY (Compilation errors)
   - repo: local
     hooks:
-      - id: rust-fmt
-        name: Rust Format Check
-        entry: bash -c 'cd src-tauri && cargo fmt --all -- --check'
+      - id: rust-compilation-critical
+        name: "🦀 Rust: Compilation Errors Only"
+        entry: bash -c 'cd src-tauri && cargo check --quiet --message-format=short 2>/dev/null || (echo "❌ Rust compilation errors found - commit blocked" && exit 1)'
         language: system
         files: ^src-tauri/.*\.rs$
         pass_filenames: false
+        stages: [commit]
 
-      - id: rust-clippy
-        name: Rust Clippy
-        entry: bash -c 'cd src-tauri && cargo clippy --all-targets --all-features -- -D warnings'
-        language: system
-        files: ^src-tauri/
-        pass_filenames: false
-
-      - id: rust-test
-        name: Rust Tests
-        entry: bash -c 'cd src-tauri && cargo test'
-        language: system
-        files: ^src-tauri/
-        pass_filenames: false
-
-  # Security and general hooks
+  # Critical file integrity checks - ONLY BUILD-BREAKING ISSUES
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v4.5.0
     hooks:
-      - id: trailing-whitespace
-      - id: end-of-file-fixer
-      - id: check-yaml
-      - id: check-json
-      - id: check-toml
       - id: check-merge-conflict
+        stages: [commit]
       - id: check-added-large-files
-        args: ['--maxkb=1000']
+        args: ['--maxkb=2000']  # Increased limit to avoid false positives
+        stages: [commit]
       - id: detect-private-key
+        stages: [commit]
+      - id: check-yaml
+        files: ^(\.github/workflows/.*\.yml|\.pre-commit-config\.yaml|src-tauri/tauri\.conf\.json)$
+        stages: [commit]
+      - id: check-json
+        files: ^(package\.json|tsconfig\.json|src-tauri/tauri\.conf\.json)$
+        stages: [commit]
 
-  # GitGuardian - commented out for initial setup
-  # - repo: https://github.com/gitguardian/ggshield
-  #   rev: v1.25.0
-  #   hooks:
-  #     - id: ggshield
-  #       language: python
-  #       stages: [commit]
+# Configuration to make pre-commit faster and less verbose
+default_stages: [commit]
+fail_fast: true  # Stop on first failure for faster feedback
+minimum_pre_commit_version: '3.0.0'

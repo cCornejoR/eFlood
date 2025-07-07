@@ -25,11 +25,7 @@ interface SimpleAnalysisStatusProps {
  */
 export const SimpleAnalysisStatus: React.FC<SimpleAnalysisStatusProps> = ({
   state,
-<<<<<<< Updated upstream
-  className = ''
-=======
   className = '',
->>>>>>> Stashed changes
 }) => {
   // 🎨 Configuración de elementos de estado
   const statusItems = [
@@ -85,21 +81,11 @@ export const SimpleAnalysisStatus: React.FC<SimpleAnalysisStatusProps> = ({
             className='flex items-center gap-2'
           >
             {/* Icono con estado */}
-<<<<<<< Updated upstream
-            <div className="relative">
-              <Icon
-                className={cn(
-                  'h-4 w-4 transition-all duration-300',
-                  item.isActive
-                    ? 'text-green-400'
-                    : 'text-gray-500',
-=======
             <div className='relative'>
               <Icon
                 className={cn(
                   'h-4 w-4 transition-all duration-300',
                   item.isActive ? 'text-green-400' : 'text-gray-500',
->>>>>>> Stashed changes
                   item.isProcessing && 'animate-pulse text-blue-400'
                 )}
               />
@@ -127,13 +113,7 @@ export const SimpleAnalysisStatus: React.FC<SimpleAnalysisStatusProps> = ({
             <span
               className={cn(
                 'text-xs font-medium transition-colors duration-300',
-<<<<<<< Updated upstream
-                item.isActive
-                  ? 'text-white'
-                  : 'text-gray-500'
-=======
                 item.isActive ? 'text-white' : 'text-gray-500'
->>>>>>> Stashed changes
               )}
             >
               {item.label}

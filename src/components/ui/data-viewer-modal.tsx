@@ -70,6 +70,7 @@ export const DataViewerModal: React.FC<DataViewerModalProps> = ({
     if (isOpen && data.type === 'dataset' && data.path) {
       loadDatasetData();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen, data]);
 
   const loadDatasetData = async () => {

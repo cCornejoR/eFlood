@@ -469,7 +469,7 @@ export const CustomTitlebar: React.FC<CustomTitlebarProps> = ({
 
       {/* 🌟 Efecto de brillo al hacer hover */}
       <motion.div
-        className='absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent pointer-events-none'
+        className='absolute inset-0 bg-gradient-to-r from-transparent via-blue-500/10 via-cyan-400/10 to-transparent pointer-events-none'
         initial={{ opacity: 0, x: '-100%' }}
         animate={
           isHovered ? { opacity: 1, x: '100%' } : { opacity: 0, x: '-100%' }

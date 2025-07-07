@@ -295,7 +295,7 @@ export const VTKViewerTab: React.FC<VTKViewerTabProps> = ({ state }) => {
         setSelectedFile(realVTKFiles[0]);
       }
     }
-  }, [state.exportedVTKFiles]);
+  }, [state.exportedVTKFiles, loadedVTKFiles.length]);
 
   return (
     <div className='space-y-4'>

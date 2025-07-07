@@ -324,7 +324,7 @@ export const FileUpload: React.FC<FileUploadProps> = ({
   // Variante default con el diseño hermoso del example.tsx
   return (
     <div
-      className={cn('relative w-full max-w-sm mx-auto', className || '')}
+      className={cn('relative w-full', className || '')}
       role='complementary'
       aria-label='File upload'
     >

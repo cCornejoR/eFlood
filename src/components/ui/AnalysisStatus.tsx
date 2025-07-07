@@ -27,11 +27,7 @@ interface AnalysisStatusProps {
 export const AnalysisStatus: React.FC<AnalysisStatusProps> = ({
   state,
   className = '',
-<<<<<<< Updated upstream
-  compact = false
-=======
   compact = false,
->>>>>>> Stashed changes
 }) => {
   // 🎨 Configuración de elementos de estado
   const statusItems = [

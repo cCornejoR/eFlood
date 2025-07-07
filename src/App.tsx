@@ -16,7 +16,7 @@ function App() {
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [userData, setUserData] = useState<UserData | null>(null);
   const [isLicenseValid, setIsLicenseValid] = useState(false);
-  const [isLicensePanelCollapsed, setIsLicensePanelCollapsed] = useState(false);
+  const [isLicensePanelCollapsed, setIsLicensePanelCollapsed] = useState(true);
 
   // Check if user has completed onboarding
   useEffect(() => {

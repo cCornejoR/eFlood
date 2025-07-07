@@ -2,11 +2,10 @@ import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import path from 'path';
 
-// @ts-expect-error process is a nodejs global
 const host = process.env.TAURI_DEV_HOST;
 
 // https://vitejs.dev/config/
-export default defineConfig(async () => ({
+export default defineConfig(() => ({
   plugins: [react()],
 
   // Path aliases
@@ -46,8 +45,37 @@ export default defineConfig(async () => ({
     // Tauri supports es2021
     target: process.env.TAURI_PLATFORM == 'windows' ? 'chrome105' : 'safari13',
     // don't minify for debug builds
-    minify: !process.env.TAURI_DEBUG ? 'esbuild' : false,
+    minify: !process.env.TAURI_DEBUG ? 'esbuild' as const : false,
     // produce sourcemaps for debug builds
     sourcemap: !!process.env.TAURI_DEBUG,
+    // Configuración para archivos grandes
+    chunkSizeWarningLimit: 2000, // 2MB chunks
+    rollupOptions: {
+      output: {
+        // Separar chunks grandes
+        manualChunks: {
+          vendor: ['react', 'react-dom'],
+          ui: ['@headlessui/react', '@heroicons/react', 'lucide-react'],
+          charts: ['plotly.js', 'react-plotly.js', 'recharts'],
+          vtk: ['@kitware/vtk.js'],
+          animations: ['framer-motion', 'gsap', 'motion'],
+          table: ['@tanstack/react-table'],
+        },
+      },
+    },
+    // Configuración de assets
+    assetsInlineLimit: 0, // No inline assets para archivos grandes
+  },
+
+  // Optimización para archivos grandes
+  optimizeDeps: {
+    include: [
+      'react',
+      'react-dom',
+      '@tauri-apps/api',
+      '@tauri-apps/plugin-dialog',
+      '@tauri-apps/plugin-opener',
+    ],
+    exclude: ['@kitware/vtk.js'], // VTK es muy grande, excluir de pre-bundling
   },
 }));

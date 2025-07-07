@@ -99,20 +99,12 @@ export const ManningDebugViewer: React.FC<ManningDebugViewerProps> = ({
                   {manningData?.manning_data?.total_zones || 0}
                 </span>
               </div>
-<<<<<<< Updated upstream
-              <div className="flex justify-between">
-                <span className="text-white/60">Zones Object:</span>
-                <span className="text-blue-400">
-                  {manningData?.manning_data?.manning_zones ?
-                    Object.keys(manningData.manning_data.manning_zones).length : 0}
-=======
               <div className='flex justify-between'>
                 <span className='text-white/60'>Zones Object:</span>
                 <span className='text-blue-400'>
                   {manningData?.manning_data?.manning_zones
                     ? Object.keys(manningData.manning_data.manning_zones).length
                     : 0}
->>>>>>> Stashed changes
                 </span>
               </div>
               {manningData?.error && (

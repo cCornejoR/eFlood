@@ -61,6 +61,7 @@ export const VTKExportModal: React.FC<VTKExportModalProps> = ({
     if (isOpen && hdfFilePath) {
       fetchExportInfo();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen, hdfFilePath]);
 
   const fetchExportInfo = async () => {

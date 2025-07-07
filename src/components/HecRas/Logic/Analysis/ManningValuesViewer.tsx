@@ -136,13 +136,8 @@ export const ManningValuesViewer: React.FC<ManningValuesViewerProps> = ({
           </h3>
         </div>
 
-<<<<<<< Updated upstream
-        <div className="flex items-center gap-3 text-gray-400">
-          <Info className="w-4 h-4" />
-=======
         <div className='flex items-center gap-3 text-gray-400'>
           <Info className='w-4 h-4' />
->>>>>>> Stashed changes
           <span>
             {manningData?.error
               ? `Error: ${manningData.error}`
@@ -171,11 +166,7 @@ export const ManningValuesViewer: React.FC<ManningValuesViewerProps> = ({
           </span>
         </div>
 
-<<<<<<< Updated upstream
-        <div className="flex items-center gap-2">
-=======
         <div className='flex items-center gap-2'>
->>>>>>> Stashed changes
           <button
             onClick={() => setShowDetails(!showDetails)}
             className={cn(

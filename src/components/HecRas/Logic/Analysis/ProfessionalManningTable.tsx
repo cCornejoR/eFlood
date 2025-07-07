@@ -85,11 +85,11 @@ export const ProfessionalManningTable: React.FC<
     manningData?.manning_data?.manning_zones &&
     Object.keys(manningData?.manning_data?.manning_zones).length > 0;
 
-  const manningZones = manningData?.manning_data?.manning_zones || {};
   const totalZones = manningData?.manning_data?.total_zones || 0;
 
   // Convert to table data
   const tableData = useMemo(() => {
+    const manningZones = manningData?.manning_data?.manning_zones || {};
     if (!hasManningData) return [];
 
     return Object.entries(manningZones).map(([id, zone]) => ({
@@ -100,7 +100,7 @@ export const ProfessionalManningTable: React.FC<
       category: getManningCategory(zone.value),
       color: getManningColor(zone.value),
     }));
-  }, [manningZones, hasManningData]);
+  }, [manningData?.manning_data?.manning_zones, hasManningData]);
 
   // Define columns
   const columns = useMemo(
@@ -116,17 +116,10 @@ export const ProfessionalManningTable: React.FC<
       }),
       columnHelper.accessor('name', {
         header: 'Tipo de Cobertura',
-<<<<<<< Updated upstream
-        cell: (info) => (
-          <div className="flex items-center gap-2">
-            <div
-              className={cn("w-3 h-3 rounded-full", info.row.original.color)}
-=======
         cell: info => (
           <div className='flex items-center gap-2'>
             <div
               className={cn('w-3 h-3 rounded-full', info.row.original.color)}
->>>>>>> Stashed changes
             />
             <span className='font-medium text-white'>{info.getValue()}</span>
           </div>
@@ -296,11 +289,7 @@ export const ProfessionalManningTable: React.FC<
           </div>
         </div>
 
-<<<<<<< Updated upstream
-        <div className="flex items-center gap-2">
-=======
         <div className='flex items-center gap-2'>
->>>>>>> Stashed changes
           <button
             onClick={() => setShowDetails(!showDetails)}
             className='flex items-center gap-2 px-3 py-2 bg-white/10 hover:bg-white/20 text-white text-sm rounded-lg transition-colors'
@@ -334,51 +323,30 @@ export const ProfessionalManningTable: React.FC<
             <p className='text-lg font-bold text-blue-400'>{stats.count}</p>
           </div>
 
-<<<<<<< Updated upstream
-          <div className="bg-white/5 rounded-lg p-3 border border-white/10">
-            <div className="flex items-center gap-2 mb-1">
-              <ArrowDown className="h-4 w-4 text-green-400" />
-              <span className="text-xs text-gray-400">Mínimo</span>
-=======
           <div className='bg-white/5 rounded-lg p-3 border border-white/10'>
             <div className='flex items-center gap-2 mb-1'>
               <ArrowDown className='h-4 w-4 text-green-400' />
               <span className='text-xs text-gray-400'>Mínimo</span>
->>>>>>> Stashed changes
             </div>
             <p className='text-lg font-bold text-green-400'>
               {stats.min.toFixed(3)}
             </p>
           </div>
 
-<<<<<<< Updated upstream
-          <div className="bg-white/5 rounded-lg p-3 border border-white/10">
-            <div className="flex items-center gap-2 mb-1">
-              <ArrowUp className="h-4 w-4 text-red-400" />
-              <span className="text-xs text-gray-400">Máximo</span>
-=======
           <div className='bg-white/5 rounded-lg p-3 border border-white/10'>
             <div className='flex items-center gap-2 mb-1'>
               <ArrowUp className='h-4 w-4 text-red-400' />
               <span className='text-xs text-gray-400'>Máximo</span>
->>>>>>> Stashed changes
             </div>
             <p className='text-lg font-bold text-red-400'>
               {stats.max.toFixed(3)}
             </p>
           </div>
 
-<<<<<<< Updated upstream
-          <div className="bg-white/5 rounded-lg p-3 border border-white/10">
-            <div className="flex items-center gap-2 mb-1">
-              <BarChart3 className="h-4 w-4 text-yellow-400" />
-              <span className="text-xs text-gray-400">Promedio</span>
-=======
           <div className='bg-white/5 rounded-lg p-3 border border-white/10'>
             <div className='flex items-center gap-2 mb-1'>
               <BarChart3 className='h-4 w-4 text-yellow-400' />
               <span className='text-xs text-gray-400'>Promedio</span>
->>>>>>> Stashed changes
             </div>
             <p className='text-lg font-bold text-yellow-400'>
               {stats.avg.toFixed(3)}
@@ -400,17 +368,11 @@ export const ProfessionalManningTable: React.FC<
           />
         </div>
 
-<<<<<<< Updated upstream
-        <div className="flex items-center gap-2 text-sm text-gray-400">
-          <Filter className="h-4 w-4" />
-          <span>{table.getFilteredRowModel().rows.length} de {tableData.length}</span>
-=======
         <div className='flex items-center gap-2 text-sm text-gray-400'>
           <Filter className='h-4 w-4' />
           <span>
             {table.getFilteredRowModel().rows.length} de {tableData.length}
           </span>
->>>>>>> Stashed changes
         </div>
       </div>
 

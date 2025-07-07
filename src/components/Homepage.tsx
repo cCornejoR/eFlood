@@ -64,7 +64,7 @@ export default function Homepage({ onNavigate }: HomepageProps) {
       {/* CONTENIDO PRINCIPAL - Flex-1 para ocupar espacio disponible */}
       <div className='relative z-10 flex-1 flex flex-col justify-center px-4 sm:px-6 md:px-8 py-8 overflow-y-auto overflow-x-hidden scrollbar-custom'>
         {/* CONTENIDO PRINCIPAL - Centrado perfecto */}
-        <div className='flex flex-col items-center justify-center space-y-8 sm:space-y-12 md:space-y-16'>
+        <div className='flex flex-col items-center justify-center space-y-8 sm:space-y-12 md:space-y-16 pt-16 sm:pt-20 md:pt-24'>
           <div className='text-center w-full max-w-6xl mx-auto'>
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -106,7 +106,7 @@ export default function Homepage({ onNavigate }: HomepageProps) {
               </div>
 
               {/* BOUNCE CARDS - Responsive y centrado */}
-              <div className='flex justify-center mb-4 sm:mb-6 md:mb-8 w-full'>
+              <div className='flex justify-center mb-4 sm:mb-6 md:mb-8 w-full mt-8 sm:mt-12 md:mt-16'>
                 <div className='w-full max-w-xs sm:max-w-sm md:max-w-md lg:max-w-xl'>
                   <BounceCards
                     className='custom-bounceCards w-full'
@@ -128,7 +128,7 @@ export default function Homepage({ onNavigate }: HomepageProps) {
               </div>
 
               {/* BOTÓN PRINCIPAL - Centrado */}
-              <div className='flex justify-center'>
+              <div className='flex justify-center mt-12 sm:mt-16 md:mt-20'>
                 <motion.div
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
