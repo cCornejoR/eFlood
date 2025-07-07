@@ -1,0 +1,81 @@
+/* README.md Custom Styles */
+
+@font-face {
+  font-family: 'Allenoire';
+  src: url('https://raw.githubusercontent.com/cCornejoR/eFlood/main/src/assets/ttf/allenoire-allenoire-regular-400.ttf') format('truetype'),
+       url('https://raw.githubusercontent.com/cCornejoR/eFlood/main/src/assets/otf/allenoire-allenoire-regular-400.otf') format('opentype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* GitHub README specific styles */
+.markdown-body h1 {
+  font-family: 'Allenoire', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+  font-weight: 400 !important;
+  letter-spacing: -0.02em !important;
+}
+
+.markdown-body h2, .markdown-body h3 {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+  font-weight: 600 !important;
+}
+
+/* Image styling */
+.markdown-body img[alt*="Logo"] {
+  border-radius: 20px !important;
+  transition: transform 0.3s ease !important;
+}
+
+.markdown-body img[alt*="Logo"]:hover {
+  transform: scale(1.05) !important;
+}
+
+.markdown-body img[alt*="Interface"] {
+  border-radius: 12px !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1) !important;
+  transition: transform 0.3s ease !important;
+}
+
+.markdown-body img[alt*="Interface"]:hover {
+  transform: translateY(-4px) !important;
+  box-shadow: 0 12px 48px rgba(0, 0, 0, 0.15) !important;
+}
+
+/* Badge styling */
+.markdown-body p img[src*="shields.io"] {
+  margin: 2px !important;
+  transition: transform 0.2s ease !important;
+}
+
+.markdown-body p img[src*="shields.io"]:hover {
+  transform: translateY(-1px) !important;
+}
+
+/* Table styling */
+.markdown-body table {
+  border-radius: 8px !important;
+  overflow: hidden !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05) !important;
+}
+
+.markdown-body table th {
+  background-color: #f8fafc !important;
+  font-weight: 600 !important;
+}
+
+/* Code block styling */
+.markdown-body pre {
+  border-radius: 8px !important;
+  border: 1px solid #e2e8f0 !important;
+}
+
+/* Link styling */
+.markdown-body a {
+  text-decoration: none !important;
+  transition: color 0.2s ease !important;
+}
+
+.markdown-body a:hover {
+  text-decoration: underline !important;
+}
