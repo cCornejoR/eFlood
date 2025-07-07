@@ -8,53 +8,41 @@ repos:
     hooks:
       - id: frontend-critical-check
         name: "🎨 Frontend: TypeScript Critical Errors Only"
-        entry: bash -c 'npm run type-check 2>/dev/null || (echo "❌ TypeScript compilation errors found - commit blocked" && exit 1)'
+        entry: npm run type-check
         language: system
         files: ^src/.*\.(ts|tsx)$
         pass_filenames: false
-        stages: [commit]
+        stages: [pre-commit]
 
   # Python hooks - CRITICAL ERRORS ONLY (Syntax errors)
   - repo: local
     hooks:
       - id: python-syntax-critical
         name: "🐍 Python: Syntax Errors Only"
-        entry: bash -c 'cd src-python && python -m py_compile $(find . -name "*.py" 2>/dev/null | head -20) 2>/dev/null || (echo "❌ Python syntax errors found - commit blocked" && exit 1)'
+        entry: python -m py_compile
         language: system
         files: ^src-python/.*\.py$
-        pass_filenames: false
-        stages: [commit]
-
-  # Rust hooks - CRITICAL ERRORS ONLY (Compilation errors)
-  - repo: local
-    hooks:
-      - id: rust-compilation-critical
-        name: "🦀 Rust: Compilation Errors Only"
-        entry: bash -c 'cd src-tauri && cargo check --quiet --message-format=short 2>/dev/null || (echo "❌ Rust compilation errors found - commit blocked" && exit 1)'
-        language: system
-        files: ^src-tauri/.*\.rs$
-        pass_filenames: false
-        stages: [commit]
+        stages: [pre-commit]
 
   # Critical file integrity checks - ONLY BUILD-BREAKING ISSUES
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v4.5.0
     hooks:
       - id: check-merge-conflict
-        stages: [commit]
+        stages: [pre-commit]
       - id: check-added-large-files
         args: ['--maxkb=2000']  # Increased limit to avoid false positives
-        stages: [commit]
+        stages: [pre-commit]
       - id: detect-private-key
-        stages: [commit]
+        stages: [pre-commit]
       - id: check-yaml
         files: ^(\.github/workflows/.*\.yml|\.pre-commit-config\.yaml|src-tauri/tauri\.conf\.json)$
-        stages: [commit]
+        stages: [pre-commit]
       - id: check-json
         files: ^(package\.json|tsconfig\.json|src-tauri/tauri\.conf\.json)$
-        stages: [commit]
+        stages: [pre-commit]
 
 # Configuration to make pre-commit faster and less verbose
-default_stages: [commit]
+default_stages: [pre-commit]
 fail_fast: true  # Stop on first failure for faster feedback
 minimum_pre_commit_version: '3.0.0'

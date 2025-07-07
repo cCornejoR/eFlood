@@ -534,7 +534,7 @@ export const DataAnalyzer: React.FC<DataAnalyzerProps> = ({
           <div className='text-center space-y-2'>
             <Button
               onClick={handleCancelAnalysis}
-              variant='outline'
+              variant='ghost'
               size='sm'
               className='bg-red-600/20 hover:bg-red-600/30 border border-red-500/30 text-red-300 hover:text-red-200'
             >
