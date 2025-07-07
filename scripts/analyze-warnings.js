@@ -143,7 +143,7 @@ class WarningAnalyzer {
         const files = fs.readdirSync('src-python').filter(f => f.endsWith('.py'));
         files.forEach(file => {
           try {
-            execSync(`python3 -m py_compile src-python/${file}`, { stdio: 'pipe' });
+            execSync(`python -m py_compile src-python/${file}`, { stdio: 'pipe' });
           } catch (error) {
             this.addWarning('critical', `Python syntax error in ${file}`, file, error.message);
           }

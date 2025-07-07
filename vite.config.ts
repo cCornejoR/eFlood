@@ -8,14 +8,17 @@ const host = process.env.TAURI_DEV_HOST;
 export default defineConfig(() => ({
   plugins: [react()],
 
-  // Path aliases
+  // Path aliases y polyfills para Node.js
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
       '@/components': path.resolve(__dirname, './src/components'),
       '@/lib': path.resolve(__dirname, './src/lib'),
-      '@/utils': path.resolve(__dirname, './src/utils'),
       '@/assets': path.resolve(__dirname, './src/assets'),
+      // Polyfills para módulos Node.js
+      'stream': 'stream-browserify',
+      'buffer': 'buffer',
+      'util': 'util',
     },
   },
 
@@ -46,7 +49,7 @@ export default defineConfig(() => ({
     // Tauri supports es2021
     target: process.env.TAURI_PLATFORM == 'windows' ? 'chrome105' : 'safari13',
     // don't minify for debug builds
-    minify: !process.env.TAURI_DEBUG ? 'esbuild' as const : false,
+    minify: !process.env.TAURI_DEBUG ? ('esbuild' as const) : false,
     // produce sourcemaps for debug builds
     sourcemap: !!process.env.TAURI_DEBUG,
     // Configuración para archivos grandes
@@ -76,7 +79,32 @@ export default defineConfig(() => ({
       '@tauri-apps/api',
       '@tauri-apps/plugin-dialog',
       '@tauri-apps/plugin-opener',
+      // Dependencias de VTK.js que necesitan pre-bundling
+      'globalthis',
+      'fast-deep-equal',
+      'seedrandom',
+      'spark-md5',
+      'fflate',
+      'gl-matrix',
+      'd3-scale',
+      'stream-browserify',
+      'utif',
+      'webworker-promise',
+      'xmlbuilder2',
     ],
     exclude: ['@kitware/vtk.js'], // VTK es muy grande, excluir de pre-bundling
   },
+
+  // Configuración específica para VTK.js y compatibilidad con Node.js
+  define: {
+    global: 'globalThis',
+    'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV || 'development'),
+  },
+
+  // Configuración para manejar dependencias CommonJS
+  ssr: {
+    noExternal: ['@kitware/vtk.js'],
+  },
+
+
 }));
