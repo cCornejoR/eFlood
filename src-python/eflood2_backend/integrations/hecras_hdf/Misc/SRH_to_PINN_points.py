@@ -4,13 +4,20 @@ This set of tools accomplish this task: convert a SRH-2D case's 2D mesh to point
     - Save format: JSON
 """
 
-import numpy as np
-import sys
-import meshio
-import math
 import json
-from .tools import generate_random01_exclude_boundaries_with_center, point_on_triangle, point_on_line
+import math
+import sys
+
+import meshio
+import numpy as np
 import pyHMT2D
+
+from .tools import (
+    generate_random01_exclude_boundaries_with_center,
+    point_on_line,
+    point_on_triangle,
+)
+
 
 def srh_to_pinn_points(srhcontrol_file, refinement=1):
     """Convert SRH-2D case's 2D mesh to points for PINN training. The saved "mesh_points.json" file can be used for PINN training. The json file contains "equation_points" and "boundary_points".
@@ -31,17 +38,19 @@ def srh_to_pinn_points(srhcontrol_file, refinement=1):
         Saves domain and boundary meshes to domain_{filename}.xdmf and boundaries_{filename}.xdmf
     """
 
-    #check the file extension
-    if not srhcontrol_file.endswith(".srhhydro") and not srhcontrol_file.endswith("_SIF.dat"):
+    # check the file extension
+    if not srhcontrol_file.endswith(".srhhydro") and not srhcontrol_file.endswith(
+        "_SIF.dat"
+    ):
         raise ValueError("The input file must be a srhhydro or SIF.dat file")
 
-    #create the SRH_2D_Data object
+    # create the SRH_2D_Data object
     my_srh_2d_data = pyHMT2D.SRH_2D.SRH_2D_Data(srhcontrol_file)
 
-    #get the SRH-2D mesh
+    # get the SRH-2D mesh
     my_srh_2d_mesh = my_srh_2d_data.srhgeom_obj
 
-    #process the internal points: Loop through all cells and generate points
+    # process the internal points: Loop through all cells and generate points
     equation_points_dict = {}
     equation_points_list = []  # List to store points for VTK output
     pointID = 0
@@ -49,12 +58,16 @@ def srh_to_pinn_points(srhcontrol_file, refinement=1):
     print(f"Total number of cells in the mesh: {my_srh_2d_mesh.numOfElements}")
 
     for iCell in range(my_srh_2d_mesh.numOfElements):
-        #get the cell's vertices
-        cell_vertices = my_srh_2d_mesh.elementNodesList[iCell, :my_srh_2d_mesh.elementNodesCount[iCell]]
+        # get the cell's vertices
+        cell_vertices = my_srh_2d_mesh.elementNodesList[
+            iCell, : my_srh_2d_mesh.elementNodesCount[iCell]
+        ]
         num_vertices = my_srh_2d_mesh.elementNodesCount[iCell]
 
         # Get vertex coordinates
-        vertex_coords = [my_srh_2d_mesh.nodeCoordinates[vid-1] for vid in cell_vertices]  # -1 because SRH-2D is 1-based
+        vertex_coords = [
+            my_srh_2d_mesh.nodeCoordinates[vid - 1] for vid in cell_vertices
+        ]  # -1 because SRH-2D is 1-based
 
         # Get the bed slope at the cell center (Sx, Sy)
         cell_bed_slope = my_srh_2d_mesh.elementBedSlope[iCell]
@@ -62,15 +75,14 @@ def srh_to_pinn_points(srhcontrol_file, refinement=1):
         # Get the Manning's n at the cell center
         cell_ManningN = my_srh_2d_data.ManningN_cell[iCell]
 
-        #print(f"cell_bed_slope: {cell_bed_slope}")
+        # print(f"cell_bed_slope: {cell_bed_slope}")
 
         if num_vertices == 3:  # Triangle
             p0, p1, p2 = vertex_coords
 
             # Generate sampling points using barycentric coordinates
             st_all = generate_random01_exclude_boundaries_with_center(
-                centers=[1.0/3.0, 2.0/3.0],
-                size=refinement
+                centers=[1.0 / 3.0, 2.0 / 3.0], size=refinement
             )
 
             for st in st_all:
@@ -81,10 +93,12 @@ def srh_to_pinn_points(srhcontrol_file, refinement=1):
                     "x": point[0],
                     "y": point[1],
                     "z": point[2],
-                    "Sx": cell_bed_slope[0],       #use the same bed slope for all points in the cell (the bed slope is constant for each cell)
+                    "Sx": cell_bed_slope[
+                        0
+                    ],  # use the same bed slope for all points in the cell (the bed slope is constant for each cell)
                     "Sy": cell_bed_slope[1],
-                    "ManningN": cell_ManningN,     #use the same Manning's n for all points in the cell (the Manning's n is constant for each cell)
-                    "spatial_dimensionality": 2
+                    "ManningN": cell_ManningN,  # use the same Manning's n for all points in the cell (the Manning's n is constant for each cell)
+                    "spatial_dimensionality": 2,
                 }
                 pointID += 1
 
@@ -93,16 +107,15 @@ def srh_to_pinn_points(srhcontrol_file, refinement=1):
 
             # Generate sampling points using bilinear interpolation
             st_all = generate_random01_exclude_boundaries_with_center(
-                centers=[0.5, 0.5],
-                size=refinement
+                centers=[0.5, 0.5], size=refinement
             )
 
             for st in st_all:
                 s, t = st
                 # Bilinear interpolation
-                bottom_edge = (1-s)*p0 + s*p1
-                top_edge = (1-s)*p3 + s*p2
-                point = (1-t)*bottom_edge + t*top_edge
+                bottom_edge = (1 - s) * p0 + s * p1
+                top_edge = (1 - s) * p3 + s * p2
+                point = (1 - t) * bottom_edge + t * top_edge
 
                 equation_points_list.append([point[0], point[1], point[2]])
 
@@ -110,10 +123,12 @@ def srh_to_pinn_points(srhcontrol_file, refinement=1):
                     "x": point[0],
                     "y": point[1],
                     "z": point[2],
-                    "Sx": cell_bed_slope[0],       #use the same bed slope for all points in the cell (the bed slope is constant for each cell)
+                    "Sx": cell_bed_slope[
+                        0
+                    ],  # use the same bed slope for all points in the cell (the bed slope is constant for each cell)
                     "Sy": cell_bed_slope[1],
-                    "ManningN": cell_ManningN,     #use the same Manning's n for all points in the cell (the Manning's n is constant for each cell)
-                    "spatial_dimensionality": 2
+                    "ManningN": cell_ManningN,  # use the same Manning's n for all points in the cell (the Manning's n is constant for each cell)
+                    "spatial_dimensionality": 2,
                 }
                 pointID += 1
         else:
@@ -121,11 +136,40 @@ def srh_to_pinn_points(srhcontrol_file, refinement=1):
 
     # Write equation points for visualization
     point_data = {
-        "zb": np.array([equation_points_dict[str(i)]["z"] for i in range(len(equation_points_dict))]),
-        "Sx": np.array([equation_points_dict[str(i)]["Sx"] for i in range(len(equation_points_dict))]),
-        "Sy": np.array([equation_points_dict[str(i)]["Sy"] for i in range(len(equation_points_dict))]),
-        "S":  np.array([[equation_points_dict[str(i)]["Sx"], equation_points_dict[str(i)]["Sy"], 0.0] for i in range(len(equation_points_dict))]),       #bed slope vectors with 0 z-component
-        "ManningN": np.array([equation_points_dict[str(i)]["ManningN"] for i in range(len(equation_points_dict))])
+        "zb": np.array(
+            [
+                equation_points_dict[str(i)]["z"]
+                for i in range(len(equation_points_dict))
+            ]
+        ),
+        "Sx": np.array(
+            [
+                equation_points_dict[str(i)]["Sx"]
+                for i in range(len(equation_points_dict))
+            ]
+        ),
+        "Sy": np.array(
+            [
+                equation_points_dict[str(i)]["Sy"]
+                for i in range(len(equation_points_dict))
+            ]
+        ),
+        "S": np.array(
+            [
+                [
+                    equation_points_dict[str(i)]["Sx"],
+                    equation_points_dict[str(i)]["Sy"],
+                    0.0,
+                ]
+                for i in range(len(equation_points_dict))
+            ]
+        ),  # bed slope vectors with 0 z-component
+        "ManningN": np.array(
+            [
+                equation_points_dict[str(i)]["ManningN"]
+                for i in range(len(equation_points_dict))
+            ]
+        ),
     }
     equation_points = np.array(equation_points_list)
 
@@ -141,7 +185,7 @@ def srh_to_pinn_points(srhcontrol_file, refinement=1):
         cells=cells,
         cell_data=cell_data,
         point_data=point_data,
-        binary=True
+        binary=True,
     )
 
     # Process boundary points
@@ -163,28 +207,36 @@ def srh_to_pinn_points(srhcontrol_file, refinement=1):
     bc_z = np.zeros(total_boundary_points, dtype=np.float64)
 
     pointID = 0
-    #Loop over all boundaries
+    # Loop over all boundaries
     for bc_id, edge_ids in my_srh_2d_mesh.boundaryEdges.items():
         for edge_id in edge_ids:
             # Get the nodes for this edge
-            edge_nodes = my_srh_2d_mesh.edges_r[abs(edge_id)]  #edge_id might be negative when the direction of the edge is the opposite of boundary
+            edge_nodes = my_srh_2d_mesh.edges_r[
+                abs(edge_id)
+            ]  # edge_id might be negative when the direction of the edge is the opposite of boundary
             node1, node2 = edge_nodes[0], edge_nodes[1]
 
             # Get the bed slope at the edge center (average of the two nodes)
-            edge_bed_slope = (my_srh_2d_mesh.nodeBedSlope[node1-1] + my_srh_2d_mesh.nodeBedSlope[node2-1]) / 2
+            edge_bed_slope = (
+                my_srh_2d_mesh.nodeBedSlope[node1 - 1]
+                + my_srh_2d_mesh.nodeBedSlope[node2 - 1]
+            ) / 2
 
-            if edge_id > 0:           #ensure the correct order of the nodes
-                p1 = nodes[node1-1]
-                p2 = nodes[node2-1]
+            if edge_id > 0:  # ensure the correct order of the nodes
+                p1 = nodes[node1 - 1]
+                p2 = nodes[node2 - 1]
             else:
-                p1 = nodes[node2-1]
-                p2 = nodes[node1-1]
+                p1 = nodes[node2 - 1]
+                p2 = nodes[node1 - 1]
 
-            line_length = np.sqrt(np.sum((p2 - p1)**2))
+            line_length = np.sqrt(np.sum((p2 - p1) ** 2))
             represented_length = line_length / refinement
 
             # Get the Manning's n at the edge center
-            edge_ManningN = (my_srh_2d_data.ManningN_node[node1-1] + my_srh_2d_data.ManningN_node[node2-1]) / 2
+            edge_ManningN = (
+                my_srh_2d_data.ManningN_node[node1 - 1]
+                + my_srh_2d_data.ManningN_node[node2 - 1]
+            ) / 2
 
             # Generate sampling points
             if refinement == 1:
@@ -213,16 +265,20 @@ def srh_to_pinn_points(srhcontrol_file, refinement=1):
 
     # Write boundary points for visualization
     point_data = {
-        'bc_ID': bc_IDs,
-        'normal_vector': bc_normal_vectors,
-        'represented_length': bc_represented_lengths,
-        'Sx': bc_bed_slope[:, 0],
-        'Sy': bc_bed_slope[:, 1],
-        'S': np.column_stack([bc_bed_slope, np.zeros(len(bc_bed_slope))]),  # Add 0 z-component
-        'ManningN': bc_ManningN,
-        'z': bc_z
+        "bc_ID": bc_IDs,
+        "normal_vector": bc_normal_vectors,
+        "represented_length": bc_represented_lengths,
+        "Sx": bc_bed_slope[:, 0],
+        "Sy": bc_bed_slope[:, 1],
+        "S": np.column_stack(
+            [bc_bed_slope, np.zeros(len(bc_bed_slope))]
+        ),  # Add 0 z-component
+        "ManningN": bc_ManningN,
+        "z": bc_z,
     }
-    meshio.write_points_cells("boundary_points.vtk", bc_points, {}, point_data, {}, binary=True)
+    meshio.write_points_cells(
+        "boundary_points.vtk", bc_points, {}, point_data, {}, binary=True
+    )
 
     # Organize points by boundary ID
     unique_BC_IDs = np.unique(bc_IDs)
@@ -240,10 +296,12 @@ def srh_to_pinn_points(srhcontrol_file, refinement=1):
                 "normal_z": float(bc_normal_vectors[mask][i][2]),
                 "Sx": float(bc_bed_slope[mask][i][0]),
                 "Sy": float(bc_bed_slope[mask][i][1]),
-                "S": [float(x) for x in bc_bed_slope[mask][i]],  # Convert numpy array to list
+                "S": [
+                    float(x) for x in bc_bed_slope[mask][i]
+                ],  # Convert numpy array to list
                 "spatial_dimensionality": 2,
                 "represented_length": float(bc_represented_lengths[mask][i]),
-                "ManningN": float(bc_ManningN[mask][i])
+                "ManningN": float(bc_ManningN[mask][i]),
             }
 
         boundary_points_dict[f"boundary_{bc_ID}"] = current_boundary_dict
@@ -257,17 +315,17 @@ def srh_to_pinn_points(srhcontrol_file, refinement=1):
             "Sx": float(equation_points_dict[point_id]["Sx"]),
             "Sy": float(equation_points_dict[point_id]["Sy"]),
             "spatial_dimensionality": 2,
-            "ManningN": float(equation_points_dict[point_id]["ManningN"])
+            "ManningN": float(equation_points_dict[point_id]["ManningN"]),
         }
 
     # Assemble all points
     all_points = {
         "training_points": {
             "equation_points": equation_points_dict,
-            "boundary_points": boundary_points_dict
+            "boundary_points": boundary_points_dict,
         }
     }
 
     # Save to JSON
-    with open("mesh_points.json", 'w') as f:
+    with open("mesh_points.json", "w") as f:
         json.dump(all_points, f, indent=4, sort_keys=False)

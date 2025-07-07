@@ -116,7 +116,8 @@ export const AnalysisTab: React.FC<AnalysisTabProps> = ({
     if (!isTabEnabled(tabId)) {
       // Mostrar mensaje de qué se necesita para habilitar la pestaña
       const requirements = getTabRequirements(tabId);
-      const tabName = analysisSubTabs.find(tab => tab.id === tabId)?.label || tabId;
+      const tabName =
+        analysisSubTabs.find(tab => tab.id === tabId)?.label || tabId;
 
       toast.warning(`${tabName} no disponible`, {
         description: requirements,
@@ -192,7 +193,9 @@ export const AnalysisTab: React.FC<AnalysisTabProps> = ({
                 )}
                 whileHover={isEnabled ? { scale: 1.02 } : {}}
                 whileTap={isEnabled ? { scale: 0.98 } : {}}
-                title={isEnabled ? subTab.description : getTabRequirements(subTab.id)}
+                title={
+                  isEnabled ? subTab.description : getTabRequirements(subTab.id)
+                }
               >
                 {/* Indicador activo con layoutId para transición suave */}
                 {isActive && (

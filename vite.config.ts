@@ -16,9 +16,9 @@ export default defineConfig(() => ({
       '@/lib': path.resolve(__dirname, './src/lib'),
       '@/assets': path.resolve(__dirname, './src/assets'),
       // Polyfills para módulos Node.js
-      'stream': 'stream-browserify',
-      'buffer': 'buffer',
-      'util': 'util',
+      stream: 'stream-browserify',
+      buffer: 'buffer',
+      util: 'util',
     },
   },
 
@@ -98,13 +98,13 @@ export default defineConfig(() => ({
   // Configuración específica para VTK.js y compatibilidad con Node.js
   define: {
     global: 'globalThis',
-    'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV || 'development'),
+    'process.env.NODE_ENV': JSON.stringify(
+      process.env.NODE_ENV || 'development'
+    ),
   },
 
   // Configuración para manejar dependencias CommonJS
   ssr: {
     noExternal: ['@kitware/vtk.js'],
   },
-
-
 }));

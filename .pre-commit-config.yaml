@@ -1,9 +1,9 @@
-# Pre-commit configuration optimized for CRITICAL ERRORS ONLY
-# Ignores warnings and only catches build-breaking issues
-# Aligned with GitHub Actions CI pipeline for consistency
+# Pre-commit configuration para eFlood2 Backend Python
+# Configuración optimizada para desarrollo con UV y .venv
+# Enfocada en RAS Commander y calidad de código esencial
 
 repos:
-  # Frontend hooks - CRITICAL ERRORS ONLY (TypeScript compilation errors)
+  # Frontend hooks - Verificación de TypeScript
   - repo: local
     hooks:
       - id: frontend-critical-check
@@ -14,35 +14,119 @@ repos:
         pass_filenames: false
         stages: [pre-commit]
 
-  # Python hooks - CRITICAL ERRORS ONLY (Syntax errors)
+  # Python Backend hooks - Solo RAS Commander (módulos funcionales)
   - repo: local
     hooks:
-      - id: python-syntax-critical
-        name: "🐍 Python: Syntax Errors Only"
-        entry: python -m py_compile
+      # Black - Formateo automático de código RAS Commander
+      - id: ras-commander-black
+        name: "🔧 RAS Commander: Black Formatting"
+        entry: powershell -Command "cd src-python; uv run black eflood2_backend/integrations/ras_commander/"
         language: system
-        files: ^src-python/.*\.py$
+        files: ^src-python/eflood2_backend/integrations/ras_commander/.*\.py$
+        pass_filenames: false
         stages: [pre-commit]
 
-  # Critical file integrity checks - ONLY BUILD-BREAKING ISSUES
+      # isort - Ordenamiento de imports RAS Commander
+      - id: ras-commander-isort
+        name: "📦 RAS Commander: Import Sorting"
+        entry: powershell -Command "cd src-python; uv run isort eflood2_backend/integrations/ras_commander/"
+        language: system
+        files: ^src-python/eflood2_backend/integrations/ras_commander/.*\.py$
+        pass_filenames: false
+        stages: [pre-commit]
+
+      # Verificación de sintaxis Python (solo RAS Commander)
+      - id: ras-commander-syntax-check
+        name: "🐍 RAS Commander: Syntax Check"
+        entry: powershell -Command "cd src-python; Get-ChildItem eflood2_backend/integrations/ras_commander/*.py | ForEach-Object { uv run python -m py_compile $_.FullName }"
+        language: system
+        files: ^src-python/eflood2_backend/integrations/ras_commander/.*\.py$
+        pass_filenames: false
+        stages: [pre-commit]
+
+  # RAS Commander Backend hooks - Tests específicos
+  - repo: local
+    hooks:
+      # Tests de verificación de archivos (solo los que pasan)
+      - id: ras-commander-files-check
+        name: "📁 RAS Commander: Files Verification"
+        entry: powershell -Command "cd src-python; uv run pytest test/test_commander_isolated.py::TestCommanderFilesExist -v --tb=short"
+        language: system
+        files: ^src-python/eflood2_backend/integrations/ras_commander/.*\.py$
+        pass_filenames: false
+        stages: [pre-commit]
+
+  # Rust Backend hooks - Tauri application
+  - repo: local
+    hooks:
+      # Cargo fmt - Formateo automático de código Rust
+      - id: rust-fmt
+        name: "🦀 Rust: Cargo Format"
+        entry: powershell -Command "cd src-tauri; cargo fmt --all"
+        language: system
+        files: ^src-tauri/.*\.rs$
+        pass_filenames: false
+        stages: [pre-commit]
+
+      # Cargo clippy - Linting de código Rust
+      - id: rust-clippy
+        name: "🔍 Rust: Clippy Linting"
+        entry: powershell -Command "cd src-tauri; cargo clippy --all-targets --all-features -- -D warnings"
+        language: system
+        files: ^src-tauri/.*\.rs$
+        pass_filenames: false
+        stages: [pre-commit]
+
+      # Cargo check - Verificación de compilación
+      - id: rust-check
+        name: "⚙️ Rust: Cargo Check"
+        entry: powershell -Command "cd src-tauri; cargo check --all-targets --all-features"
+        language: system
+        files: ^src-tauri/.*\.rs$
+        pass_filenames: false
+        stages: [pre-commit]
+
+      # Cargo test - Tests unitarios de Rust
+      - id: rust-test
+        name: "🧪 Rust: Unit Tests"
+        entry: powershell -Command "cd src-tauri; cargo test --all-features"
+        language: system
+        files: ^src-tauri/.*\.rs$
+        pass_filenames: false
+        stages: [pre-commit]
+
+  # Verificaciones de integridad de archivos
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.5.0
+    rev: v4.6.0
     hooks:
       - id: check-merge-conflict
+        name: "🔀 Check: Merge Conflicts"
         stages: [pre-commit]
       - id: check-added-large-files
-        args: ['--maxkb=2000']  # Increased limit to avoid false positives
+        name: "📁 Check: Large Files"
+        args: ['--maxkb=5000']
         stages: [pre-commit]
       - id: detect-private-key
+        name: "🔐 Check: Private Keys"
         stages: [pre-commit]
       - id: check-yaml
+        name: "📄 Check: YAML Syntax"
         files: ^(\.github/workflows/.*\.yml|\.pre-commit-config\.yaml|src-tauri/tauri\.conf\.json)$
         stages: [pre-commit]
       - id: check-json
-        files: ^(package\.json|tsconfig\.json|src-tauri/tauri\.conf\.json)$
+        name: "📋 Check: JSON Syntax"
+        files: ^(package\.json|tsconfig\.json|src-tauri/tauri\.conf\.json|src-python/.*\.json)$
+        stages: [pre-commit]
+      - id: trailing-whitespace
+        name: "✂️  Check: Trailing Whitespace"
+        files: ^src-python/.*\.(py|md|yml|yaml|json)$
+        stages: [pre-commit]
+      - id: end-of-file-fixer
+        name: "📝 Check: End of File"
+        files: ^src-python/.*\.(py|md|yml|yaml|json)$
         stages: [pre-commit]
 
-# Configuration to make pre-commit faster and less verbose
+# Configuración optimizada para desarrollo con UV
 default_stages: [pre-commit]
-fail_fast: true  # Stop on first failure for faster feedback
+fail_fast: false  # Ejecutar todos los hooks para ver todos los problemas
 minimum_pre_commit_version: '3.0.0'

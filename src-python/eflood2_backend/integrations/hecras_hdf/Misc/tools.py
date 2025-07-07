@@ -2,21 +2,19 @@
 Some tools
 """
 
-import vtk
 import sys
-
-import numpy as np
-from scipy import interpolate
-
 import xml.etree.cElementTree as ET
 
 import h5py
+import numpy as np
+import vtk
+from scipy import interpolate
 
-#from osgeo import gdal
+# from osgeo import gdal
 
 
 def horizontalDistance(point1, point2):
-    """ Horizontal distance between two points
+    """Horizontal distance between two points
 
     Parameters
     ----------
@@ -30,6 +28,7 @@ def horizontalDistance(point1, point2):
 
     """
     return np.sqrt(np.square(point2[0] - point1[0]) + np.square(point2[1] - point1[1]))
+
 
 def assembleVectors(pointVx, pointVy, pointVz):
     """Assemble vectors from their components and return the numpy array
@@ -50,7 +49,7 @@ def assembleVectors(pointVx, pointVy, pointVz):
 
     """
 
-    assert (len(pointVx) == len(pointVy))
+    assert len(pointVx) == len(pointVy)
 
     V = np.zeros((len(pointVx), 3))
 
@@ -62,11 +61,13 @@ def assembleVectors(pointVx, pointVy, pointVz):
 
     return V
 
+
 def setNumpyArrayValueToNaN(array, value):
     # for numpy array value to NaN if it equals to value
-    array[array==value]=np.nan
+    array[array == value] = np.nan
 
     return array
+
 
 def generate_random01_exclude_boundaries_with_center(centers, size=1):
     """Generate random numbers in (0, 1) which exclude the boundaries 0 and 1 and include the center (0.5)
@@ -97,23 +98,30 @@ def generate_random01_exclude_boundaries_with_center(centers, size=1):
 
             # Check if points are too close to boundaries or centers
             if len(centers) == 1:
-                if (min(abs(current_set)) < epsilon or
-                    min(abs(current_set - centers)) < epsilon or
-                    min(abs(current_set - 1.0)) < epsilon):
+                if (
+                    min(abs(current_set)) < epsilon
+                    or min(abs(current_set - centers)) < epsilon
+                    or min(abs(current_set - 1.0)) < epsilon
+                ):
                     continue
             elif len(centers) == 2:
-                if (min(abs(current_set)) < epsilon or
-                    min(abs(current_set - centers)) < epsilon or
-                    min(abs(current_set - 1.0)) < epsilon or
-                    abs(current_set[0] - current_set[1]) < epsilon):
+                if (
+                    min(abs(current_set)) < epsilon
+                    or min(abs(current_set - centers)) < epsilon
+                    or min(abs(current_set - 1.0)) < epsilon
+                    or abs(current_set[0] - current_set[1]) < epsilon
+                ):
                     continue
             else:
-                raise ValueError(f"Unsupported number of random numbers in a set: {len(centers)}")
+                raise ValueError(
+                    f"Unsupported number of random numbers in a set: {len(centers)}"
+                )
 
             results[i, :] = current_set
             break
 
     return results
+
 
 def point_on_triangle(pt1, pt2, pt3, s, t):
     """Calculate a point on a triangle using barycentric coordinates.
@@ -131,9 +139,12 @@ def point_on_triangle(pt1, pt2, pt3, s, t):
         (x, y, z) coordinates of the point
     """
     s, t = sorted([s, t])  # Ensure s <= t
-    return (s * pt1[0] + (t - s) * pt2[0] + (1 - t) * pt3[0],
-            s * pt1[1] + (t - s) * pt2[1] + (1 - t) * pt3[1],
-            s * pt1[2] + (t - s) * pt2[2] + (1 - t) * pt3[2])
+    return (
+        s * pt1[0] + (t - s) * pt2[0] + (1 - t) * pt3[0],
+        s * pt1[1] + (t - s) * pt2[1] + (1 - t) * pt3[1],
+        s * pt1[2] + (t - s) * pt2[2] + (1 - t) * pt3[2],
+    )
+
 
 def point_on_line(pt1, pt2, s):
     """Calculate a point on a line segment using linear interpolation.
@@ -150,13 +161,14 @@ def point_on_line(pt1, pt2, s):
     tuple
         (x, y, z) coordinates of the point
     """
-    return (s * pt1[0] + (1 - s) * pt2[0],
-            s * pt1[1] + (1 - s) * pt2[1],
-            s * pt1[2] + (1 - s) * pt2[2])
+    return (
+        s * pt1[0] + (1 - s) * pt2[0],
+        s * pt1[1] + (1 - s) * pt2[1],
+        s * pt1[2] + (1 - s) * pt2[2],
+    )
 
 
-
-def printProgressBar(i,total,postText):
+def printProgressBar(i, total, postText):
     """A simple function to print a progress bar (no need to use other libraries)
 
     Note: any print inbetween the calling of this function will create a new progress bar. So
@@ -175,12 +187,13 @@ def printProgressBar(i,total,postText):
     -------
 
     """
-    n_bar =20 #size of progress bar
-    j= (i+1)/total
-    j=max(j,0.01001)  #at least print something at the beginning
-    sys.stdout.write('\r')
+    n_bar = 20  # size of progress bar
+    j = (i + 1) / total
+    j = max(j, 0.01001)  # at least print something at the beginning
+    sys.stdout.write("\r")
     sys.stdout.write(f"[{'=' * int(n_bar * j):{n_bar}s}] {int(100 * j)}%  {postText}")
     sys.stdout.flush()
+
 
 def build_gdal_vrt(vrtFileName, sourceGeoTiffFileNameList):
     """build GDAL VRT to compose terrain from multiple GeoTiff files
@@ -203,18 +216,21 @@ def build_gdal_vrt(vrtFileName, sourceGeoTiffFileNameList):
     try:
         from osgeo import gdal
     except ImportError:
-        raise ImportError('Error in importing GDAL package. Make sure GDAL has been installed properly.')
+        raise ImportError(
+            "Error in importing GDAL package. Make sure GDAL has been installed properly."
+        )
 
-    vrt_options = gdal.BuildVRTOptions(resampleAlg='cubic', addAlpha=True)
+    vrt_options = gdal.BuildVRTOptions(resampleAlg="cubic", addAlpha=True)
 
-    #result_vrt = gdal.BuildVRT(vrtFileName, sourceGeoTiffFileNameList, options=vrt_options)
+    # result_vrt = gdal.BuildVRT(vrtFileName, sourceGeoTiffFileNameList, options=vrt_options)
     result_vrt = gdal.BuildVRT(vrtFileName, sourceGeoTiffFileNameList)
 
-    #write the vrt to file
+    # write the vrt to file
     result_vrt = None
 
+
 def generate_custom_paraview_color_map(colorMapName, values, r, g, b):
-    """ Generate custom color map for Paraview.
+    """Generate custom color map for Paraview.
 
     The color map can be used have the same color scheme for the comparison e.g., SRH-2D (visualized in
     Paraview) and HEC-RAS (visualized in RAS Mapper).
@@ -261,22 +277,42 @@ def generate_custom_paraview_color_map(colorMapName, values, r, g, b):
 
     ColorMap_depth = ET.SubElement(root, "ColorMap", name=colorMapName, space="RGB")
     for i in range(values.shape[0]):
-        ET.SubElement(ColorMap_depth, "Point x=\" " + str(values[i]) + "\"  o=\"1\" " \
-                      + "r=\"" + str(r[i]) + "\" " \
-                      + "g=\"" + str(g[i]) + "\" " \
-                      + "b=\"" + str(b[i]) + "\"").text = ""
+        ET.SubElement(
+            ColorMap_depth,
+            'Point x=" '
+            + str(values[i])
+            + '"  o="1" '
+            + 'r="'
+            + str(r[i])
+            + '" '
+            + 'g="'
+            + str(g[i])
+            + '" '
+            + 'b="'
+            + str(b[i])
+            + '"',
+        ).text = ""
 
     tree = ET.ElementTree(root)
 
     indent(root)
 
     # writing xml
-    tree.write(colorMapName+"_colormaps.xml", encoding="utf-8", xml_declaration=True)
+    tree.write(colorMapName + "_colormaps.xml", encoding="utf-8", xml_declaration=True)
 
-def generate_rating_curve_based_on_Mannings_equation(station_profile, zprofile, overboard,
-                                                     station_ManningN, ManningN, slope,
-                                                     number_of_rc_points, nResample=101, units='EN'):
-    """ Generate a rating curve for a river cross section based on the Manning's equation
+
+def generate_rating_curve_based_on_Mannings_equation(
+    station_profile,
+    zprofile,
+    overboard,
+    station_ManningN,
+    ManningN,
+    slope,
+    number_of_rc_points,
+    nResample=101,
+    units="EN",
+):
+    """Generate a rating curve for a river cross section based on the Manning's equation
 
     The river corss section is given in (station, z) pair.
 
@@ -309,56 +345,77 @@ def generate_rating_curve_based_on_Mannings_equation(station_profile, zprofile, 
 
     """
 
-    #sanity check
-    if station_profile.shape[0]!=zprofile.shape[0]:
-        print("The lengths of arrays station and zprofile are different: ",
-              station_profile.shape[0], zprofile.shape[0], ". Exiting ...")
+    # sanity check
+    if station_profile.shape[0] != zprofile.shape[0]:
+        print(
+            "The lengths of arrays station and zprofile are different: ",
+            station_profile.shape[0],
+            zprofile.shape[0],
+            ". Exiting ...",
+        )
         sys.exit()
 
-    if station_ManningN.shape[0]!=ManningN.shape[0]:
-        print("The lengths of arrays station_ManningN and ManningN are different: ",
-              station_ManningN.shape[0], ManningN.shape[0], ". Exiting ...")
+    if station_ManningN.shape[0] != ManningN.shape[0]:
+        print(
+            "The lengths of arrays station_ManningN and ManningN are different: ",
+            station_ManningN.shape[0],
+            ManningN.shape[0],
+            ". Exiting ...",
+        )
         sys.exit()
 
     # check the values in the array station_profile are strictly increasing
-    bStationIncreasing = all(i < j for i, j in zip(station_profile, station_profile[1:]))
+    bStationIncreasing = all(
+        i < j for i, j in zip(station_profile, station_profile[1:])
+    )
 
     if not bStationIncreasing:
-        print("Values in station_profile are not strictly increasing. Check. Exiting ...")
+        print(
+            "Values in station_profile are not strictly increasing. Check. Exiting ..."
+        )
         sys.exit()
 
     # check the values in the array station_ManningN are strictly increasing
-    bStationIncreasing = all(i < j for i, j in zip(station_ManningN, station_ManningN[1:]))
+    bStationIncreasing = all(
+        i < j for i, j in zip(station_ManningN, station_ManningN[1:])
+    )
 
     if not bStationIncreasing:
-        print("Values in station_ManningN are not strictly increasing. Check. Exiting ...")
+        print(
+            "Values in station_ManningN are not strictly increasing. Check. Exiting ..."
+        )
         sys.exit()
 
-    if (ManningN<=0).all() or slope<=0 or number_of_rc_points<=0:
-        print("Manning's n, slope, and number_of_rc_points can't be negative or zero. Exiting ...")
+    if (ManningN <= 0).all() or slope <= 0 or number_of_rc_points <= 0:
+        print(
+            "Manning's n, slope, and number_of_rc_points can't be negative or zero. Exiting ..."
+        )
         sys.exit()
 
-    if units!="EN" and units!="SI":
-        print("Specified units must be either EN or SI. The current units are not valid: ", units)
+    if units != "EN" and units != "SI":
+        print(
+            "Specified units must be either EN or SI. The current units are not valid: ",
+            units,
+        )
         sys.exit()
 
-    #unit factor (default is SI)
+    # unit factor (default is SI)
     Kn = 1.0
 
-    if units=="EN":
+    if units == "EN":
         Kn = 1.486
 
     Q = np.zeros(number_of_rc_points)
-    zmin = np.min(zprofile)   #min of profile elevation
-    zmax = np.max(zprofile)   #max of profile elevation
-    stage = np.linspace(zmin, zmax+overboard, number_of_rc_points)
+    zmin = np.min(zprofile)  # min of profile elevation
+    zmax = np.max(zprofile)  # max of profile elevation
+    stage = np.linspace(zmin, zmax + overboard, number_of_rc_points)
 
     station_resample = np.linspace(0, np.max(station_profile), nResample)
 
-    #station distance between re-sample points
-    dx_resample = (np.max(station_profile) - np.min(station_profile)) /(nResample-1)
+    # station distance between re-sample points
+    dx_resample = (np.max(station_profile) - np.min(station_profile)) / (nResample - 1)
 
-    #interplate the channel profile and Manning's n to the re-sampling points
+    # interplate the channel profile and Manning's n to the re-sampling points
     profile_interpolator = interpolate.interp1d(station_profile, zprofile)
     ManningN_interpolator = interpolate.interp1d(station_ManningN, ManningN)
 
@@ -366,49 +423,70 @@ def generate_rating_curve_based_on_Mannings_equation(station_profile, zprofile, 
 
     n_resample = ManningN_interpolator(station_resample)
 
-    #now each re-sampled section is a trazoidal with
-    #1. two points on top: (station_resample[i], zmax), (station_resample[i+1], zmax)
-    #2. two points on bottom: (station_resample[i], z_resample[i]), (station_resample[i+1], z_resample[i+1])
+    # now each re-sampled section is a trazoidal with
+    # 1. two points on top: (station_resample[i], zmax), (station_resample[i+1], zmax)
+    # 2. two points on bottom: (station_resample[i], z_resample[i]), (station_resample[i+1], z_resample[i+1])
 
-    #area and wetted perimenter vs. depth
+    # area and wetted perimenter vs. depth
     Area = np.zeros(number_of_rc_points)
     Pwet = np.zeros(number_of_rc_points)
 
-    #loop over different stage on the rating curve
+    # loop over different stage on the rating curve
     for pointI in range(number_of_rc_points):
-        #get the current stage
-        current_stage = stage[pointI]  #current constant stage
+        # get the current stage
+        current_stage = stage[pointI]  # current constant stage
 
         # list of 0 or 1 to signify whether a re-sampled section (i, i+1) is wetted or not
         # a section is wetted only when both bottom points are below the free surface
         underWaterFlag = np.zeros(nResample - 1)
 
-        #loop over all re-sampled sections
-        for sectionI in range(nResample-1):
-            #the current re-sampled section is wet only when both bottom points are below the stage
-            if z_resample[sectionI] < current_stage and z_resample[sectionI+1] < current_stage:
+        # loop over all re-sampled sections
+        for sectionI in range(nResample - 1):
+            # the current re-sampled section is wet only when both bottom points are below the stage
+            if (
+                z_resample[sectionI] < current_stage
+                and z_resample[sectionI + 1] < current_stage
+            ):
                 underWaterFlag[sectionI] = 1
 
-        #accumulate area and wetted perimeter
-        for sectionI in range(nResample-1):
-            Area[pointI] += 0.5*( (current_stage-z_resample[sectionI]) + (current_stage-z_resample[sectionI+1]))* \
-                            dx_resample*underWaterFlag[sectionI]
+        # accumulate area and wetted perimeter
+        for sectionI in range(nResample - 1):
+            Area[pointI] += (
+                0.5
+                * (
+                    (current_stage - z_resample[sectionI])
+                    + (current_stage - z_resample[sectionI + 1])
+                )
+                * dx_resample
+                * underWaterFlag[sectionI]
+            )
 
-            Pwet[pointI] += np.sqrt( dx_resample**2 + (z_resample[sectionI]-z_resample[sectionI+1])**2 )*underWaterFlag[sectionI]
+            Pwet[pointI] += (
+                np.sqrt(
+                    dx_resample**2
+                    + (z_resample[sectionI] - z_resample[sectionI + 1]) ** 2
+                )
+                * underWaterFlag[sectionI]
+            )
 
-
-        #now we have the total area and wetted perimenter, we can use the Manning's equation to get discharge Q
-        #if all re-sampled profile points are above water, discharge is zero.
+        # now we have the total area and wetted perimenter, we can use the Manning's equation to get discharge Q
+        # if all re-sampled profile points are above water, discharge is zero.
         if np.max(underWaterFlag) <= 0:
             Q[pointI] = 0.0
         else:
-            Q[pointI] = Kn/n_resample[pointI]*Area[pointI]*\
-                        (Area[pointI]/Pwet[pointI])**(2.0/3.0)*np.sqrt(slope)
+            Q[pointI] = (
+                Kn
+                / n_resample[pointI]
+                * Area[pointI]
+                * (Area[pointI] / Pwet[pointI]) ** (2.0 / 3.0)
+                * np.sqrt(slope)
+            )
 
     return stage, Q, Area, Pwet, station_resample, z_resample
 
+
 def yes_or_no(question):
-    """ a utility tool to ask the user yes/no question
+    """a utility tool to ask the user yes/no question
 
     Parameters
     ----------
@@ -422,11 +500,11 @@ def yes_or_no(question):
 
     """
     while True:
-        answer = input(question + ' (y/n): ').lower().strip()
-        if answer in ('y', 'yes', 'n', 'no'):
-            return answer in ('y', 'yes')
+        answer = input(question + " (y/n): ").lower().strip()
+        if answer in ("y", "yes", "n", "no"):
+            return answer in ("y", "yes")
         else:
-            print('You must answer y, yes, n, or no.')
+            print("You must answer y, yes, n, or no.")
 
 
 def dumpXMDFFileItems(xmdfFileName):
@@ -470,18 +548,18 @@ def h5py_visitor_func(name, node):
 
     """
     if isinstance(node, h5py.Group):
-        print(node.name, 'is a Group')
+        print(node.name, "is a Group")
     elif isinstance(node, h5py.Dataset):
-        if (node.dtype == 'object'):
-            print(node.name, 'is an object Dataset')
+        if node.dtype == "object":
+            print(node.name, "is an object Dataset")
         else:
-            print(node.name, 'is a Dataset')
+            print(node.name, "is a Dataset")
     else:
-        print(node.name, 'is an unknown type')
+        print(node.name, "is an unknown type")
 
 
 def json_dict_type_correction(aDict):
-    """ Correct data type and value in dictionary loaded from JSON
+    """Correct data type and value in dictionary loaded from JSON
 
     In JSON, we can't use some of Python's data type. For example, None has to be written as "None" in JSON,
     and True/False has to be strings similarly. This function corrects that in dictionary derived from JSON.

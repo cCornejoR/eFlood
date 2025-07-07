@@ -4,16 +4,17 @@ Combines functionality from boundary_conditions_reader and enhanced_boundary_con
 Extracts boundary condition data from HDF5 files following pyHMT2D principles
 """
 
-import h5py
 import json
-import sys
-import os
-import numpy as np
-from typing import Dict, List, Any, Optional
 import logging
+import os
+import sys
+from typing import Any, Dict, List, Optional
+
+import h5py
+import numpy as np
 
 # Import utilities
-from ..utils.common import setup_logging, validate_file_path, format_error_message
+from ..utils.common import format_error_message, setup_logging, validate_file_path
 
 # Configure logging
 logger = setup_logging()
@@ -32,7 +33,7 @@ class BoundaryReader:
         Args:
             hdf_file_path (str): Path to the HDF5 file
         """
-        self.hdf_file_path = validate_file_path(hdf_file_path, ['.hdf', '.h5', '.hdf5'])
+        self.hdf_file_path = validate_file_path(hdf_file_path, [".hdf", ".h5", ".hdf5"])
 
     def extract_boundary_conditions(self, enhanced_mode: bool = True) -> Dict[str, Any]:
         """
@@ -45,7 +46,7 @@ class BoundaryReader:
             Dict containing boundary conditions data
         """
         try:
-            with h5py.File(self.hdf_file_path, 'r') as hf:
+            with h5py.File(self.hdf_file_path, "r") as hf:
                 logger.info(f"Reading boundary conditions from: {self.hdf_file_path}")
 
                 # Search for boundary condition groups
@@ -63,7 +64,7 @@ class BoundaryReader:
                     "time_series": time_series_data,
                     "total_boundaries": len(boundary_data),
                     "file_path": str(self.hdf_file_path),
-                    "enhanced_mode": enhanced_mode
+                    "enhanced_mode": enhanced_mode,
                 }
 
                 logger.info(f"Found {len(boundary_data)} boundary conditions")
@@ -74,17 +75,19 @@ class BoundaryReader:
             return {
                 "success": True,  # Don't block analysis
                 "error": format_error_message(e, "Boundary conditions extraction"),
-                "boundary_conditions": [{
-                    "name": "Error al leer condiciones de contorno",
-                    "type": "Error",
-                    "description": f"No se pudieron leer las condiciones de contorno: {str(e)}",
-                    "data_available": False,
-                    "time_steps": 0,
-                    "data_keys": []
-                }],
+                "boundary_conditions": [
+                    {
+                        "name": "Error al leer condiciones de contorno",
+                        "type": "Error",
+                        "description": f"No se pudieron leer las condiciones de contorno: {str(e)}",
+                        "data_available": False,
+                        "time_steps": 0,
+                        "data_keys": [],
+                    }
+                ],
                 "time_series": {},
                 "total_boundaries": 1,
-                "enhanced_mode": enhanced_mode
+                "enhanced_mode": enhanced_mode,
             }
 
     def _search_boundary_conditions(self, hf: h5py.File) -> List[Dict[str, Any]]:
@@ -106,7 +109,7 @@ class BoundaryReader:
             "Unsteady/Event Conditions",
             "Unsteady/Boundary Conditions",
             "Results/Unsteady/Event Conditions",
-            "Results/Unsteady/Boundary Conditions"
+            "Results/Unsteady/Boundary Conditions",
         ]
 
         found_any = False
@@ -121,30 +124,38 @@ class BoundaryReader:
                 for bc_name in bc_group.keys():
                     try:
                         bc_item = bc_group[bc_name]
-                        bc_info = self._create_bc_info(bc_name, f"{bc_path}/{bc_name}", bc_item)
+                        bc_info = self._create_bc_info(
+                            bc_name, f"{bc_path}/{bc_name}", bc_item
+                        )
                         if bc_info:
                             boundary_conditions.append(bc_info)
 
                     except Exception as e:
-                        logger.warning(f"Error processing boundary condition {bc_name}: {str(e)}")
+                        logger.warning(
+                            f"Error processing boundary condition {bc_name}: {str(e)}"
+                        )
                         continue
 
         # If no boundary conditions found, create a default message
         if not found_any or len(boundary_conditions) == 0:
             logger.info("No boundary conditions found in standard locations")
-            boundary_conditions.append({
-                "name": "Sin condiciones de contorno detectadas",
-                "path": "N/A",
-                "type": "Información",
-                "description": "No se encontraron condiciones de contorno en las ubicaciones estándar del archivo HDF5",
-                "data_available": False,
-                "time_steps": 0,
-                "data_keys": []
-            })
+            boundary_conditions.append(
+                {
+                    "name": "Sin condiciones de contorno detectadas",
+                    "path": "N/A",
+                    "type": "Información",
+                    "description": "No se encontraron condiciones de contorno en las ubicaciones estándar del archivo HDF5",
+                    "data_available": False,
+                    "time_steps": 0,
+                    "data_keys": [],
+                }
+            )
 
         return boundary_conditions
 
-    def _search_specific_boundary_conditions(self, hf: h5py.File) -> List[Dict[str, Any]]:
+    def _search_specific_boundary_conditions(
+        self, hf: h5py.File
+    ) -> List[Dict[str, Any]]:
         """
         Enhanced search for specific boundary conditions with actual names
 
@@ -178,30 +189,46 @@ class BoundaryReader:
                         bc_item = bc_group[bc_name]
 
                         # Skip if this looks like a generic group name
-                        if bc_name.lower() in ['boundary conditions', 'flow hydrographs', 'stage hydrographs']:
+                        if bc_name.lower() in [
+                            "boundary conditions",
+                            "flow hydrographs",
+                            "stage hydrographs",
+                        ]:
                             # This is a group, search inside it
-                            if hasattr(bc_item, 'keys'):
+                            if hasattr(bc_item, "keys"):
                                 for sub_bc_name in bc_item.keys():
                                     try:
                                         sub_bc_item = bc_item[sub_bc_name]
-                                        bc_info = self._create_bc_info(sub_bc_name, f"{bc_path}/{bc_name}/{sub_bc_name}", sub_bc_item)
+                                        bc_info = self._create_bc_info(
+                                            sub_bc_name,
+                                            f"{bc_path}/{bc_name}/{sub_bc_name}",
+                                            sub_bc_item,
+                                        )
                                         if bc_info:
                                             boundary_conditions.append(bc_info)
-                                            logger.info(f"Added specific boundary condition: {sub_bc_name}")
+                                            logger.info(
+                                                f"Added specific boundary condition: {sub_bc_name}"
+                                            )
                                             path_found_bcs = True
                                     except Exception as e:
-                                        logger.warning(f"Error processing sub-BC {sub_bc_name}: {str(e)}")
+                                        logger.warning(
+                                            f"Error processing sub-BC {sub_bc_name}: {str(e)}"
+                                        )
                                         continue
                         else:
                             # This looks like a specific boundary condition name
-                            bc_info = self._create_bc_info(bc_name, f"{bc_path}/{bc_name}", bc_item)
+                            bc_info = self._create_bc_info(
+                                bc_name, f"{bc_path}/{bc_name}", bc_item
+                            )
                             if bc_info:
                                 boundary_conditions.append(bc_info)
                                 logger.info(f"Added boundary condition: {bc_name}")
                                 path_found_bcs = True
 
                     except Exception as e:
-                        logger.warning(f"Error processing boundary condition {bc_name}: {str(e)}")
+                        logger.warning(
+                            f"Error processing boundary condition {bc_name}: {str(e)}"
+                        )
                         continue
 
                 if path_found_bcs:
@@ -209,7 +236,9 @@ class BoundaryReader:
 
         # If no specific BCs found, do a recursive search
         if len(boundary_conditions) == 0:
-            logger.info("No specific boundary conditions found, doing recursive search...")
+            logger.info(
+                "No specific boundary conditions found, doing recursive search..."
+            )
             boundary_conditions = self._recursive_search_for_bcs(hf)
 
         # Remove duplicates based on name and type
@@ -218,20 +247,26 @@ class BoundaryReader:
         # If still no BCs found, create a default entry
         if len(boundary_conditions) == 0:
             logger.info("No boundary conditions found anywhere")
-            boundary_conditions.append({
-                "name": "Sin condiciones de contorno específicas",
-                "path": "N/A",
-                "type": "Información",
-                "description": "No se encontraron condiciones de contorno específicas en el archivo HDF5",
-                "data_available": False,
-                "time_steps": 0,
-                "data_keys": []
-            })
+            boundary_conditions.append(
+                {
+                    "name": "Sin condiciones de contorno específicas",
+                    "path": "N/A",
+                    "type": "Información",
+                    "description": "No se encontraron condiciones de contorno específicas en el archivo HDF5",
+                    "data_available": False,
+                    "time_steps": 0,
+                    "data_keys": [],
+                }
+            )
 
-        logger.info(f"Final boundary conditions count after deduplication: {len(boundary_conditions)}")
+        logger.info(
+            f"Final boundary conditions count after deduplication: {len(boundary_conditions)}"
+        )
         return boundary_conditions
 
-    def _create_bc_info(self, bc_name: str, bc_path: str, bc_item) -> Optional[Dict[str, Any]]:
+    def _create_bc_info(
+        self, bc_name: str, bc_path: str, bc_item
+    ) -> Optional[Dict[str, Any]]:
         """
         Create boundary condition info dictionary
 
@@ -251,15 +286,17 @@ class BoundaryReader:
                 "description": self._generate_description(str(bc_name)),
                 "data_available": False,
                 "time_steps": 0,
-                "data_keys": []
+                "data_keys": [],
             }
 
             # Check if data is available
-            if hasattr(bc_item, 'shape'):
+            if hasattr(bc_item, "shape"):
                 # This is a dataset
                 bc_info["data_available"] = True
-                bc_info["time_steps"] = bc_item.shape[0] if len(bc_item.shape) > 0 else 0
-            elif hasattr(bc_item, 'keys'):
+                bc_info["time_steps"] = (
+                    bc_item.shape[0] if len(bc_item.shape) > 0 else 0
+                )
+            elif hasattr(bc_item, "keys"):
                 # This is a group, check for datasets inside
                 data_keys = list(bc_item.keys())
                 bc_info["data_keys"] = data_keys
@@ -296,7 +333,7 @@ class BoundaryReader:
                     logger.info(f"Found BC in recursive search: {key}")
 
             # Recurse into groups
-            if hasattr(item, 'keys'):
+            if hasattr(item, "keys"):
                 sub_bcs = self._recursive_search_for_bcs(item, current_path)
                 boundary_conditions.extend(sub_bcs)
 
@@ -318,28 +355,54 @@ class BoundaryReader:
 
         # Positive indicators
         bc_indicators = [
-            'entrada', 'salida', 'inflow', 'outflow', 'inlet', 'outlet',
-            'rio', 'river', 'boundary', 'condition', 'hydrograph',
-            'stage', 'flow', 'discharge', 'caudal', 'nivel'
+            "entrada",
+            "salida",
+            "inflow",
+            "outflow",
+            "inlet",
+            "outlet",
+            "rio",
+            "river",
+            "boundary",
+            "condition",
+            "hydrograph",
+            "stage",
+            "flow",
+            "discharge",
+            "caudal",
+            "nivel",
         ]
 
         # Negative indicators (things to avoid)
         avoid_indicators = [
-            'geometry', 'mesh', 'terrain', 'material', 'manning',
-            'results', 'output', 'time', 'coordinates'
+            "geometry",
+            "mesh",
+            "terrain",
+            "material",
+            "manning",
+            "results",
+            "output",
+            "time",
+            "coordinates",
         ]
 
         # Check for positive indicators
-        has_positive = any(indicator in name_lower or indicator in path_lower
-                          for indicator in bc_indicators)
+        has_positive = any(
+            indicator in name_lower or indicator in path_lower
+            for indicator in bc_indicators
+        )
 
         # Check for negative indicators
-        has_negative = any(indicator in name_lower or indicator in path_lower
-                          for indicator in avoid_indicators)
+        has_negative = any(
+            indicator in name_lower or indicator in path_lower
+            for indicator in avoid_indicators
+        )
 
         return has_positive and not has_negative
 
-    def _remove_duplicates(self, boundary_conditions: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    def _remove_duplicates(
+        self, boundary_conditions: List[Dict[str, Any]]
+    ) -> List[Dict[str, Any]]:
         """
         Remove duplicate boundary conditions based on name and type
 
@@ -374,13 +437,18 @@ class BoundaryReader:
         """
         name_lower = bc_name.lower()
 
-        if any(keyword in name_lower for keyword in ['entrada', 'inflow', 'inlet', 'rio']):
+        if any(
+            keyword in name_lower for keyword in ["entrada", "inflow", "inlet", "rio"]
+        ):
             return "Caudal de Entrada"
-        elif any(keyword in name_lower for keyword in ['salida', 'outflow', 'outlet', 'stage']):
+        elif any(
+            keyword in name_lower
+            for keyword in ["salida", "outflow", "outlet", "stage"]
+        ):
             return "Nivel de Salida"
-        elif any(keyword in name_lower for keyword in ['flow', 'discharge', 'caudal']):
+        elif any(keyword in name_lower for keyword in ["flow", "discharge", "caudal"]):
             return "Hidrograma de Caudal"
-        elif any(keyword in name_lower for keyword in ['stage', 'level', 'nivel']):
+        elif any(keyword in name_lower for keyword in ["stage", "level", "nivel"]):
             return "Hidrograma de Nivel"
         else:
             return "Condición de Contorno"
@@ -430,9 +498,13 @@ class BoundaryReader:
         for ts_path in ts_paths:
             if ts_path in hf:
                 try:
-                    self._extract_time_series_from_group(hf[ts_path], time_series, ts_path)
+                    self._extract_time_series_from_group(
+                        hf[ts_path], time_series, ts_path
+                    )
                 except Exception as e:
-                    logger.warning(f"Error extracting time series from {ts_path}: {str(e)}")
+                    logger.warning(
+                        f"Error extracting time series from {ts_path}: {str(e)}"
+                    )
                     continue
 
         return time_series
@@ -449,16 +521,18 @@ class BoundaryReader:
         for key in group.keys():
             try:
                 item = group[key]
-                if hasattr(item, 'shape') and len(item.shape) > 0:
+                if hasattr(item, "shape") and len(item.shape) > 0:
                     # This is a dataset with data
                     time_series[f"{base_path}/{key}"] = {
                         "shape": item.shape,
                         "dtype": str(item.dtype),
-                        "size": item.size
+                        "size": item.size,
                     }
-                elif hasattr(item, 'keys'):
+                elif hasattr(item, "keys"):
                     # Recurse into subgroups
-                    self._extract_time_series_from_group(item, time_series, f"{base_path}/{key}")
+                    self._extract_time_series_from_group(
+                        item, time_series, f"{base_path}/{key}"
+                    )
             except Exception as e:
                 logger.warning(f"Error processing time series item {key}: {str(e)}")
                 continue
@@ -469,10 +543,14 @@ def main():
     Main function for command line usage
     """
     if len(sys.argv) < 2:
-        print(json.dumps({
-            "success": False,
-            "error": "Usage: python boundary_reader.py <hdf_file_path> [--enhanced]"
-        }))
+        print(
+            json.dumps(
+                {
+                    "success": False,
+                    "error": "Usage: python boundary_reader.py <hdf_file_path> [--enhanced]",
+                }
+            )
+        )
         sys.exit(1)
 
     hdf_file_path = sys.argv[1]
@@ -486,7 +564,7 @@ def main():
     except Exception as e:
         error_result = {
             "success": False,
-            "error": format_error_message(e, "Boundary conditions extraction")
+            "error": format_error_message(e, "Boundary conditions extraction"),
         }
         print(json.dumps(error_result))
         sys.exit(1)

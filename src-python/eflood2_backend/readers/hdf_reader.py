@@ -31,8 +31,10 @@ class HDFReader:
             raise FileNotFoundError(f"HDF file not found: {file_path}")
 
         # Validate file extension
-        if self.file_path.suffix.lower() not in ['.hdf', '.h5', '.hdf5']:
-            raise ValueError(f"Invalid file type. Expected .hdf, .h5, or .hdf5, got: {self.file_path.suffix}")
+        if self.file_path.suffix.lower() not in [".hdf", ".h5", ".hdf5"]:
+            raise ValueError(
+                f"Invalid file type. Expected .hdf, .h5, or .hdf5, got: {self.file_path.suffix}"
+            )
 
     def get_file_info(self) -> Dict[str, Any]:
         """
@@ -163,11 +165,12 @@ class HDFReader:
                 "depth": {"count": 0, "max_shape": []},
                 "velocity": {"count": 0, "max_shape": []},
                 "wse": {"count": 0, "max_shape": []},
-            }
+            },
         }
 
         try:
             with h5py.File(self.file_path, "r") as f:
+
                 def analyze_dataset(name, obj):
                     if isinstance(obj, h5py.Dataset):
                         metadata["total_datasets"] += 1
@@ -178,7 +181,9 @@ class HDFReader:
                         if len(shape) >= 2:
                             time_steps = shape[0]
                             cells = shape[1]
-                            metadata["time_steps"] = max(metadata["time_steps"], time_steps)
+                            metadata["time_steps"] = max(
+                                metadata["time_steps"], time_steps
+                            )
                             metadata["cell_count"] = max(metadata["cell_count"], cells)
 
                         # Contar áreas de flujo
@@ -188,15 +193,25 @@ class HDFReader:
                         # Categorizar variables
                         if "depth" in name_lower:
                             metadata["variables"]["depth"]["count"] += 1
-                            if len(shape) > len(metadata["variables"]["depth"]["max_shape"]):
-                                metadata["variables"]["depth"]["max_shape"] = list(shape)
+                            if len(shape) > len(
+                                metadata["variables"]["depth"]["max_shape"]
+                            ):
+                                metadata["variables"]["depth"]["max_shape"] = list(
+                                    shape
+                                )
                         elif "velocity" in name_lower:
                             metadata["variables"]["velocity"]["count"] += 1
-                            if len(shape) > len(metadata["variables"]["velocity"]["max_shape"]):
-                                metadata["variables"]["velocity"]["max_shape"] = list(shape)
+                            if len(shape) > len(
+                                metadata["variables"]["velocity"]["max_shape"]
+                            ):
+                                metadata["variables"]["velocity"]["max_shape"] = list(
+                                    shape
+                                )
                         elif "wse" in name_lower or "water surface" in name_lower:
                             metadata["variables"]["wse"]["count"] += 1
-                            if len(shape) > len(metadata["variables"]["wse"]["max_shape"]):
+                            if len(shape) > len(
+                                metadata["variables"]["wse"]["max_shape"]
+                            ):
                                 metadata["variables"]["wse"]["max_shape"] = list(shape)
 
                 f.visititems(analyze_dataset)

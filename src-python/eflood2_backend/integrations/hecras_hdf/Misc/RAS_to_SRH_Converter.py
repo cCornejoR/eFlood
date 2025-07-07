@@ -4,6 +4,7 @@ A Python class to convert HEC-RAS case, mainly mesh and material (Manning's n), 
 
 import pyHMT2D
 
+
 class RAS_to_SRH_Converter:
     """A Python class to convert HEC-RAS case, mainly mesh and material (Manning's n), to SRH-2D case
 
@@ -25,7 +26,9 @@ class RAS_to_SRH_Converter:
 
     def __init__(self, RASPlanResultFileName, RASTerrainGeoTiffFileName, SRHCaseName):
         self.RASPlanResultFileName = RASPlanResultFileName  # HEC-RAS result from a plan, such as caseName.p01.hdf
-        self.RASTerrainGeoTiffFileName = RASTerrainGeoTiffFileName #HEC-RAS Terrain's GeoTiff file name
+        self.RASTerrainGeoTiffFileName = (
+            RASTerrainGeoTiffFileName  # HEC-RAS Terrain's GeoTiff file name
+        )
         self.SRHCaseName = SRHCaseName
 
     def convert_to_SRH(self):
@@ -36,8 +39,10 @@ class RAS_to_SRH_Converter:
 
 
         """
-        #create the RAS_2D_Data object
-        ras_2d_data_obj = pyHMT2D.RAS_2D.RAS_2D_Data(self.RASPlanResultFileName, self.RASTerrainGeoTiffFileName)
+        # create the RAS_2D_Data object
+        ras_2d_data_obj = pyHMT2D.RAS_2D.RAS_2D_Data(
+            self.RASPlanResultFileName, self.RASTerrainGeoTiffFileName
+        )
 
         ras_2d_data_obj.exportSRHGEOMFile(self.SRHCaseName)
 

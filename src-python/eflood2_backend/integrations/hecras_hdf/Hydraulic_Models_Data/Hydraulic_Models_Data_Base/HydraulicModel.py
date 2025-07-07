@@ -1,5 +1,5 @@
 class HydraulicModel(object):
-    """ Hydraulic model base class
+    """Hydraulic model base class
 
     Attributes
     ----------
@@ -23,7 +23,7 @@ class HydraulicModel(object):
         return "%s version %s" % (self.name, self.version)
 
     def init_model(self):
-        """ Initialize the model
+        """Initialize the model
 
         Returns
         -------
@@ -32,7 +32,7 @@ class HydraulicModel(object):
         pass
 
     def run_model(self):
-        """ Run the model
+        """Run the model
 
         Returns
         -------
@@ -41,7 +41,7 @@ class HydraulicModel(object):
         pass
 
     def exit_model(self):
-        """ Exit the model
+        """Exit the model
 
         Returns
         -------

@@ -244,7 +244,9 @@ export const DataAnalyzer: React.FC<DataAnalyzerProps> = ({
     // Timeout de seguridad para evitar bloqueos
     const analysisTimeout = setTimeout(() => {
       updateState({ isAnalyzing: false });
-      setAnalysisError('El análisis ha tardado demasiado tiempo. Intente nuevamente.');
+      setAnalysisError(
+        'El análisis ha tardado demasiado tiempo. Intente nuevamente.'
+      );
     }, 60000); // 60 segundos timeout
 
     try {

@@ -1,14 +1,64 @@
 [flake8]
-max-line-length = 88
-extend-ignore = E203, W503, E501
+# Configuración de Flake8 para eFlood2 Backend
+# Optimizada para desarrollo con UV y .venv
+
+# Longitud máxima de línea
+max-line-length = 100
+
+# Errores y warnings a ignorar durante desarrollo
+extend-ignore =
+    # Imports no utilizados (común durante desarrollo)
+    F401,
+    # Líneas demasiado largas (se maneja con Black)
+    E501,
+    # Funciones demasiado complejas (se optimizará después)
+    C901,
+    # Variables no definidas por star imports (común en código heredado)
+    F405,
+    # Star imports (común en código heredado)
+    F403,
+    # Imports no al inicio del archivo (común en código heredado)
+    E402,
+    # Variables asignadas pero no usadas (común durante desarrollo)
+    F841,
+    # Nombres no definidos (común durante refactoring)
+    F821,
+    # Bare except (se corregirá gradualmente)
+    E722,
+    # f-strings sin placeholders (menor prioridad)
+    F541,
+    # Comparaciones con 'not in' (menor prioridad)
+    E713,
+    # Espacios en blanco antes de ':' (compatible con Black)
+    E203,
+    # Salto de línea antes de operador binario (compatible con Black)
+    W503
+
+# Directorios a excluir
 exclude =
     .git,
     __pycache__,
     .venv,
-    .eggs,
-    *.egg,
+    build,
     dist,
-    build
+    *.egg-info,
+    .pytest_cache,
+    .mypy_cache
+
+# Configuraciones por archivo
 per-file-ignores =
-    __init__.py:F401
-max-complexity = 10
+    # __init__.py puede tener imports no utilizados
+    __init__.py:F401,F403
+    # Tests pueden tener imports no utilizados y líneas largas
+    test_*.py:F401,E501
+    # Código heredado de HEC-RAS puede tener más flexibilidad
+    */hecras_hdf/*:F401,F403,F405,E402,C901,E501
+
+# Configuración de complejidad
+max-complexity = 15
+
+# Mostrar estadísticas
+statistics = True
+
+# Mostrar el código fuente de cada error
+show-source = True

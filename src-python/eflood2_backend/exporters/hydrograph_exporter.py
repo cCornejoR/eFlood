@@ -4,20 +4,22 @@ Exportador de Hidrogramas para eFlood2
 Extrae y exporta datos de hidrogramas desde archivos HDF5 de HEC-RAS
 """
 
-import sys
 import json
 import os
-import pandas as pd
+import sys
 from pathlib import Path
-from typing import Dict, List, Any, Optional
+from typing import Any, Dict, List, Optional
+
 import h5py
 import numpy as np
+import pandas as pd
 
 # Import utilities
-from ..utils.common import setup_logging, validate_file_path, format_error_message
+from ..utils.common import format_error_message, setup_logging, validate_file_path
 
 # Configure logging
 logger = setup_logging()
+
 
 class HydrographExporter:
     """Exportador de datos de hidrogramas desde archivos HDF5"""
@@ -46,7 +48,7 @@ class HydrographExporter:
         hydrograph_data = {}
 
         try:
-            with h5py.File(self.hdf_file_path, 'r') as f:
+            with h5py.File(self.hdf_file_path, "r") as f:
                 # Buscar datos de condiciones de contorno
                 for bc_name in boundary_conditions:
                     bc_data = self._find_boundary_condition_data(f, bc_name)
@@ -58,7 +60,9 @@ class HydrographExporter:
 
         return hydrograph_data
 
-    def _find_boundary_condition_data(self, hdf_file, bc_name: str) -> Optional[Dict[str, Any]]:
+    def _find_boundary_condition_data(
+        self, hdf_file, bc_name: str
+    ) -> Optional[Dict[str, Any]]:
         """
         Buscar datos de una condición de contorno específica
 
@@ -88,11 +92,11 @@ class HydrographExporter:
 
                     # Buscar datasets de caudal
                     for key in group.keys():
-                        if 'flow' in key.lower() or 'discharge' in key.lower():
+                        if "flow" in key.lower() or "discharge" in key.lower():
                             flow_data = group[key][:]
-                        elif 'time' in key.lower():
+                        elif "time" in key.lower():
                             time_data = group[key][:]
-                        elif 'stage' in key.lower() or 'elevation' in key.lower():
+                        elif "stage" in key.lower() or "elevation" in key.lower():
                             stage_data = group[key][:]
 
                     # Si no encontramos tiempo, crear array de tiempo sintético
@@ -101,14 +105,12 @@ class HydrographExporter:
 
                     if flow_data is not None:
                         return {
-                            'time': time_data.tolist() if time_data is not None else [],
-                            'flow': flow_data.tolist(),
-                            'stage': stage_data.tolist() if stage_data is not None else [],
-                            'units': {
-                                'time': 'hours',
-                                'flow': 'cms',
-                                'stage': 'm'
-                            }
+                            "time": time_data.tolist() if time_data is not None else [],
+                            "flow": flow_data.tolist(),
+                            "stage": (
+                                stage_data.tolist() if stage_data is not None else []
+                            ),
+                            "units": {"time": "hours", "flow": "cms", "stage": "m"},
                         }
 
         except Exception as e:
@@ -132,17 +134,17 @@ class HydrographExporter:
             all_data = []
 
             for bc_name, data in hydrograph_data.items():
-                if 'time' in data and 'flow' in data:
-                    for i, (time, flow) in enumerate(zip(data['time'], data['flow'])):
+                if "time" in data and "flow" in data:
+                    for i, (time, flow) in enumerate(zip(data["time"], data["flow"])):
                         row = {
-                            'Boundary_Condition': bc_name,
-                            'Time_Hours': time,
-                            'Flow_CMS': flow,
+                            "Boundary_Condition": bc_name,
+                            "Time_Hours": time,
+                            "Flow_CMS": flow,
                         }
 
                         # Agregar datos de nivel si están disponibles
-                        if 'stage' in data and i < len(data['stage']):
-                            row['Stage_M'] = data['stage'][i]
+                        if "stage" in data and i < len(data["stage"]):
+                            row["Stage_M"] = data["stage"][i]
 
                         all_data.append(row)
 
@@ -156,7 +158,9 @@ class HydrographExporter:
 
         return False
 
-    def export_to_excel(self, hydrograph_data: Dict[str, Any], output_path: str) -> bool:
+    def export_to_excel(
+        self, hydrograph_data: Dict[str, Any], output_path: str
+    ) -> bool:
         """
         Exportar datos de hidrograma a Excel
 
@@ -168,39 +172,47 @@ class HydrographExporter:
             bool: True si exitoso
         """
         try:
-            with pd.ExcelWriter(output_path, engine='openpyxl') as writer:
+            with pd.ExcelWriter(output_path, engine="openpyxl") as writer:
                 # Crear hoja para cada condición de contorno
                 for bc_name, data in hydrograph_data.items():
-                    if 'time' in data and 'flow' in data:
+                    if "time" in data and "flow" in data:
                         df_data = {
-                            'Time_Hours': data['time'],
-                            'Flow_CMS': data['flow'],
+                            "Time_Hours": data["time"],
+                            "Flow_CMS": data["flow"],
                         }
 
-                        if 'stage' in data and data['stage']:
-                            df_data['Stage_M'] = data['stage']
+                        if "stage" in data and data["stage"]:
+                            df_data["Stage_M"] = data["stage"]
 
                         df = pd.DataFrame(df_data)
 
                         # Limpiar nombre de hoja (Excel tiene restricciones)
-                        sheet_name = bc_name.replace('/', '_').replace('\\', '_')[:31]
+                        sheet_name = bc_name.replace("/", "_").replace("\\", "_")[:31]
                         df.to_excel(writer, sheet_name=sheet_name, index=False)
 
                 # Crear hoja de resumen
                 summary_data = []
                 for bc_name, data in hydrograph_data.items():
-                    if 'flow' in data:
-                        summary_data.append({
-                            'Boundary_Condition': bc_name,
-                            'Max_Flow_CMS': max(data['flow']) if data['flow'] else 0,
-                            'Min_Flow_CMS': min(data['flow']) if data['flow'] else 0,
-                            'Avg_Flow_CMS': np.mean(data['flow']) if data['flow'] else 0,
-                            'Data_Points': len(data['flow']) if data['flow'] else 0,
-                        })
+                    if "flow" in data:
+                        summary_data.append(
+                            {
+                                "Boundary_Condition": bc_name,
+                                "Max_Flow_CMS": (
+                                    max(data["flow"]) if data["flow"] else 0
+                                ),
+                                "Min_Flow_CMS": (
+                                    min(data["flow"]) if data["flow"] else 0
+                                ),
+                                "Avg_Flow_CMS": (
+                                    np.mean(data["flow"]) if data["flow"] else 0
+                                ),
+                                "Data_Points": len(data["flow"]) if data["flow"] else 0,
+                            }
+                        )
 
                 if summary_data:
                     summary_df = pd.DataFrame(summary_data)
-                    summary_df.to_excel(writer, sheet_name='Summary', index=False)
+                    summary_df.to_excel(writer, sheet_name="Summary", index=False)
 
             return True
 
@@ -213,10 +225,14 @@ class HydrographExporter:
 def main():
     """Interfaz de línea de comandos"""
     if len(sys.argv) < 5:
-        print(json.dumps({
-            "success": False,
-            "error": "Usage: python hydrograph_exporter.py export_hydrograph <hdf_file> <output_path> <format> [boundary_conditions...]"
-        }))
+        print(
+            json.dumps(
+                {
+                    "success": False,
+                    "error": "Usage: python hydrograph_exporter.py export_hydrograph <hdf_file> <output_path> <format> [boundary_conditions...]",
+                }
+            )
+        )
         sys.exit(1)
 
     command = sys.argv[1]
@@ -233,51 +249,63 @@ def main():
             hydrograph_data = exporter.extract_hydrograph_data(boundary_conditions)
 
             if not hydrograph_data:
-                print(json.dumps({
-                    "success": False,
-                    "error": "No se encontraron datos de hidrograma para las condiciones especificadas"
-                }))
+                print(
+                    json.dumps(
+                        {
+                            "success": False,
+                            "error": "No se encontraron datos de hidrograma para las condiciones especificadas",
+                        }
+                    )
+                )
                 sys.exit(1)
 
             # Exportar según formato
             success = False
-            if format_type.lower() == 'csv':
+            if format_type.lower() == "csv":
                 success = exporter.export_to_csv(hydrograph_data, output_path)
-            elif format_type.lower() in ['excel', 'xlsx']:
+            elif format_type.lower() in ["excel", "xlsx"]:
                 success = exporter.export_to_excel(hydrograph_data, output_path)
             else:
-                print(json.dumps({
-                    "success": False,
-                    "error": f"Formato no soportado: {format_type}"
-                }))
+                print(
+                    json.dumps(
+                        {
+                            "success": False,
+                            "error": f"Formato no soportado: {format_type}",
+                        }
+                    )
+                )
                 sys.exit(1)
 
             if success:
-                print(json.dumps({
-                    "success": True,
-                    "output_file": output_path,
-                    "boundary_conditions": boundary_conditions,
-                    "format": format_type,
-                    "data_summary": {
-                        bc: len(data.get('flow', [])) for bc, data in hydrograph_data.items()
-                    }
-                }))
+                print(
+                    json.dumps(
+                        {
+                            "success": True,
+                            "output_file": output_path,
+                            "boundary_conditions": boundary_conditions,
+                            "format": format_type,
+                            "data_summary": {
+                                bc: len(data.get("flow", []))
+                                for bc, data in hydrograph_data.items()
+                            },
+                        }
+                    )
+                )
             else:
-                print(json.dumps({
-                    "success": False,
-                    "error": "Error durante la exportación"
-                }))
+                print(
+                    json.dumps(
+                        {"success": False, "error": "Error durante la exportación"}
+                    )
+                )
         else:
-            print(json.dumps({
-                "success": False,
-                "error": f"Comando no reconocido: {command}"
-            }))
+            print(
+                json.dumps(
+                    {"success": False, "error": f"Comando no reconocido: {command}"}
+                )
+            )
 
     except Exception as e:
-        print(json.dumps({
-            "success": False,
-            "error": f"Error: {str(e)}"
-        }))
+        print(json.dumps({"success": False, "error": f"Error: {str(e)}"}))
         sys.exit(1)
 
 

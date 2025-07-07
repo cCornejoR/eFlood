@@ -4,19 +4,21 @@
 Extracts Manning's n values directly from HDF5 files without requiring terrain files
 """
 
-import h5py
 import json
-import sys
-import os
-import numpy as np
-from typing import Dict, List, Any, Optional
 import logging
+import os
+import sys
+from typing import Any, Dict, List, Optional
+
+import h5py
+import numpy as np
 
 # Import utilities
-from ..utils.common import setup_logging, validate_file_path, format_error_message
+from ..utils.common import format_error_message, setup_logging, validate_file_path
 
 # Configure logging
 logger = setup_logging()
+
 
 class ManningReader:
     """
@@ -40,7 +42,7 @@ class ManningReader:
             Dict containing Manning values data
         """
         try:
-            with h5py.File(self.hdf_file_path, 'r') as hf:
+            with h5py.File(self.hdf_file_path, "r") as hf:
                 logger.info(f"Reading Manning values from: {self.hdf_file_path}")
 
                 # First, try to find Manning data in the main HDF file
@@ -50,45 +52,48 @@ class ManningReader:
                     # Process and format the data
                     processed_data = self._process_manning_data(manning_data)
 
-                    if processed_data.get('success', False):
+                    if processed_data.get("success", False):
                         result = {
                             "success": True,
                             "manning_data": processed_data,
-                            "table_printed": True
+                            "table_printed": True,
                         }
 
-                        logger.info(f"Found {processed_data.get('total_zones', 0)} Manning zones in main HDF")
+                        logger.info(
+                            f"Found {processed_data.get('total_zones', 0)} Manning zones in main HDF"
+                        )
                         return result
 
                 # If not found in main file, try to find LandCover.hdf file
-                logger.info("Manning data not found in main HDF, searching for LandCover.hdf...")
+                logger.info(
+                    "Manning data not found in main HDF, searching for LandCover.hdf..."
+                )
                 landcover_data = self._search_landcover_file(hf)
 
                 if landcover_data is not None:
                     processed_data = self._process_manning_data(landcover_data)
 
-                    if processed_data.get('success', False):
+                    if processed_data.get("success", False):
                         result = {
                             "success": True,
                             "manning_data": processed_data,
                             "table_printed": True,
-                            "source": "LandCover.hdf"
+                            "source": "LandCover.hdf",
                         }
 
-                        logger.info(f"Found {processed_data.get('total_zones', 0)} Manning zones in LandCover.hdf")
+                        logger.info(
+                            f"Found {processed_data.get('total_zones', 0)} Manning zones in LandCover.hdf"
+                        )
                         return result
 
                 return {
                     "success": False,
-                    "error": "No Manning data found in HDF5 file or associated LandCover.hdf"
+                    "error": "No Manning data found in HDF5 file or associated LandCover.hdf",
                 }
 
         except Exception as e:
             logger.error(f"Error reading Manning values: {str(e)}")
-            return {
-                "success": False,
-                "error": str(e)
-            }
+            return {"success": False, "error": str(e)}
 
     def _search_manning_data(self, hf: h5py.File) -> Optional[np.ndarray]:
         """
@@ -108,16 +113,13 @@ class ManningReader:
             "Geometry/Land Cover (Manning's n)/Manning's n Values",
             "Geometry/Manning's n",
             "Geometry/2D Flow Areas/Manning's n",
-
             # Results paths
             "Results/Unsteady/Output/Output Blocks/Base Output/Unsteady Time Series/2D Flow Areas/2D Area 1/Manning's n",
             "Results/Unsteady/Output/Output Blocks/Base Output/Summary Output/2D Flow Areas/2D Area 1/Manning's n",
-
             # Alternative naming conventions
             "Geometry/2D Flow Areas/2D Area 1/Cell Manning's n",
             "Geometry/2D Flow Areas/2D Area 1/Cell Center Manning's n",
             "Geometry/2D Flow Areas/2D Area 1/Cells Manning's n",
-
             # Land cover paths
             "Geometry/Land Cover/Manning's n Values",
             "Geometry/Land Cover/Manning n",
@@ -129,19 +131,25 @@ class ManningReader:
                 logger.info(f"Found Manning data at: {path}")
                 try:
                     data = hf[path][:]
-                    if hasattr(data, '__len__') and len(data) > 0:
+                    if hasattr(data, "__len__") and len(data) > 0:
                         # Validate that this looks like Manning data (values between 0 and 1)
                         if isinstance(data, np.ndarray) and data.size > 0:
-                            valid_values = data[(data > 0) & (data < 1.0) & np.isfinite(data)]
+                            valid_values = data[
+                                (data > 0) & (data < 1.0) & np.isfinite(data)
+                            ]
                             if len(valid_values) > 0:
-                                logger.info(f"Valid Manning data found with {len(valid_values)} values")
+                                logger.info(
+                                    f"Valid Manning data found with {len(valid_values)} values"
+                                )
                                 return data
                 except Exception as e:
                     logger.warning(f"Error reading Manning data at {path}: {str(e)}")
                     continue
 
         # If not found in standard locations, search recursively
-        logger.info("Manning data not found in standard paths, searching recursively...")
+        logger.info(
+            "Manning data not found in standard paths, searching recursively..."
+        )
         logger.info(f"Available top-level groups: {list(hf.keys())}")
         return self._recursive_search_manning(hf)
 
@@ -161,23 +169,31 @@ class ManningReader:
             current_path = f"{path}/{key}" if path else key
 
             # Check if this looks like Manning data
-            if ("manning" in key.lower() or "roughness" in key.lower() or
-                "land cover" in key.lower() or key.lower().endswith(" n")):
-                if hasattr(item, 'shape') and len(item.shape) >= 1:
+            if (
+                "manning" in key.lower()
+                or "roughness" in key.lower()
+                or "land cover" in key.lower()
+                or key.lower().endswith(" n")
+            ):
+                if hasattr(item, "shape") and len(item.shape) >= 1:
                     try:
                         data = item[:]
                         if isinstance(data, np.ndarray) and data.size > 0:
                             # Check if values are in typical Manning range
-                            valid_values = data[(data > 0) & (data < 1.0) & np.isfinite(data)]
+                            valid_values = data[
+                                (data > 0) & (data < 1.0) & np.isfinite(data)
+                            ]
                             if len(valid_values) > 0:
-                                logger.info(f"Found Manning data at: {current_path} ({len(valid_values)} valid values)")
+                                logger.info(
+                                    f"Found Manning data at: {current_path} ({len(valid_values)} valid values)"
+                                )
                                 return data
                     except Exception as e:
                         logger.debug(f"Error reading data at {current_path}: {str(e)}")
                         continue
 
             # Recurse into groups
-            if hasattr(item, 'keys'):
+            if hasattr(item, "keys"):
                 result = self._recursive_search_manning(item, current_path)
                 if result is not None:
                     return result
@@ -202,56 +218,68 @@ class ManningReader:
             landcover_filename = None
             landcover_layername = None
 
-            if 'Geometry' in hf and hasattr(hf['Geometry'], 'attrs'):
-                attrs = hf['Geometry'].attrs
-                if 'Land Cover Filename' in attrs:
-                    landcover_filename = attrs['Land Cover Filename']
+            if "Geometry" in hf and hasattr(hf["Geometry"], "attrs"):
+                attrs = hf["Geometry"].attrs
+                if "Land Cover Filename" in attrs:
+                    landcover_filename = attrs["Land Cover Filename"]
                     if isinstance(landcover_filename, bytes):
-                        landcover_filename = landcover_filename.decode('utf-8')
+                        landcover_filename = landcover_filename.decode("utf-8")
                     logger.info(f"Found Land Cover Filename: {landcover_filename}")
 
-                if 'Land Cover Layername' in attrs:
-                    landcover_layername = attrs['Land Cover Layername']
+                if "Land Cover Layername" in attrs:
+                    landcover_layername = attrs["Land Cover Layername"]
                     if isinstance(landcover_layername, bytes):
-                        landcover_layername = landcover_layername.decode('utf-8')
+                        landcover_layername = landcover_layername.decode("utf-8")
                     logger.info(f"Found Land Cover Layername: {landcover_layername}")
 
             # Try different possible LandCover file names
             possible_files = []
 
             if landcover_layername:
-                possible_files.extend([
-                    os.path.join(hdf_dir, f"{landcover_layername}.hdf"),
-                    os.path.join(hdf_dir, f"{landcover_layername}.hdf5"),
-                ])
+                possible_files.extend(
+                    [
+                        os.path.join(hdf_dir, f"{landcover_layername}.hdf"),
+                        os.path.join(hdf_dir, f"{landcover_layername}.hdf5"),
+                    ]
+                )
 
             if landcover_filename:
-                possible_files.extend([
-                    os.path.join(hdf_dir, landcover_filename),
-                    os.path.join(hdf_dir, landcover_filename.replace('.tif', '.hdf')),
-                ])
+                possible_files.extend(
+                    [
+                        os.path.join(hdf_dir, landcover_filename),
+                        os.path.join(
+                            hdf_dir, landcover_filename.replace(".tif", ".hdf")
+                        ),
+                    ]
+                )
 
             # Common LandCover file names
-            possible_files.extend([
-                os.path.join(hdf_dir, "LandCover.hdf"),
-                os.path.join(hdf_dir, "LandCover.hdf5"),
-                os.path.join(hdf_dir, "landcover.hdf"),
-                os.path.join(hdf_dir, "Manning.hdf"),
-                os.path.join(hdf_dir, "manning.hdf"),
-            ])
+            possible_files.extend(
+                [
+                    os.path.join(hdf_dir, "LandCover.hdf"),
+                    os.path.join(hdf_dir, "LandCover.hdf5"),
+                    os.path.join(hdf_dir, "landcover.hdf"),
+                    os.path.join(hdf_dir, "Manning.hdf"),
+                    os.path.join(hdf_dir, "manning.hdf"),
+                ]
+            )
 
             # Try each possible file
             for landcover_path in possible_files:
                 if os.path.exists(landcover_path):
                     logger.info(f"Found potential LandCover file: {landcover_path}")
                     try:
-                        with h5py.File(landcover_path, 'r') as lc_hf:
+                        with h5py.File(landcover_path, "r") as lc_hf:
                             manning_data = self._extract_from_landcover_file(lc_hf)
                             if manning_data is not None:
-                                logger.info(f"Successfully extracted Manning data from: {landcover_path}")
+                                logger.info(
+                                    f"Successfully extracted Manning data from: {landcover_path}"
+                                )
                                 return manning_data
                     except Exception as e:
-                        logger.warning(f"Error reading LandCover file {landcover_path}: {str(e)}")
+                        logger.warning(
+                            f"Error reading LandCover file {landcover_path}: {str(e)}"
+                        )
                         continue
 
             logger.info("No valid LandCover.hdf file found")
@@ -290,22 +318,30 @@ class ManningReader:
                     try:
                         data = lc_hf[path][:]
                         if isinstance(data, np.ndarray) and data.size > 0:
-                            valid_values = data[(data > 0) & (data < 1.0) & np.isfinite(data)]
+                            valid_values = data[
+                                (data > 0) & (data < 1.0) & np.isfinite(data)
+                            ]
                             if len(valid_values) > 0:
-                                logger.info(f"Valid Manning data found with {len(valid_values)} values")
+                                logger.info(
+                                    f"Valid Manning data found with {len(valid_values)} values"
+                                )
                                 return data
                     except Exception as e:
-                        logger.warning(f"Error reading Manning data at {path}: {str(e)}")
+                        logger.warning(
+                            f"Error reading Manning data at {path}: {str(e)}"
+                        )
                         continue
 
             # If direct paths don't work, try to extract from IDs and ManningsN arrays
-            if 'IDs' in lc_hf and 'ManningsN' in lc_hf:
+            if "IDs" in lc_hf and "ManningsN" in lc_hf:
                 try:
-                    ids = lc_hf['IDs'][:]
-                    manning_values = lc_hf['ManningsN'][:]
+                    ids = lc_hf["IDs"][:]
+                    manning_values = lc_hf["ManningsN"][:]
 
                     if len(manning_values) > 0:
-                        logger.info(f"Found Manning values via IDs/ManningsN arrays: {len(manning_values)} values")
+                        logger.info(
+                            f"Found Manning values via IDs/ManningsN arrays: {len(manning_values)} values"
+                        )
                         return manning_values
 
                 except Exception as e:
@@ -331,7 +367,9 @@ class ManningReader:
         clean_data = []
         for val in manning_array:
             # Accept a wider range of Manning values (some models use values > 1.0)
-            if np.isfinite(val) and val > 0 and val < 10.0:  # Expanded valid Manning range
+            if (
+                np.isfinite(val) and val > 0 and val < 10.0
+            ):  # Expanded valid Manning range
                 clean_data.append(float(val))
 
         # If no values in the typical range, try even more flexible criteria
@@ -341,14 +379,16 @@ class ManningReader:
                     clean_data.append(float(val))
 
         if not clean_data:
-            logger.warning(f"No valid Manning values found. Raw data sample: {manning_array[:10] if len(manning_array) > 0 else 'empty'}")
+            logger.warning(
+                f"No valid Manning values found. Raw data sample: {manning_array[:10] if len(manning_array) > 0 else 'empty'}"
+            )
             return {
                 "success": False,
                 "error": f"No valid Manning values found in array of size {len(manning_array)}",
                 "total_zones": 0,
                 "manning_zones": {},
                 "table_data": [],
-                "formatted_table": ""
+                "formatted_table": "",
             }
 
         # Get unique values and create zones
@@ -363,15 +403,17 @@ class ManningReader:
             manning_zones[str(zone_id)] = {
                 "name": zone_name,
                 "value": value,
-                "description": self._get_detailed_description(value)
+                "description": self._get_detailed_description(value),
             }
 
-            table_data.append([
-                zone_id,
-                zone_name,
-                f"{value:.4f}",
-                self._get_detailed_description(value)
-            ])
+            table_data.append(
+                [
+                    zone_id,
+                    zone_name,
+                    f"{value:.4f}",
+                    self._get_detailed_description(value),
+                ]
+            )
 
         # Create formatted table (simple text format)
         formatted_table = self._create_formatted_table(table_data)
@@ -381,7 +423,7 @@ class ManningReader:
             "manning_zones": manning_zones,
             "total_zones": len(unique_values),
             "table_data": table_data,
-            "formatted_table": formatted_table
+            "formatted_table": formatted_table,
         }
 
     def _get_manning_description(self, value: float) -> str:
@@ -432,38 +474,42 @@ class ManningReader:
 
         return "\n".join(lines)
 
+
 def main():
     """
     Main function for command line usage
     """
     if len(sys.argv) < 2:
-        print(json.dumps({
-            "success": False,
-            "error": "Usage: python manning_extractor.py <hdf_file_path>"
-        }))
+        print(
+            json.dumps(
+                {
+                    "success": False,
+                    "error": "Usage: python -m eflood2_backend.readers.manning_reader <hdf_file_path>",
+                }
+            )
+        )
         sys.exit(1)
 
     hdf_file_path = sys.argv[1]
 
     if not os.path.exists(hdf_file_path):
-        print(json.dumps({
-            "success": False,
-            "error": f"HDF file not found: {hdf_file_path}"
-        }))
+        print(
+            json.dumps(
+                {"success": False, "error": f"HDF file not found: {hdf_file_path}"}
+            )
+        )
         sys.exit(1)
 
     try:
-        extractor = ManningExtractor(hdf_file_path)
-        result = extractor.extract_manning_values()
+        reader = ManningReader(hdf_file_path)
+        result = reader.extract_manning_values()
         print(json.dumps(result, indent=2))
 
     except Exception as e:
-        error_result = {
-            "success": False,
-            "error": f"Unexpected error: {str(e)}"
-        }
+        error_result = {"success": False, "error": f"Unexpected error: {str(e)}"}
         print(json.dumps(error_result))
         sys.exit(1)
+
 
 if __name__ == "__main__":
     main()

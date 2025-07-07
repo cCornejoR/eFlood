@@ -27,7 +27,7 @@ from reportlab.platypus import (
 )
 
 # Import utilities
-from ..utils.common import setup_logging, validate_file_path, format_error_message
+from ..utils.common import format_error_message, setup_logging, validate_file_path
 
 # Configure logging
 logger = setup_logging()

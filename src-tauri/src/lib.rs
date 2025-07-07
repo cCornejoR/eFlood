@@ -1,9 +1,9 @@
 use serde::{Deserialize, Serialize};
+use std::fs;
 use std::path::PathBuf;
 use std::process::Command;
-use std::fs;
+use sysinfo::{Pid, System};
 use tauri::AppHandle;
-use sysinfo::{System, Pid};
 
 // Constants for better maintainability
 const HECRAS_PROCESSOR_SCRIPT: &str = "HECRAS-HDF/hecras_processor.py";
@@ -54,6 +54,24 @@ fn create_error_result(error_message: &str) -> PythonResult {
     }
 }
 
+/// Helper function to validate file existence
+///
+/// # Arguments
+/// * `file_path` - Path to the file to validate
+///
+/// # Returns
+/// * Result<(), String> - Ok if file exists, Err with message if not
+fn validate_file_exists(file_path: &str) -> Result<(), String> {
+    let path = PathBuf::from(file_path);
+    if !path.exists() {
+        return Err(format!("File not found: {}", file_path));
+    }
+    if !path.is_file() {
+        return Err(format!("Path is not a file: {}", file_path));
+    }
+    Ok(())
+}
+
 #[derive(Debug, Serialize, Deserialize)]
 pub struct PythonResult {
     pub success: bool,
@@ -75,7 +93,76 @@ pub struct FileInfo {
     pub modified: u64,
 }
 
-// Python execution helper function
+// Python execution helper function for modules
+fn execute_python_module(module_name: &str, args: Vec<String>) -> PythonResult {
+    // Get the project root directory (parent of src-tauri)
+    let current_dir = std::env::current_dir().unwrap_or_else(|_| PathBuf::from("."));
+
+    // Try to find the project root by looking for src-python directory
+    let backend_path = if current_dir.join("src-python").exists() {
+        // We're already in the project root
+        current_dir.join("src-python")
+    } else if current_dir.parent().is_some()
+        && current_dir.parent().unwrap().join("src-python").exists()
+    {
+        // We're in src-tauri, go up one level
+        current_dir.parent().unwrap().join("src-python")
+    } else {
+        // Fallback: try relative path from src-tauri
+        current_dir.join("../src-python")
+    };
+
+    // Debug information
+    println!("Current dir: {:?}", current_dir);
+    println!("Backend path: {:?}", backend_path);
+    println!("Module name: {}", module_name);
+
+    // Check if the backend directory exists
+    if !backend_path.exists() {
+        return PythonResult {
+            success: false,
+            data: None,
+            error: Some(format!(
+                "Python backend directory not found: {:?}",
+                backend_path
+            )),
+        };
+    }
+
+    // Use UV to run Python modules with the virtual environment
+    let mut cmd = Command::new("uv");
+    cmd.arg("run")
+        .arg("python")
+        .arg("-m")
+        .arg(module_name)
+        .args(&args)
+        .current_dir(&backend_path);
+
+    match cmd.output() {
+        Ok(output) => {
+            if output.status.success() {
+                PythonResult {
+                    success: true,
+                    data: Some(String::from_utf8_lossy(&output.stdout).to_string()),
+                    error: None,
+                }
+            } else {
+                PythonResult {
+                    success: false,
+                    data: None,
+                    error: Some(String::from_utf8_lossy(&output.stderr).to_string()),
+                }
+            }
+        }
+        Err(e) => PythonResult {
+            success: false,
+            data: None,
+            error: Some(format!("Failed to execute Python module: {}", e)),
+        },
+    }
+}
+
+// Python execution helper function for scripts
 fn execute_python_script(script_name: &str, args: Vec<String>) -> PythonResult {
     // Get the project root directory (parent of src-tauri)
     let current_dir = std::env::current_dir().unwrap_or_else(|_| PathBuf::from("."));
@@ -158,24 +245,36 @@ fn execute_python_script(script_name: &str, args: Vec<String>) -> PythonResult {
 // Tauri commands for HDF file operations
 #[tauri::command]
 async fn read_hdf_file_info(file_path: String) -> Result<PythonResult, String> {
+    if let Err(error) = validate_file_exists(&file_path) {
+        return Ok(create_error_result(&error));
+    }
     let result = execute_python_script("hdf_reader.py", vec![file_path, "info".to_string()]);
     Ok(result)
 }
 
 #[tauri::command]
 async fn read_hdf_file_structure(file_path: String) -> Result<PythonResult, String> {
+    if let Err(error) = validate_file_exists(&file_path) {
+        return Ok(create_error_result(&error));
+    }
     let result = execute_python_script("hdf_reader.py", vec![file_path, "structure".to_string()]);
     Ok(result)
 }
 
 #[tauri::command]
 async fn find_hydraulic_datasets(file_path: String) -> Result<PythonResult, String> {
+    if let Err(error) = validate_file_exists(&file_path) {
+        return Ok(create_error_result(&error));
+    }
     let result = execute_python_script("hdf_reader.py", vec![file_path, "hydraulic".to_string()]);
     Ok(result)
 }
 
 #[tauri::command]
 async fn get_detailed_hdf_metadata(file_path: String) -> Result<PythonResult, String> {
+    if let Err(error) = validate_file_exists(&file_path) {
+        return Ok(create_error_result(&error));
+    }
     let result = execute_python_script("hdf_reader.py", vec![file_path, "metadata".to_string()]);
     Ok(result)
 }
@@ -185,9 +284,12 @@ async fn extract_manning_values(
     hdf_file_path: String,
     _terrain_file_path: Option<String>,
 ) -> Result<PythonResult, String> {
-    // Use the new manning_extractor.py script that doesn't require terrain files
-    let result = execute_python_script(
-        "manning_extractor.py",
+    if let Err(error) = validate_file_exists(&hdf_file_path) {
+        return Ok(create_error_result(&error));
+    }
+    // Use the manning_reader module from eflood2_backend
+    let result = execute_python_module(
+        "eflood2_backend.readers.manning_reader",
         vec![hdf_file_path],
     );
     Ok(result)
@@ -561,7 +663,10 @@ async fn get_vtk_export_info(
 // Boundary conditions extraction command
 #[tauri::command]
 async fn extract_boundary_conditions(hdf_file_path: String) -> Result<PythonResult, String> {
-    let result = execute_python_script("enhanced_boundary_conditions_reader.py", vec![hdf_file_path]);
+    let result = execute_python_script(
+        "enhanced_boundary_conditions_reader.py",
+        vec![hdf_file_path],
+    );
     Ok(result)
 }
 
@@ -586,6 +691,73 @@ async fn export_hydrograph_data(
     }
 
     let result = execute_python_script("hydrograph_exporter.py", args);
+    Ok(result)
+}
+
+// RAS Commander Integration Commands
+#[tauri::command]
+async fn get_comprehensive_mesh_info(
+    hdf_file_path: String,
+    terrain_file_path: Option<String>,
+) -> Result<PythonResult, String> {
+    let terrain_arg = terrain_file_path.unwrap_or_else(|| "null".to_string());
+    let result = execute_python_module(
+        "eflood2_backend.integrations.ras_commander_integration",
+        vec!["mesh_info".to_string(), hdf_file_path, terrain_arg],
+    );
+    Ok(result)
+}
+
+#[tauri::command]
+async fn get_manning_values_enhanced(
+    hdf_file_path: String,
+    terrain_file_path: Option<String>,
+) -> Result<PythonResult, String> {
+    let terrain_arg = terrain_file_path.unwrap_or_else(|| "null".to_string());
+    let result = execute_python_module(
+        "eflood2_backend.integrations.ras_commander_integration",
+        vec!["manning".to_string(), hdf_file_path, terrain_arg],
+    );
+    Ok(result)
+}
+
+#[tauri::command]
+async fn export_vtk_enhanced(
+    hdf_file_path: String,
+    output_directory: String,
+    terrain_file_path: Option<String>,
+) -> Result<PythonResult, String> {
+    let terrain_arg = terrain_file_path.unwrap_or_else(|| "null".to_string());
+    let result = execute_python_module(
+        "eflood2_backend.integrations.ras_commander_integration",
+        vec![
+            "export_vtk".to_string(),
+            hdf_file_path,
+            terrain_arg,
+            output_directory,
+        ],
+    );
+    Ok(result)
+}
+
+#[tauri::command]
+async fn get_time_series_data(
+    hdf_file_path: String,
+    mesh_name: String,
+    variable: String,
+    terrain_file_path: Option<String>,
+) -> Result<PythonResult, String> {
+    let terrain_arg = terrain_file_path.unwrap_or_else(|| "null".to_string());
+    let result = execute_python_module(
+        "eflood2_backend.integrations.ras_commander_integration",
+        vec![
+            "timeseries".to_string(),
+            hdf_file_path,
+            terrain_arg,
+            mesh_name,
+            variable,
+        ],
+    );
     Ok(result)
 }
 
@@ -661,7 +833,7 @@ async fn get_system_metrics() -> Result<SystemMetrics, String> {
         // proc.cpu_usage() returns usage per core, divide by total cores for percentage of total system
         let process_cpu = proc.cpu_usage() as f64;
         let normalized_cpu = process_cpu / num_cores;
-        normalized_cpu.min(100.0).max(0.0)
+        normalized_cpu.clamp(0.0, 100.0)
     } else {
         0.0
     };
@@ -724,6 +896,11 @@ pub fn run() {
             process_hec_ras_data,
             create_hydrograph_py_hmt2_d,
             create_depth_map_py_hmt2_d,
+            // RAS Commander Integration
+            get_comprehensive_mesh_info,
+            get_manning_values_enhanced,
+            export_vtk_enhanced,
+            get_time_series_data,
             create_profile_py_hmt2_d,
             export_to_vtk_py_hmt2_d,
             get_vtk_export_info,

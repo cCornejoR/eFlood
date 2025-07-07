@@ -30,6 +30,7 @@ import {
   ShieldX,
   Maximize2,
   Minimize2,
+  Microscope,
 } from 'lucide-react';
 import logoImage from '@/assets/logo.svg';
 import { UserData } from '@/components/OnboardingModal';
@@ -52,6 +53,7 @@ interface CustomTitlebarProps {
   onToggleLicenseCollapse?: () => void;
   enableDoubleClickMaximize?: boolean;
   isAnalyzerMode?: boolean;
+  analyzerType?: 'hdf-viewer' | 'analyzer-plus';
 }
 
 // Tipos para manejo de errores del titlebar
@@ -85,6 +87,7 @@ export const CustomTitlebar: React.FC<CustomTitlebarProps> = ({
   onToggleLicenseCollapse,
   enableDoubleClickMaximize = true,
   isAnalyzerMode = false,
+  analyzerType = 'hdf-viewer',
 }) => {
   // Estados de ventana
   const [windowState, setWindowState] = useState<WindowState>({
@@ -378,35 +381,46 @@ export const CustomTitlebar: React.FC<CustomTitlebarProps> = ({
 
       {/* 🎨 Logo y título centrado - perfectamente alineados */}
       <motion.div
-        className='absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 flex items-center gap-2 z-10 select-none cursor-move'
+        className='absolute left-1/2 top-0 bottom-0 transform -translate-x-1/2 z-10 select-none cursor-move flex items-center'
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.5 }}
         onDoubleClick={handleDoubleClick}
       >
-        <motion.img
-          src={logoImage}
-          alt='eFlood² Logo'
-          className='h-6 w-6 object-contain pointer-events-none flex-shrink-0'
-          whileHover={{ scale: 1.1, rotate: 5 }}
-          transition={{ duration: 0.2 }}
-        />
-        <motion.h1
-          className='text-lg font-bold text-white eflow-brand pointer-events-none leading-none'
+        <motion.div
+          className='flex items-center gap-2 pointer-events-none h-full'
           whileHover={{ scale: 1.05 }}
           transition={{ duration: 0.2 }}
         >
+          <motion.img
+            src={logoImage}
+            alt='eFlood² Logo'
+            className='h-6 w-6 object-contain flex-shrink-0'
+            whileHover={{ scale: 1.1, rotate: 5 }}
+            transition={{ duration: 0.2 }}
+          />
           {isAnalyzerMode ? (
-            <span className='flex items-center gap-2'>
-              {title}
-              <span className='px-2 py-1 text-sm bg-gradient-to-r from-blue-500/30 to-cyan-400/30 border border-blue-400/30 rounded-lg text-blue-300 font-medium'>
-                Analyzer
-              </span>
-            </span>
+            <>
+              <h1 className='text-lg text-white eflow-brand leading-none flex items-center'>
+                {title}
+              </h1>
+              {analyzerType === 'analyzer-plus' ? (
+                <span className='flex items-center gap-1 px-2 py-1 rounded-md bg-gradient-to-r from-blue-500/20 to-cyan-500/20 border border-blue-400/30 text-blue-300 font-medium text-xs h-6'>
+                  <Microscope className='h-3 w-3' />
+                  Analyzer+
+                </span>
+              ) : (
+                <span className='flex items-center px-2 py-1 text-xs bg-gradient-to-r from-blue-500/30 to-cyan-400/30 border border-blue-400/30 rounded-md text-blue-300 font-medium h-6'>
+                  HDF Viewer
+                </span>
+              )}
+            </>
           ) : (
-            title
+            <h1 className='text-lg text-white eflow-brand leading-none flex items-center'>
+              {title}
+            </h1>
           )}
-        </motion.h1>
+        </motion.div>
       </motion.div>
 
       {/* 🔲 Botones de control de ventana */}

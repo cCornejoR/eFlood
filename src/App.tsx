@@ -3,13 +3,14 @@ import { toast } from 'sonner';
 import './App.css';
 import Homepage from './components/Homepage';
 import { HecRas } from './components/HecRas';
+import { AnalyzerPlus } from './components/analyzer-plus';
 import OnboardingModal, { UserData } from './components/OnboardingModal';
 import LicenseTitlebar from './components/LicenseTitlebar';
 import CustomTitlebar from './components/CustomTitlebar';
 // import SafeAreaLayout from './components/ui/SafeArea'; // No usado - HecRas maneja su propio layout
 // import { cn } from '@/lib/utils'; // No usado actualmente
 
-type ActiveTab = 'home' | 'hecras';
+type ActiveTab = 'home' | 'hecras' | 'analyzer-plus';
 
 function App() {
   const [activeTab, setActiveTab] = useState<ActiveTab>('home');
@@ -60,7 +61,7 @@ function App() {
   const handleNavigation = (tab: string) => {
     // Check if license is valid before allowing navigation to analysis tools
     if (
-      tab === 'hecras' &&
+      (tab === 'hecras' || tab === 'analyzer-plus') &&
       (!userData || !userData.name || !userData.email || !isLicenseValid)
     ) {
       toast.error('Licencia requerida', {
@@ -72,7 +73,7 @@ function App() {
     }
 
     // Collapse license panel when entering analyzer
-    if (tab === 'hecras') {
+    if (tab === 'hecras' || tab === 'analyzer-plus') {
       setIsLicensePanelCollapsed(true);
     }
 
@@ -92,7 +93,12 @@ function App() {
           }
           enableDoubleClickMaximize={true}
           className='titlebar-native'
-          isAnalyzerMode={activeTab === 'hecras'}
+          isAnalyzerMode={
+            activeTab === 'hecras' || activeTab === 'analyzer-plus'
+          }
+          analyzerType={
+            activeTab === 'analyzer-plus' ? 'analyzer-plus' : 'hdf-viewer'
+          }
         />
       </div>
 
@@ -116,6 +122,12 @@ function App() {
             {activeTab === 'home' && <Homepage onNavigate={handleNavigation} />}
             {activeTab === 'hecras' && (
               <HecRas
+                onNavigateHome={() => setActiveTab('home')}
+                isLicensePanelCollapsed={isLicensePanelCollapsed}
+              />
+            )}
+            {activeTab === 'analyzer-plus' && (
+              <AnalyzerPlus
                 onNavigateHome={() => setActiveTab('home')}
                 isLicensePanelCollapsed={isLicensePanelCollapsed}
               />

@@ -1,417 +1,487 @@
-// ===========================================
-// EFLOOD² DOCUMENTATION ANIMATIONS
-// ===========================================
+// TRAE AI - Professional Minimal GSAP Animations
+// =============================================
 
 // Register GSAP plugins
-gsap.registerPlugin(ScrollTrigger, SplitText);
+gsap.registerPlugin(ScrollTrigger);
 
-// Initialize animations when DOM is loaded
-document.addEventListener('DOMContentLoaded', function() {
-    initializeSplitTextAnimations();
-    initializeAnimations();
-    setupInteractivity();
+// Global animation settings
+gsap.defaults({
+    ease: "power2.out",
+    duration: 1.2
 });
 
-// Initialize Split Text Animations - EXACTLY like the example
-function initializeSplitTextAnimations() {
-    document.fonts.ready.then(() => {
-        gsap.set(".split", { opacity: 1 });
 
-        let split = SplitText.create(".split", {
-            type: "chars, words",
-            mask: "chars"
-        });
 
-        let tween = gsap.from(split.chars, {
-            duration: 2.2,
-            yPercent: "random([-150, 150])",
-            xPercent: "random([-150, 150])",
-            stagger: {
-                from: "random",
-                amount: 1.5,
-            },
-            ease: "power3.out"
-        });
+// Initialize when DOM is loaded
+document.addEventListener('DOMContentLoaded', () => {
+    initializeAnimations();
+    setupScrollTriggers();
+    setupInteractivity();
+    setupNavigation();
+    setupMobileMenu();
+});
+
+// Main initialization function
+function initializeAnimations() {
+    // Set initial states for eFlood² theme - optimized for faster loading
+    gsap.set('.title-line', { opacity: 0, y: 50 });
+    gsap.set('.hero-description', { opacity: 0, y: 20 });
+    gsap.set('.hero-actions', { opacity: 0, y: 20 });
+    gsap.set('.program-preview', { opacity: 0, y: 50, scale: 0.9 });
+    gsap.set('.hero-scroll', { opacity: 0 });
+    
+    // Hero entrance animation with hydraulic theme - faster and smoother
+    const heroTl = gsap.timeline({ delay: 0.2 });
+    
+    heroTl
+        .to('.title-line', {
+            opacity: 1,
+            y: 0,
+            duration: 0.8,
+            stagger: 0.1,
+            ease: "power2.out"
+        })
+        .to('.hero-description', {
+            opacity: 1,
+            y: 0,
+            duration: 0.6,
+            ease: "power2.out"
+        }, "-=0.6")
+        .to('.hero-actions', {
+            opacity: 1,
+            y: 0,
+            duration: 0.6,
+            ease: "power2.out"
+        }, "-=0.4")
+        .to('.program-preview', {
+            opacity: 1,
+            y: 0,
+            scale: 1,
+            duration: 1,
+            ease: "power2.out"
+        }, "-=0.6")
+        .to('.hero-scroll', {
+            opacity: 1,
+            duration: 0.6,
+            ease: "power2.out"
+        }, "-=0.3");
+    
+    // Animate scroll indicator with water flow effect - optimized
+    gsap.to('.scroll-line', {
+        scaleY: 0.3,
+        duration: 1.5,
+        yoyo: true,
+        repeat: -1,
+        ease: "sine.inOut"
     });
+    
+    // Program image hover effect
+    const programImage = document.querySelector('.program-image');
+    if (programImage) {
+        programImage.addEventListener('mouseenter', () => {
+            gsap.to(programImage, { scale: 1.02, duration: 0.3, ease: "power2.out" });
+        });
+        programImage.addEventListener('mouseleave', () => {
+            gsap.to(programImage, { scale: 1, duration: 0.3, ease: "power2.out" });
+        });
+    }
 }
 
-// Main animation initialization
-function initializeAnimations() {
-    // Set initial states
-    gsap.set('.hero-content', { opacity: 0, y: 50 });
-    gsap.set('.hero-visual', { opacity: 0, x: 50 });
-    gsap.set('.hero-background', { opacity: 0 });
+// Setup scroll-triggered animations for eFlood² - optimized for speed
+function setupScrollTriggers() {
+    // Set initial states for scroll animations
+    gsap.set('.about .label-text, .features .label-text, .contact .label-text', { opacity: 0, y: 20 });
+    gsap.set('.about .section-title, .features .section-title, .contact .section-title', { opacity: 0, y: 30 });
+    gsap.set('.about .section-description', { opacity: 0, y: 20 });
+    gsap.set('.stat-item', { opacity: 0, y: 30, scale: 0.9 });
     gsap.set('.feature-item', { opacity: 0, y: 30 });
-    gsap.set('.nav', { y: -100 });
-
-    // Navigation entrance
-    gsap.to('.nav', {
-        y: 0,
-        duration: 0.8,
-        ease: 'power3.out',
-        delay: 0.2
-    });
-
-    // Hero background animation
-    gsap.to('.hero-background', {
-        opacity: 0.9,
-        duration: 2,
-        ease: 'power2.out'
-    });
-
-    // Hero content animation
-    const heroTl = gsap.timeline({ delay: 0.5 });
-
-    heroTl.to('.hero-content', {
-        opacity: 1,
-        y: 0,
-        duration: 1,
-        ease: 'power3.out'
+    gsap.set('.contact-item', { opacity: 0, y: 20, scale: 0.95 });
+    
+    // About section - faster animations
+    gsap.timeline({
+        scrollTrigger: {
+            trigger: '.about',
+            start: 'top 85%',
+            toggleActions: 'play none none reverse'
+        }
     })
-    .to('.hero-visual', {
-        opacity: 1,
-        x: 0,
-        duration: 1,
-        ease: 'power3.out'
-    }, '-=0.5');
-
-    // Split text animations are handled by initializeSplitTextAnimations()
-
-    // Feature items scroll animation
-    gsap.to('.feature-item', {
-        opacity: 1,
-        y: 0,
-        duration: 0.8,
-        stagger: 0.15,
-        ease: 'power3.out',
+    .to('.about .label-text', { opacity: 1, y: 0, duration: 0.5 })
+    .to('.about .section-title', { opacity: 1, y: 0, duration: 0.6, ease: "power2.out" }, "-=0.3")
+    .to('.about .section-description', { opacity: 1, y: 0, duration: 0.5 }, "-=0.4")
+    .to('.stat-item', { opacity: 1, y: 0, scale: 1, duration: 0.6, stagger: 0.1, ease: "back.out(1.7)" }, "-=0.3");
+    
+    // Features section - optimized stagger
+    gsap.timeline({
         scrollTrigger: {
-            trigger: '.features-grid',
-            start: 'top 80%',
-            end: 'bottom 20%',
+            trigger: '.features',
+            start: 'top 85%',
             toggleActions: 'play none none reverse'
         }
-    });
-
-    // Download section animation
-    gsap.to('.download-container', {
-        opacity: 1,
-        y: 0,
-        duration: 1,
-        ease: 'power3.out',
+    })
+    .to('.features .label-text', { opacity: 1, y: 0, duration: 0.5 })
+    .to('.features .section-title', { opacity: 1, y: 0, duration: 0.6, ease: "power2.out" }, "-=0.3")
+    .to('.feature-item', { opacity: 1, y: 0, duration: 0.6, stagger: 0.1, ease: "power2.out" }, "-=0.4");
+    
+    // Contact section animation - simple and clean
+    gsap.timeline({
         scrollTrigger: {
-            trigger: '.download',
-            start: 'top 80%',
+            trigger: '.contact',
+            start: 'top 85%',
             toggleActions: 'play none none reverse'
         }
-    });
-
-    // Parallax effect for hero background
-    gsap.to('.hero', {
-        backgroundPosition: '50% 100px',
-        ease: 'none',
+    })
+    .to('.contact .label-text', {
+        opacity: 1,
+        y: 0,
+        duration: 0.5
+    })
+    .to('.contact .section-title', {
+        opacity: 1,
+        y: 0,
+        duration: 0.6,
+        ease: "power2.out"
+    }, "-=0.3")
+    .to('.contact-item', {
+        opacity: 1,
+        y: 0,
+        scale: 1,
+        duration: 0.5,
+        stagger: 0.1,
+        ease: "power2.out"
+    }, "-=0.4");
+    
+    // Parallax effects for water simulation
+    gsap.to('.water-container', {
+        y: -50,
         scrollTrigger: {
             trigger: '.hero',
-            start: 'top bottom',
+            start: 'top top',
             end: 'bottom top',
-            scrub: true
+            scrub: 1.5
         }
     });
-
-    // Hero image sequence animation
-    initHeroImageSequence();
-}
-
-// Hero image sequence animation
-function initHeroImageSequence() {
-    const images = document.querySelectorAll('.app-interface');
-    const totalImages = images.length;
-    let currentIndex = 0;
-
-    if (totalImages <= 1) return;
-
-    // Create scroll trigger for image sequence
+    
+    // Grid pattern parallax
+    gsap.to('.grid-pattern', {
+        y: -80,
+        rotation: 5,
+        scrollTrigger: {
+            trigger: '.hero',
+            start: 'top top',
+            end: 'bottom top',
+            scrub: 2
+        }
+    });
+    
+    // Navigation background on scroll with eFlood² branding
     ScrollTrigger.create({
-        trigger: '.hero',
-        start: 'top top',
-        end: 'bottom center',
-        scrub: 1,
-        onUpdate: (self) => {
-            // Calculate which image should be active based on scroll progress
-            const progress = self.progress;
-            const newIndex = Math.floor(progress * (totalImages - 1));
-
-            if (newIndex !== currentIndex && newIndex < totalImages) {
-                // Animate out current image
-                gsap.to(images[currentIndex], {
-                    opacity: 0,
-                    scale: 0.95,
-                    rotationY: -10,
-                    duration: 0.4,
-                    ease: 'power2.out'
-                });
-
-                // Animate in new image
-                gsap.to(images[newIndex], {
-                    opacity: 1,
-                    scale: 1,
-                    rotationY: 0,
-                    duration: 0.4,
-                    ease: 'power2.out',
-                    delay: 0.1
-                });
-
-                // Update classes
-                images[currentIndex].classList.remove('active');
-                images[newIndex].classList.add('active');
-
-                currentIndex = newIndex;
-            }
+        start: 'top -80',
+        end: 99999,
+        toggleClass: {
+            className: 'nav-scrolled',
+            targets: '.nav'
         }
-    });
-
-    // Auto-cycle images when not scrolling (optional)
-    let autoInterval = setInterval(() => {
-        if (!ScrollTrigger.isScrolling()) {
-            const nextIndex = (currentIndex + 1) % totalImages;
-
-            gsap.to(images[currentIndex], {
-                opacity: 0,
-                scale: 0.95,
-                rotationY: 10,
-                duration: 0.6,
-                ease: 'power2.inOut'
-            });
-
-            gsap.to(images[nextIndex], {
-                opacity: 1,
-                scale: 1,
-                rotationY: 0,
-                duration: 0.6,
-                ease: 'power2.inOut',
-                delay: 0.2
-            });
-
-            images[currentIndex].classList.remove('active');
-            images[nextIndex].classList.add('active');
-
-            currentIndex = nextIndex;
-        }
-    }, 4000);
-
-    // Clear interval when scrolling
-    ScrollTrigger.addEventListener('scrollStart', () => {
-        clearInterval(autoInterval);
-    });
-
-    ScrollTrigger.addEventListener('scrollEnd', () => {
-        autoInterval = setInterval(() => {
-            if (!ScrollTrigger.isScrolling()) {
-                const nextIndex = (currentIndex + 1) % totalImages;
-
-                gsap.to(images[currentIndex], {
-                    opacity: 0,
-                    scale: 0.95,
-                    rotationY: 10,
-                    duration: 0.6,
-                    ease: 'power2.inOut'
-                });
-
-                gsap.to(images[nextIndex], {
-                    opacity: 1,
-                    scale: 1,
-                    rotationY: 0,
-                    duration: 0.6,
-                    ease: 'power2.inOut',
-                    delay: 0.2
-                });
-
-                images[currentIndex].classList.remove('active');
-                images[nextIndex].classList.add('active');
-
-                currentIndex = nextIndex;
-            }
-        }, 4000);
     });
 }
 
-// Split text animations are handled by SplitText plugin
-
-// Setup interactive features
+// Setup interactive elements
 function setupInteractivity() {
-    // Smooth scrolling for navigation links
-    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-        anchor.addEventListener('click', function (e) {
-            e.preventDefault();
-            const target = document.querySelector(this.getAttribute('href'));
-            if (target) {
-                gsap.to(window, {
-                    duration: 1,
-                    scrollTo: target,
-                    ease: 'power3.inOut'
-                });
-            }
-        });
-    });
-
-    // Copy to clipboard functionality
-    const copyBtn = document.getElementById('copyInstall');
-    if (copyBtn) {
-        copyBtn.addEventListener('click', function() {
-            const command = 'curl -fsSL https://eflood2.dev/install | bash';
-            navigator.clipboard.writeText(command).then(() => {
-                // Visual feedback
-                gsap.to(copyBtn, {
-                    scale: 0.9,
-                    duration: 0.1,
-                    yoyo: true,
-                    repeat: 1,
-                    ease: 'power2.inOut'
-                });
-
-                // Change icon temporarily
-                const originalHTML = copyBtn.innerHTML;
-                copyBtn.innerHTML = `
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <polyline points="20,6 9,17 4,12"></polyline>
-                    </svg>
-                `;
-
-                setTimeout(() => {
-                    copyBtn.innerHTML = originalHTML;
-                }, 2000);
-            });
-        });
-    }
-
     // Button hover animations
     document.querySelectorAll('.btn').forEach(btn => {
-        btn.addEventListener('mouseenter', function() {
-            gsap.to(this, {
+        btn.addEventListener('mouseenter', () => {
+            gsap.to(btn, {
                 scale: 1.05,
                 duration: 0.3,
-                ease: 'power2.out'
+                ease: "power2.out"
             });
         });
-
-        btn.addEventListener('mouseleave', function() {
-            gsap.to(this, {
+        
+        btn.addEventListener('mouseleave', () => {
+            gsap.to(btn, {
                 scale: 1,
                 duration: 0.3,
-                ease: 'power2.out'
+                ease: "power2.out"
             });
         });
     });
-
-    // Feature content hover effects
-    document.querySelectorAll('.feature-content').forEach(content => {
-        content.addEventListener('mouseenter', function() {
-            gsap.to(this, {
-                y: -8,
-                duration: 0.3,
-                ease: 'power2.out'
+    
+    // Feature item hover effects
+    document.querySelectorAll('.feature-item').forEach(item => {
+        const icon = item.querySelector('.icon-shape');
+        
+        item.addEventListener('mouseenter', () => {
+            gsap.to(item, {
+                y: -10,
+                duration: 0.4,
+                ease: "power2.out"
+            });
+            
+            gsap.to(icon, {
+                scale: 1.1,
+                rotation: 5,
+                duration: 0.4,
+                ease: "back.out(1.7)"
             });
         });
-
-        content.addEventListener('mouseleave', function() {
-            gsap.to(this, {
+        
+        item.addEventListener('mouseleave', () => {
+            gsap.to(item, {
                 y: 0,
-                duration: 0.3,
-                ease: 'power2.out'
+                duration: 0.4,
+                ease: "power2.out"
+            });
+            
+            gsap.to(icon, {
+                scale: 1,
+                rotation: 0,
+                duration: 0.4,
+                ease: "power2.out"
             });
         });
     });
+    
+    // Grid item hover effects
+    document.querySelectorAll('.grid-item').forEach(item => {
+        item.addEventListener('mouseenter', () => {
+            gsap.to(item, {
+                scale: 1.1,
+                rotationY: 0,
+                duration: 0.4,
+                ease: "power2.out"
+            });
+        });
+        
+        item.addEventListener('mouseleave', () => {
+            gsap.to(item, {
+                scale: 1,
+                rotationY: 5,
+                duration: 0.4,
+                ease: "power2.out"
+            });
+        });
+    });
+    
+    // Stat number counter animation
+    ScrollTrigger.create({
+        trigger: '.stats-grid',
+        start: 'top 80%',
+        onEnter: () => {
+            document.querySelectorAll('.stat-number').forEach(stat => {
+                const text = stat.textContent;
+                const isNumber = /\d/.test(text);
+                
+                if (isNumber) {
+                    const endValue = parseInt(text.replace(/\D/g, ''));
+                    const suffix = text.replace(/\d/g, '');
+                    
+                    gsap.fromTo(stat, {
+                        textContent: 0
+                    }, {
+                        textContent: endValue,
+                        duration: 2,
+                        ease: "power2.out",
+                        snap: { textContent: 1 },
+                        onUpdate: function() {
+                            stat.textContent = Math.round(this.targets()[0].textContent) + suffix;
+                        }
+                    });
+                }
+            });
+        }
+    });
+}
 
-    // Navigation scroll effect
-    let lastScrollY = window.scrollY;
-
-    window.addEventListener('scroll', () => {
-        const currentScrollY = window.scrollY;
-
-        if (currentScrollY > 100) {
-            if (currentScrollY > lastScrollY) {
-                // Scrolling down - hide nav
-                gsap.to('.nav', {
-                    y: -100,
-                    duration: 0.3,
-                    ease: 'power2.out'
-                });
-            } else {
-                // Scrolling up - show nav
-                gsap.to('.nav', {
-                    y: 0,
-                    duration: 0.3,
-                    ease: 'power2.out'
+// Setup smooth navigation
+function setupNavigation() {
+    // Smooth scroll for navigation links
+    document.querySelectorAll('.nav-link').forEach(link => {
+        link.addEventListener('click', (e) => {
+            e.preventDefault();
+            const targetId = link.getAttribute('href');
+            const targetSection = document.querySelector(targetId);
+            
+            if (targetSection) {
+                gsap.to(window, {
+                    duration: 1.5,
+                    scrollTo: {
+                        y: targetSection,
+                        offsetY: 80
+                    },
+                    ease: "power2.inOut"
                 });
             }
-        }
-
-        lastScrollY = currentScrollY;
+        });
     });
+    
+    // Active navigation highlighting
+    const sections = document.querySelectorAll('section');
+    const navLinks = document.querySelectorAll('.nav-link');
+    
+    ScrollTrigger.batch(sections, {
+        onEnter: (elements) => {
+            const id = elements[0].getAttribute('id');
+            navLinks.forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href') === `#${id}`) {
+                    link.classList.add('active');
+                }
+            });
+        },
+        onLeave: (elements) => {
+            const id = elements[0].getAttribute('id');
+            navLinks.forEach(link => {
+                if (link.getAttribute('href') === `#${id}`) {
+                    link.classList.remove('active');
+                }
+            });
+        }
+    });
+}
 
-    // Button click handlers
-    const getStartedBtn = document.getElementById('getStartedBtn');
-    const docsBtn = document.getElementById('docsBtn');
-
-    if (getStartedBtn) {
-        getStartedBtn.addEventListener('click', function() {
-            gsap.to(window, {
+// Advanced mouse tracking for hero section
+function setupMouseTracking() {
+    const hero = document.querySelector('.hero');
+    const visualGrid = document.querySelector('.visual-grid');
+    const heroContent = document.querySelector('.hero-content');
+    
+    if (hero && visualGrid && heroContent) {
+        hero.addEventListener('mousemove', (e) => {
+            const rect = hero.getBoundingClientRect();
+            const x = (e.clientX - rect.left) / rect.width - 0.5;
+            const y = (e.clientY - rect.top) / rect.height - 0.5;
+            
+            gsap.to(visualGrid, {
+                x: x * 20,
+                y: y * 20,
+                rotationY: x * 10,
+                rotationX: -y * 10,
                 duration: 1,
-                scrollTo: '#download',
-                ease: 'power3.inOut'
+                ease: "power2.out"
+            });
+            
+            gsap.to(heroContent, {
+                x: x * 10,
+                y: y * 10,
+                duration: 1,
+                ease: "power2.out"
+            });
+        });
+        
+        hero.addEventListener('mouseleave', () => {
+            gsap.to([visualGrid, heroContent], {
+                x: 0,
+                y: 0,
+                rotationY: 0,
+                rotationX: 0,
+                duration: 1,
+                ease: "power2.out"
             });
         });
     }
-
-    if (docsBtn) {
-        docsBtn.addEventListener('click', function() {
-            window.location.href = 'docs/index.html';
-        });
-    }
 }
 
-// Utility function for creating stagger animations
-function createStaggerAnimation(selector, options = {}) {
-    const defaults = {
-        opacity: 1,
-        y: 0,
-        duration: 0.8,
-        stagger: 0.1,
-        ease: 'power3.out'
-    };
-
-    const config = { ...defaults, ...options };
-
-    return gsap.to(selector, config);
-}
-
-// Utility function for scroll-triggered animations
-function createScrollAnimation(trigger, target, options = {}) {
-    const defaults = {
-        opacity: 1,
-        y: 0,
-        duration: 1,
-        ease: 'power3.out',
-        scrollTrigger: {
-            trigger: trigger,
-            start: 'top 80%',
-            toggleActions: 'play none none reverse'
-        }
-    };
-
-    const config = { ...defaults, ...options };
-
-    return gsap.to(target, config);
-}
-
-// Performance optimization: Reduce motion for users who prefer it
-if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-    gsap.globalTimeline.timeScale(0.5);
-    ScrollTrigger.config({ ignoreMobileResize: true });
-}
-
-// Split text animations replace scramble effect
+// Initialize mouse tracking after DOM load
+document.addEventListener('DOMContentLoaded', () => {
+    setupMouseTracking();
+});
 
 // Refresh ScrollTrigger on window resize
 window.addEventListener('resize', () => {
     ScrollTrigger.refresh();
 });
+
+// Add CSS for navigation scrolled state
+const style = document.createElement('style');
+style.textContent = `
+    .nav-scrolled {
+        background: rgba(10, 10, 10, 0.95) !important;
+        backdrop-filter: blur(30px) !important;
+    }
+    
+    .nav-link.active {
+        color: var(--text-primary) !important;
+    }
+    
+    .nav-link.active::after {
+        width: 100% !important;
+    }
+`;
+document.head.appendChild(style);
+
+// Mobile Menu Setup
+function setupMobileMenu() {
+    const navToggle = document.getElementById('nav-toggle');
+    const navMenu = document.getElementById('nav-menu');
+    const navLinks = document.querySelectorAll('.nav-link');
+    
+    if (!navToggle || !navMenu) return;
+    
+    // Toggle mobile menu
+    navToggle.addEventListener('click', () => {
+        navToggle.classList.toggle('active');
+        navMenu.classList.toggle('active');
+        
+        // Prevent body scroll when menu is open
+        if (navMenu.classList.contains('active')) {
+            document.body.style.overflow = 'hidden';
+        } else {
+            document.body.style.overflow = '';
+        }
+    });
+    
+    // Close menu when clicking on a link
+    navLinks.forEach(link => {
+        link.addEventListener('click', () => {
+            navToggle.classList.remove('active');
+            navMenu.classList.remove('active');
+            document.body.style.overflow = '';
+        });
+    });
+    
+    // Close menu when clicking outside
+    document.addEventListener('click', (e) => {
+        if (!navToggle.contains(e.target) && !navMenu.contains(e.target)) {
+            navToggle.classList.remove('active');
+            navMenu.classList.remove('active');
+            document.body.style.overflow = '';
+        }
+    });
+    
+    // Close menu on escape key
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            navToggle.classList.remove('active');
+            navMenu.classList.remove('active');
+            document.body.style.overflow = '';
+        }
+    });
+    
+    // Handle window resize
+    window.addEventListener('resize', () => {
+        if (window.innerWidth > 768) {
+            navToggle.classList.remove('active');
+            navMenu.classList.remove('active');
+            document.body.style.overflow = '';
+        }
+    });
+}
+
+// Performance optimization
+gsap.config({
+    force3D: true,
+    nullTargetWarn: false
+});
+
+// Export functions for external use
+window.TraeAnimations = {
+    initializeAnimations,
+    setupScrollTriggers,
+    setupInteractivity,
+    setupNavigation,
+    setupMobileMenu,
+    setupMouseTracking,
+    initWaterSimulation,
+    animateWater
+};
+
+console.log('🚀 Trae AI animations initialized successfully!');

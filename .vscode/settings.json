@@ -1,7 +1,15 @@
 {
-    "python.testing.pytestArgs": [
-        "src-python"
-    ],
-    "python.testing.unittestEnabled": false,
-    "python.testing.pytestEnabled": true
+  "python.testing.pytestArgs": [
+    "src-python"
+  ],
+  "python.testing.unittestEnabled": false,
+  "python.testing.pytestEnabled": true,
+
+  "python.defaultInterpreterPath": "${workspaceFolder}/src-python/.venv/Scripts/python.exe",
+  "python.venvPath": "${workspaceFolder}/src-python/.venv",
+  "python.terminal.activateEnvironment": true,
+  "python.envFile": "${workspaceFolder}/src-python/.env",
+  "python.analysis.extraPaths": [
+    "src-python/.venv/Lib/site-packages"
+  ]
 }

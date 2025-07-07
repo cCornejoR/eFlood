@@ -1,5 +1,5 @@
 class HydraulicData(object):
-    """ Hydraulic data base class
+    """Hydraulic data base class
 
     Attributes
     ----------
@@ -19,7 +19,7 @@ class HydraulicData(object):
         return "Data name: %s " % (self.name)
 
     def init_data(self):
-        """ Initialize the data
+        """Initialize the data
 
         Returns
         -------
@@ -28,7 +28,7 @@ class HydraulicData(object):
         pass
 
     def reset_data(self):
-        """ Reset the data
+        """Reset the data
 
         Returns
         -------
@@ -37,7 +37,7 @@ class HydraulicData(object):
         pass
 
     def clear_data(self):
-        """ clear the data
+        """clear the data
 
         Returns
         -------

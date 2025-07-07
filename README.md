@@ -47,6 +47,47 @@
 - 🔧 **Multiplataforma**: Windows, macOS y Linux
 - 🚀 **Alto Rendimiento**: Arquitectura Rust + Python optimizada
 
+## 🏗️ Arquitectura
+
+eFlood² utiliza una arquitectura moderna de tres capas con backends especializados:
+
+### **🎨 Frontend**
+- **React + TypeScript**: Interfaz de usuario moderna y reactiva
+- **Vite**: Build tool optimizado para desarrollo rápido
+- **TailwindCSS**: Diseño responsive y componentes reutilizables
+
+### **🦀 Backend Nativo (Tauri/Rust)**
+- **Alto rendimiento**: Operaciones del sistema y gestión de archivos
+- **Seguridad**: Comunicación segura entre frontend y backend Python
+- **Multiplataforma**: Compilación nativa para Windows, macOS y Linux
+- **Gestión de recursos**: Monitoreo de CPU, memoria y procesos
+
+### **🐍 Backend Científico (Python)**
+- **pyHMT2D**: Procesamiento avanzado de archivos HDF5 de HEC-RAS
+- **RAS Commander**: Integración con automatización de HEC-RAS
+- **Análisis hidráulico**: Cálculos especializados y procesamiento de datos
+- **Exportación VTK**: Generación de archivos para visualización científica
+
+```
+┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
+│   React + TS    │◄──►│   Tauri (Rust)  │◄──►│ Python Backend  │
+│   (Frontend)    │    │   (Sistema)     │    │  (Hidráulico)   │
+│                 │    │                 │    │                 │
+│ • UI/UX         │    │ • File System   │    │ • HDF Analysis  │
+│ • Visualización │    │ • Process Mgmt  │    │ • RAS Commander │
+│ • Interacción   │    │ • System Info   │    │ • VTK Export    │
+└─────────────────┘    └─────────────────┘    └─────────────────┘
+```
+
+### **🔄 Flujo de Datos**
+
+1. **Usuario** interactúa con la interfaz React
+2. **Frontend** envía comandos al backend Tauri
+3. **Tauri** ejecuta scripts Python con UV
+4. **Python** procesa datos HDF y genera resultados
+5. **Resultados** se devuelven a través de Tauri al frontend
+6. **Visualización** se actualiza en tiempo real
+
 ## 🚀 Instalación
 
 ### Desde Releases (Recomendado)
@@ -114,15 +155,86 @@ npm run test             # Vitest
 - [ ] Comparación de escenarios
 - [ ] API REST para integración
 
+## 🛠️ Desarrollo y Calidad de Código
+
+### **Pre-commit Hooks**
+
+eFlood² utiliza pre-commit hooks para mantener la calidad del código automáticamente:
+
+```bash
+# Instalar pre-commit hooks
+uv run --directory src-python pre-commit install
+
+# Ejecutar manualmente todos los hooks
+uv run --directory src-python pre-commit run --all-files
+```
+
+### **Hooks Configurados**
+
+| Hook | Descripción | Tecnología |
+|------|-------------|------------|
+| 🎨 **TypeScript Check** | Verificación de tipos TypeScript | Frontend |
+| 🔧 **Black Formatting** | Formateo automático Python | Backend Python |
+| 📦 **Import Sorting** | Ordenamiento de imports Python | Backend Python |
+| 🐍 **Syntax Check** | Verificación de sintaxis Python | Backend Python |
+| 🦀 **Cargo Format** | Formateo automático Rust | Backend Rust |
+| 🔍 **Clippy Linting** | Linting avanzado Rust | Backend Rust |
+| ⚙️ **Cargo Check** | Verificación de compilación Rust | Backend Rust |
+| 🧪 **Unit Tests** | Tests unitarios automáticos | Ambos backends |
+| 🔒 **Security Checks** | Verificaciones de seguridad | General |
+
+### **Comandos de Desarrollo**
+
+```bash
+# Python Backend
+cd src-python
+uv run black .                    # Formatear código Python
+uv run isort .                    # Ordenar imports
+uv run flake8 eflood2_backend/    # Linting Python
+uv run pytest test/ -v           # Tests Python
+
+# Rust Backend
+cd src-tauri
+cargo fmt                        # Formatear código Rust
+cargo clippy -- -D warnings      # Linting Rust
+cargo check                      # Verificar compilación
+cargo test                       # Tests Rust
+
+# Frontend
+npm run lint                     # ESLint
+npm run format                   # Prettier
+npm run type-check               # TypeScript
+npm run test                     # Vitest
+```
+
+### **Configuración de Calidad**
+
+- **Python**: Black, isort, flake8, mypy, pytest
+- **Rust**: rustfmt, clippy, cargo check/test
+- **TypeScript**: ESLint, Prettier, TypeScript compiler
+- **Pre-commit**: Hooks automáticos en cada commit
+
 ## 🤝 Contribuir
 
 Las contribuciones son bienvenidas. Para nuevas características, abre un issue primero para discutir los cambios propuestos.
 
-1. Fork del proyecto
-2. Crear rama feature (`git checkout -b feature/nueva-caracteristica`)
-3. Commit cambios (`git commit -m 'feat: agregar nueva característica'`)
-4. Push a la rama (`git push origin feature/nueva-caracteristica`)
-5. Abrir Pull Request
+### **Proceso de Contribución**
+
+1. **Fork** del proyecto
+2. **Crear** rama feature (`git checkout -b feature/nueva-caracteristica`)
+3. **Desarrollar** siguiendo los estándares de calidad
+4. **Verificar** que todos los pre-commit hooks pasan
+5. **Commit** cambios (`git commit -m 'feat: agregar nueva característica'`)
+6. **Push** a la rama (`git push origin feature/nueva-caracteristica`)
+7. **Abrir** Pull Request
+
+### **Estándares de Código**
+
+- ✅ **Python**: PEP 8, type hints, docstrings
+- ✅ **Rust**: Rustfmt, Clippy warnings como errores
+- ✅ **TypeScript**: Strict mode, ESLint rules
+- ✅ **Tests**: Cobertura mínima del 80%
+- ✅ **Commits**: Conventional Commits format
 
 ## 📄 Licencia
 

@@ -127,8 +127,8 @@ export default function Homepage({ onNavigate }: HomepageProps) {
                 </div>
               </div>
 
-              {/* BOTÓN PRINCIPAL - Centrado */}
-              <div className='flex justify-center mt-12 sm:mt-16 md:mt-20'>
+              {/* BOTONES PRINCIPALES - Centrados */}
+              <div className='flex flex-col sm:flex-row justify-center items-center gap-4 sm:gap-6 mt-12 sm:mt-16 md:mt-20'>
                 <motion.div
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
@@ -137,8 +137,21 @@ export default function Homepage({ onNavigate }: HomepageProps) {
                   transition={{ duration: 0.6, delay: 0.3 }}
                 >
                   <FlowButton
-                    text='Analizar'
+                    text='HDF Viewer'
                     onClick={() => onNavigate?.('hecras')}
+                  />
+                </motion.div>
+
+                <motion.div
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.6, delay: 0.4 }}
+                >
+                  <FlowButton
+                    text='Analyzer+'
+                    onClick={() => onNavigate?.('analyzer-plus')}
                   />
                 </motion.div>
               </div>

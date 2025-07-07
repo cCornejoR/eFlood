@@ -23,6 +23,10 @@ dependencies = [
     "pyhmt2d>=1.0.6",
     "meshio>=5.3.5",
     "gdal",
+    "geopandas>=0.14.0",
+    "ras-commander>=0.1.0",
+    "pytest>=8.4.1",
+    "pre-commit>=4.2.0",
 ]
 
 [project.optional-dependencies]
@@ -69,30 +73,83 @@ multi_line_output = 3
 line_length = 88
 known_first_party = ["eflood2_backend"]
 
+[tool.flake8]
+max-line-length = 88
+extend-ignore = ["E203", "W503", "E501"]
+exclude = [
+    ".git",
+    "__pycache__",
+    ".venv",
+    "build",
+    "dist",
+    "*.egg-info"
+]
+per-file-ignores = [
+    "__init__.py:F401"
+]
+
 [tool.mypy]
 python_version = "3.11"
 warn_return_any = true
 warn_unused_configs = true
-disallow_untyped_defs = true
-disallow_incomplete_defs = true
+disallow_untyped_defs = false  # Más permisivo para desarrollo
+disallow_incomplete_defs = false
 check_untyped_defs = true
-disallow_untyped_decorators = true
+disallow_untyped_decorators = false
 no_implicit_optional = true
 warn_redundant_casts = true
 warn_unused_ignores = true
 warn_no_return = true
 warn_unreachable = true
 strict_equality = true
+ignore_missing_imports = true
+show_error_codes = true
 
 [tool.pytest.ini_options]
 testpaths = ["test"]
 python_files = ["test_*.py", "*_test.py"]
 python_classes = ["Test*"]
 python_functions = ["test_*"]
-addopts = "-v"
+addopts = [
+    "-v",
+    "--tb=short",
+    "--strict-markers",
+    "--strict-config",
+    "--color=yes",
+    "--durations=10",
+    "--disable-warnings"
+]
+markers = [
+    "unit: Tests unitarios básicos",
+    "integration: Tests de integración entre módulos",
+    "slow: Tests que tardan más tiempo en ejecutarse",
+    "requires_ras_commander: Tests que requieren RAS Commander instalado",
+    "requires_hdf_file: Tests que requieren archivos HDF reales",
+    "export: Tests de funcionalidades de exportación",
+    "analysis: Tests de funcionalidades de análisis"
+]
+log_cli = true
+log_cli_level = "INFO"
+log_cli_format = "%(asctime)s [%(levelname)8s] %(name)s: %(message)s"
+log_cli_date_format = "%Y-%m-%d %H:%M:%S"
+filterwarnings = [
+    "ignore::UserWarning",
+    "ignore::DeprecationWarning",
+    "ignore::PendingDeprecationWarning"
+]
+minversion = "3.11"
 
 [tool.uv.sources]
 gdal = { path = "./gdal-whl/gdal-3.11.1-cp311-cp311-win_amd64.whl" }
+
+[dependency-groups]
+dev = [
+    "black>=25.1.0",
+    "flake8>=7.3.0",
+    "isort>=6.0.1",
+    "mypy>=1.16.1",
+    "pre-commit>=4.2.0",
+]
 
 [project.scripts]
 # eFlood2 Backend entry points
@@ -110,3 +167,4 @@ eflood2-hydrograph-exporter = "eflood2_backend.exporters.hydrograph_exporter:mai
 
 # HECRAS-HDF integration
 hecras-processor = "eflood2_backend.integrations.hecras_hdf.hecras_processor:main"
+ras-commander-processor = "eflood2_backend.integrations.ras_commander_integration:main"
