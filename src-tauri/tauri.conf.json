@@ -44,47 +44,7 @@
     "withGlobalTauri": true,
     "macOSPrivateApi": true
   },
-  "plugins": {
-    "dialog": {
-      "all": true,
-      "ask": true,
-      "confirm": true,
-      "message": true,
-      "open": true,
-      "save": true
-    },
-    "fs": {
-      "all": true,
-      "readFile": true,
-      "writeFile": true,
-      "readDir": true,
-      "copyFile": true,
-      "createDir": true,
-      "removeDir": true,
-      "removeFile": true,
-      "renameFile": true,
-      "exists": true,
-      "scope": ["**"]
-    },
-    "shell": {
-      "all": false,
-      "execute": true,
-      "sidecar": true,
-      "open": true,
-      "scope": [
-        {
-          "name": "python",
-          "cmd": "python",
-          "args": true
-        },
-        {
-          "name": "uv",
-          "cmd": "uv",
-          "args": true
-        }
-      ]
-    }
-  },
+
   "bundle": {
     "active": true,
     "targets": "all",
