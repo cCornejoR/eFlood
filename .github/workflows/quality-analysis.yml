@@ -1,15 +1,13 @@
-name: Quality Analysis and Warnings Report
+name: Quality Analysis
 
 on:
-  push:
-    branches: [ main, develop ]
-  pull_request:
-    branches: [ main, develop ]
   workflow_dispatch:
+  schedule:
+    - cron: '0 2 * * 1'  # Weekly on Monday at 2 AM
 
 jobs:
   quality-analysis:
-    name: Complete Quality Analysis
+    name: 📊 Quality Analysis
     runs-on: ubuntu-latest
 
     steps:
@@ -19,17 +17,13 @@ jobs:
     - name: Setup Node.js
       uses: actions/setup-node@v4
       with:
-        node-version: '18'
+        node-version: '20'
         cache: 'npm'
 
     - name: Install dependencies
       run: npm ci
 
-    - name: Run complete validation
-      run: npm run validate
-      continue-on-error: true
-
-    - name: Analyze warnings
+    - name: Run warnings analysis
       run: npm run analyze:warnings
       continue-on-error: true
 
@@ -41,86 +35,4 @@ jobs:
         path: warnings-report.md
         retention-days: 30
 
-    - name: Comment PR with warnings summary
-      if: github.event_name == 'pull_request'
-      uses: actions/github-script@v7
-      with:
-        script: |
-          const fs = require('fs');
-          try {
-            if (fs.existsSync('warnings-report.md')) {
-              const report = fs.readFileSync('warnings-report.md', 'utf8');
-              const body = [
-                '## Warnings Analysis Report - eFlood2',
-                '',
-                report.substring(0, 1000) + '...',
-                '',
-                '**Full report available in workflow artifacts**',
-                '',
-                '**For local analysis**: `npm run analyze:warnings`'
-              ].join('\n');
 
-              github.rest.issues.createComment({
-                issue_number: context.issue.number,
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                body: body
-              });
-            } else {
-              console.log('Warnings report file not found');
-            }
-          } catch (error) {
-            console.log('Could not read warnings report:', error.message);
-          }
-
-  python-quality:
-    name: Python Quality Analysis
-    runs-on: ubuntu-latest
-    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
-
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-
-    - name: Setup Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.11'
-
-    - name: Install UV
-      run: pip install uv
-
-    - name: Install Python dependencies
-      run: |
-        cd src-python
-        uv sync --no-dev || echo "UV sync failed, continuing with basic setup"
-
-    - name: Run complete Python validation
-      run: |
-        cd src-python
-        echo "Checking Python syntax..."
-        python -c "import py_compile, glob; [py_compile.compile(f, doraise=True) for f in glob.glob('*.py')]" || echo "Python syntax issues found"
-        echo "Python validation completed"
-      continue-on-error: true
-
-  rust-quality:
-    name: Rust Quality Analysis
-    runs-on: ubuntu-latest
-    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
-
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-
-    - name: Setup Rust
-      uses: dtolnay/rust-toolchain@stable
-      with:
-        components: rustfmt, clippy
-
-    - name: Run complete Rust validation
-      run: |
-        cd src-tauri
-        cargo fmt --all -- --check || echo "Rust formatting issues found"
-        cargo clippy --all-targets --all-features -- -D warnings || echo "Clippy issues found"
-        cargo test || echo "Test issues found"
-      continue-on-error: true

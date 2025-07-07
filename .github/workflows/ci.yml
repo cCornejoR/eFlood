@@ -1,4 +1,4 @@
-name: Critical Errors CI (Aligned with Pre-commit)
+name: Critical Checks
 
 on:
   push:
@@ -7,9 +7,10 @@ on:
     branches: [ main, develop ]
 
 jobs:
-  frontend-critical:
-    name: 🎨 Frontend Critical Errors Only
+  frontend-check:
+    name: 🎨 Frontend Check
     runs-on: ubuntu-latest
+    if: github.event_name == 'push' || github.event_name == 'pull_request'
 
     steps:
     - name: Checkout code
@@ -18,39 +19,41 @@ jobs:
     - name: Setup Node.js
       uses: actions/setup-node@v4
       with:
-        node-version: '18'
+        node-version: '20'
         cache: 'npm'
 
     - name: Install dependencies
       run: npm ci
 
-    - name: TypeScript critical check (same as pre-commit)
+    - name: TypeScript check
       run: npm run type-check
 
-    - name: Build test (critical compilation check)
+    - name: Build check
       run: npm run build
 
-  python-critical:
-    name: 🐍 Python Critical Errors Only
+  python-check:
+    name: 🐍 Python Check
     runs-on: ubuntu-latest
+    if: github.event_name == 'push' || github.event_name == 'pull_request'
 
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
 
     - name: Setup Python
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v5
       with:
         python-version: '3.11'
 
-    - name: Python syntax check (same as pre-commit)
+    - name: Python syntax check
       run: |
         cd src-python
-        python -c "import py_compile, glob; [py_compile.compile(f, doraise=True) for f in glob.glob('*.py')]"
+        python -m py_compile *.py
 
-  rust-critical:
-    name: 🦀 Rust Critical Errors Only
+  rust-check:
+    name: 🦀 Rust Check
     runs-on: ubuntu-latest
+    if: github.event_name == 'push' || github.event_name == 'pull_request'
 
     steps:
     - name: Checkout code
@@ -59,25 +62,7 @@ jobs:
     - name: Setup Rust
       uses: dtolnay/rust-toolchain@stable
 
-    - name: Rust compilation check (same as pre-commit)
+    - name: Rust compilation check
       run: |
         cd src-tauri
-        cargo check --quiet --message-format=short
-
-  critical-checks-complete:
-    name: ✅ All Critical Checks Passed
-    runs-on: ubuntu-latest
-    needs: [frontend-critical, python-critical, rust-critical]
-
-    steps:
-    - name: Success summary
-      run: |
-        echo "🎉 All critical checks passed - build is safe to proceed!"
-        echo ""
-        echo "📊 Results:"
-        echo "  Frontend: ${{ needs.frontend-critical.result }}"
-        echo "  Python: ${{ needs.python-critical.result }}"
-        echo "  Rust: ${{ needs.rust-critical.result }}"
-        echo ""
-        echo "💡 This pipeline only checks for build-breaking errors"
-        echo "🔍 For detailed warnings analysis, run: npm run analyze:warnings"
+        cargo check
