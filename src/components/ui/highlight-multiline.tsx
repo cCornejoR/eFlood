@@ -7,7 +7,7 @@ import {
   type UseInViewOptions,
 } from 'framer-motion';
 
-import { cn } from '@/utils/cn';
+import { cn } from '@/lib/utils';
 
 type HighlightMultilineProps = HTMLMotionProps<'span'> & {
   text: string;
