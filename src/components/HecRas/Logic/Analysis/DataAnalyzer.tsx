@@ -23,7 +23,9 @@ import {
   Layers,
   Zap,
   Play,
+  X,
 } from 'lucide-react';
+import { toast } from 'sonner';
 import { invoke } from '@tauri-apps/api/core';
 import { HecRasState } from '../../index';
 import { Button } from '@/components/ui/Button';
@@ -223,11 +225,27 @@ export const DataAnalyzer: React.FC<DataAnalyzerProps> = ({
   }, []); // Solo ejecutar una vez al montar el componente
 
   /**
+   * 🛑 Cancelar análisis en progreso
+   */
+  const handleCancelAnalysis = () => {
+    updateState({ isAnalyzing: false });
+    setAnalysisError(null);
+    setAnalysisProgress(0);
+    setAnalysisStep('Análisis cancelado');
+  };
+
+  /**
    * 🔍 Ejecutar análisis completo
    * Procesa el archivo HDF paso a paso
    */
   const handleStartAnalysis = async () => {
     if (!state.selectedHDFFile) return;
+
+    // Timeout de seguridad para evitar bloqueos
+    const analysisTimeout = setTimeout(() => {
+      updateState({ isAnalyzing: false });
+      setAnalysisError('El análisis ha tardado demasiado tiempo. Intente nuevamente.');
+    }, 60000); // 60 segundos timeout
 
     try {
       updateState({ isAnalyzing: true });
@@ -333,6 +351,12 @@ export const DataAnalyzer: React.FC<DataAnalyzerProps> = ({
 
       setAnalysisStep('Análisis completado');
 
+      // Mostrar notificación de éxito
+      toast.success('¡Análisis completado exitosamente!', {
+        description: 'Ahora puedes visualizar hidrogramas y exportar a VTK',
+        duration: 4000,
+      });
+
       // NO auto-avanzar al siguiente tab - mantener en la pestaña actual
       // El usuario puede navegar manualmente al hidrograma cuando lo desee
     } catch (error) {
@@ -349,6 +373,8 @@ export const DataAnalyzer: React.FC<DataAnalyzerProps> = ({
 
       // NO auto-avanzar en caso de error - mantener en la pestaña actual
     } finally {
+      // Limpiar timeout y resetear estado
+      clearTimeout(analysisTimeout);
       updateState({ isAnalyzing: false });
     }
   };
@@ -481,7 +507,7 @@ export const DataAnalyzer: React.FC<DataAnalyzerProps> = ({
     <div className='space-y-4'>
       {/* 🔄 Panel de análisis */}
       {state.isAnalyzing ? (
-        <div className='fixed inset-0 z-50 flex flex-col items-center justify-center space-y-8'>
+        <div className='fixed inset-0 z-50 flex flex-col items-center justify-center space-y-8 bg-black/50 backdrop-blur-sm'>
           {/* DotFlow centrado con animaciones dinámicas */}
           <DotFlow
             items={getAnalysisItems()}
@@ -502,6 +528,22 @@ export const DataAnalyzer: React.FC<DataAnalyzerProps> = ({
                 transition={{ duration: 0.5 }}
               />
             </div>
+          </div>
+
+          {/* Botón de cancelar */}
+          <div className='text-center space-y-2'>
+            <Button
+              onClick={handleCancelAnalysis}
+              variant='outline'
+              size='sm'
+              className='bg-red-600/20 hover:bg-red-600/30 border border-red-500/30 text-red-300 hover:text-red-200'
+            >
+              <X className='w-4 h-4 mr-2' />
+              Cancelar Análisis
+            </Button>
+            <p className='text-white/40 text-xs'>
+              El análisis se cancelará automáticamente después de 60 segundos
+            </p>
           </div>
         </div>
       ) : analysisError ? (

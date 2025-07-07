@@ -21,6 +21,7 @@ import {
   Calendar,
   Clock,
 } from 'lucide-react';
+import { toast } from 'sonner';
 import { invoke } from '@tauri-apps/api/core';
 import { HecRasState } from '../../index';
 import { FileUpload } from '../../UI/FileUpload';
@@ -175,6 +176,11 @@ export const DataLoader: React.FC<DataLoaderProps> = ({
    */
   const handleContinueToAnalysis = () => {
     if (state.selectedHDFFile) {
+      // Mostrar notificación de progreso
+      toast.success('¡Datos cargados correctamente!', {
+        description: 'Ahora puedes proceder al análisis de los datos',
+        duration: 3000,
+      });
       onDataLoaded();
     }
   };

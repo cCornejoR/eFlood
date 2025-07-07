@@ -13,6 +13,7 @@
 import React, { useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Upload, Play, TrendingUp, Download } from 'lucide-react';
+import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import { HecRasState } from '../index';
 import { DataLoader } from './Analysis/DataLoader';
@@ -91,6 +92,58 @@ export const AnalysisTab: React.FC<AnalysisTabProps> = ({
   }, [state.selectedHDFFile, state.hdfData, activeSubTab]);
 
   /**
+   * 🔒 Determinar si una pestaña está habilitada según el progreso
+   */
+  const isTabEnabled = (tabId: AnalysisSubTab): boolean => {
+    switch (tabId) {
+      case 'load':
+        return true; // Siempre habilitado
+      case 'analyze':
+        return !!state.selectedHDFFile; // Requiere archivo HDF cargado
+      case 'hydrograph':
+        return !!state.hdfData; // Requiere análisis completado
+      case 'export':
+        return !!state.hdfData; // Requiere análisis completado
+      default:
+        return false;
+    }
+  };
+
+  /**
+   * 🎯 Manejar clic en pestaña con validación de progreso
+   */
+  const handleTabClick = (tabId: AnalysisSubTab) => {
+    if (!isTabEnabled(tabId)) {
+      // Mostrar mensaje de qué se necesita para habilitar la pestaña
+      const requirements = getTabRequirements(tabId);
+      const tabName = analysisSubTabs.find(tab => tab.id === tabId)?.label || tabId;
+
+      toast.warning(`${tabName} no disponible`, {
+        description: requirements,
+        duration: 3000,
+      });
+      return;
+    }
+    setActiveSubTab(tabId);
+  };
+
+  /**
+   * 📋 Obtener requisitos para habilitar una pestaña
+   */
+  const getTabRequirements = (tabId: AnalysisSubTab): string => {
+    switch (tabId) {
+      case 'analyze':
+        return 'Primero debes cargar un archivo HDF en la pestaña "Cargar Datos"';
+      case 'hydrograph':
+        return 'Primero debes completar el análisis de datos en la pestaña "Analizar"';
+      case 'export':
+        return 'Primero debes completar el análisis de datos en la pestaña "Analizar"';
+      default:
+        return '';
+    }
+  };
+
+  /**
    * 🎯 Renderizar contenido del sub-tab activo
    */
   const renderActiveSubTab = () => {
@@ -122,20 +175,24 @@ export const AnalysisTab: React.FC<AnalysisTabProps> = ({
           {analysisSubTabs.map(subTab => {
             const Icon = subTab.icon;
             const isActive = subTab.id === activeSubTab;
+            const isEnabled = isTabEnabled(subTab.id);
 
             return (
               <motion.button
                 key={subTab.id}
-                onClick={() => setActiveSubTab(subTab.id)}
+                onClick={() => handleTabClick(subTab.id)}
+                disabled={!isEnabled}
                 className={cn(
-                  'flex cursor-default select-none items-center rounded-xl px-3 py-1.5 text-sm font-medium outline-none transition-all duration-200 relative',
-                  isActive
-                    ? 'bg-white/15 text-white shadow-sm'
-                    : 'text-white/60 hover:bg-white/10 hover:text-white'
+                  'flex select-none items-center rounded-xl px-3 py-1.5 text-sm font-medium outline-none transition-all duration-200 relative',
+                  isEnabled
+                    ? isActive
+                      ? 'bg-white/15 text-white shadow-sm cursor-default'
+                      : 'text-white/60 hover:bg-white/10 hover:text-white cursor-pointer'
+                    : 'text-white/30 cursor-not-allowed opacity-50'
                 )}
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                title={subTab.description}
+                whileHover={isEnabled ? { scale: 1.02 } : {}}
+                whileTap={isEnabled ? { scale: 0.98 } : {}}
+                title={isEnabled ? subTab.description : getTabRequirements(subTab.id)}
               >
                 {/* Indicador activo con layoutId para transición suave */}
                 {isActive && (
@@ -153,17 +210,35 @@ export const AnalysisTab: React.FC<AnalysisTabProps> = ({
                 {/* Contenido del botón */}
                 <div className='relative z-10 flex items-center gap-2'>
                   <Icon
-                    className={cn('h-4 w-4', isActive ? subTab.color : '')}
+                    className={cn(
+                      'h-4 w-4',
+                      isActive && isEnabled ? subTab.color : '',
+                      !isEnabled ? 'opacity-50' : ''
+                    )}
                   />
                   <span>{subTab.label}</span>
 
-                  {/* 🎯 Indicador de estado completado */}
-                  {((subTab.id === 'load' && state.selectedHDFFile) ||
-                    (subTab.id === 'analyze' && state.hdfData) ||
-                    (subTab.id === 'hydrograph' && state.hydrographData) ||
-                    (subTab.id === 'export' &&
-                      state.exportedVTKFiles.length > 0)) && (
-                    <div className='w-1.5 h-1.5 bg-green-400 rounded-full ml-1' />
+                  {/* 🎯 Indicadores de estado */}
+                  {isEnabled ? (
+                    // Indicador de completado (verde)
+                    ((subTab.id === 'load' && state.selectedHDFFile) ||
+                      (subTab.id === 'analyze' && state.hdfData) ||
+                      (subTab.id === 'hydrograph' && state.hydrographData) ||
+                      (subTab.id === 'export' &&
+                        state.exportedVTKFiles.length > 0)) && (
+                      <div className='w-1.5 h-1.5 bg-green-400 rounded-full ml-1' />
+                    )
+                  ) : (
+                    // Indicador de bloqueado (candado)
+                    <div className='w-3 h-3 ml-1 opacity-50'>
+                      <svg
+                        viewBox='0 0 12 12'
+                        fill='currentColor'
+                        className='w-full h-full'
+                      >
+                        <path d='M3 5V3.5C3 2.12 4.12 1 5.5 1S8 2.12 8 3.5V5h.5c.28 0 .5.22.5.5v4c0 .28-.22.5-.5.5h-6c-.28 0-.5-.22-.5-.5v-4c0-.28.22-.5.5-.5H3zm1 0h4V3.5C8 2.67 7.33 2 6.5 2S5 2.67 5 3.5V5z' />
+                      </svg>
+                    </div>
                   )}
                 </div>
               </motion.button>
