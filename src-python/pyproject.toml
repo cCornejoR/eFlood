@@ -28,7 +28,6 @@ dependencies = [
 [project.optional-dependencies]
 dev = [
     "pytest>=7.4.0",
-    "pytest-cov>=4.1.0",
     "black>=23.0.0",
     "isort>=5.12.0",
     "flake8>=6.0.0",
@@ -86,22 +85,28 @@ warn_unreachable = true
 strict_equality = true
 
 [tool.pytest.ini_options]
-testpaths = ["tests"]
+testpaths = ["test"]
 python_files = ["test_*.py", "*_test.py"]
 python_classes = ["Test*"]
 python_functions = ["test_*"]
-addopts = "--cov=. --cov-report=html --cov-report=term-missing"
+addopts = "-v"
 
 [tool.uv.sources]
-gdal = { path = "gdal-whl/gdal-3.11.1-cp311-cp311-win_amd64.whl" }
+gdal = { path = "./gdal-whl/gdal-3.11.1-cp311-cp311-win_amd64.whl" }
 
 [project.scripts]
-hdf-reader = "hdf_reader:main"
-hdf-data-extractor = "hdf_data_extractor:main"
-hydraulic-plots = "hydraulic_plots:main"
-raster-converter = "raster_converter:main"
-geometry-tools = "geometry_tools:main"
-section-tools = "section_tools:main"
-hydraulic-calc = "hydraulic_calc:main"
-export-tools = "export_tools:main"
-hecras-processor = "HECRAS-HDF.hecras_processor:main"
+# eFlood2 Backend entry points
+eflood2-hdf-reader = "eflood2_backend.readers.hdf_reader:main"
+eflood2-data-extractor = "eflood2_backend.readers.data_extractor:main"
+eflood2-boundary-reader = "eflood2_backend.readers.boundary_reader:main"
+eflood2-manning-reader = "eflood2_backend.readers.manning_reader:main"
+eflood2-hydraulic-calculator = "eflood2_backend.processors.hydraulic_calculator:main"
+eflood2-hydraulic-plotter = "eflood2_backend.processors.hydraulic_plotter:main"
+eflood2-geometry-processor = "eflood2_backend.processors.geometry_processor:main"
+eflood2-section-processor = "eflood2_backend.processors.section_processor:main"
+eflood2-data-exporter = "eflood2_backend.exporters.data_exporter:main"
+eflood2-raster-exporter = "eflood2_backend.exporters.raster_exporter:main"
+eflood2-hydrograph-exporter = "eflood2_backend.exporters.hydrograph_exporter:main"
+
+# HECRAS-HDF integration
+hecras-processor = "eflood2_backend.integrations.hecras_hdf.hecras_processor:main"
