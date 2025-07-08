@@ -6,7 +6,7 @@ use sysinfo::{Pid, System};
 use tauri::AppHandle;
 
 // Constants for better maintainability
-const HECRAS_PROCESSOR_SCRIPT: &str = "HECRAS-HDF/hecras_processor.py";
+const HECRAS_PROCESSOR_SCRIPT: &str = "eflood2_backend/integrations/hecras_hdf/hecras_processor.py";
 const NULL_ARG: &str = "null";
 
 /// System metrics structure for monitoring app performance
@@ -248,7 +248,7 @@ async fn read_hdf_file_info(file_path: String) -> Result<PythonResult, String> {
     if let Err(error) = validate_file_exists(&file_path) {
         return Ok(create_error_result(&error));
     }
-    let result = execute_python_script("hdf_reader.py", vec![file_path, "info".to_string()]);
+    let result = execute_python_script("eflood2_backend/readers/hdf_reader.py", vec![file_path, "info".to_string()]);
     Ok(result)
 }
 
@@ -257,7 +257,7 @@ async fn read_hdf_file_structure(file_path: String) -> Result<PythonResult, Stri
     if let Err(error) = validate_file_exists(&file_path) {
         return Ok(create_error_result(&error));
     }
-    let result = execute_python_script("hdf_reader.py", vec![file_path, "structure".to_string()]);
+    let result = execute_python_script("eflood2_backend/readers/hdf_reader.py", vec![file_path, "structure".to_string()]);
     Ok(result)
 }
 
@@ -266,7 +266,7 @@ async fn find_hydraulic_datasets(file_path: String) -> Result<PythonResult, Stri
     if let Err(error) = validate_file_exists(&file_path) {
         return Ok(create_error_result(&error));
     }
-    let result = execute_python_script("hdf_reader.py", vec![file_path, "hydraulic".to_string()]);
+    let result = execute_python_script("eflood2_backend/readers/hdf_reader.py", vec![file_path, "hydraulic".to_string()]);
     Ok(result)
 }
 
@@ -275,7 +275,7 @@ async fn get_detailed_hdf_metadata(file_path: String) -> Result<PythonResult, St
     if let Err(error) = validate_file_exists(&file_path) {
         return Ok(create_error_result(&error));
     }
-    let result = execute_python_script("hdf_reader.py", vec![file_path, "metadata".to_string()]);
+    let result = execute_python_script("eflood2_backend/readers/hdf_reader.py", vec![file_path, "metadata".to_string()]);
     Ok(result)
 }
 
@@ -302,7 +302,7 @@ async fn convert_to_raster(
     output_dir: String,
 ) -> Result<PythonResult, String> {
     let result = execute_python_script(
-        "raster_converter.py",
+        "eflood2_backend/exporters/raster_exporter.py",
         vec!["convert".to_string(), input_data_path, output_dir],
     );
     Ok(result)
@@ -311,7 +311,7 @@ async fn convert_to_raster(
 #[tauri::command]
 async fn get_raster_info(raster_path: String) -> Result<PythonResult, String> {
     let result =
-        execute_python_script("raster_converter.py", vec!["info".to_string(), raster_path]);
+        execute_python_script("eflood2_backend/exporters/raster_exporter.py", vec!["info".to_string(), raster_path]);
     Ok(result)
 }
 
@@ -323,7 +323,7 @@ async fn create_spline_from_points(points_json: String) -> Result<PythonResult, 
     std::fs::write(temp_file, points_json).map_err(|e| e.to_string())?;
 
     let result = execute_python_script(
-        "geometry_tools.py",
+        "eflood2_backend/processors/geometry_processor.py",
         vec!["spline".to_string(), temp_file.to_string()],
     );
 
@@ -343,7 +343,7 @@ async fn generate_cross_sections(
     std::fs::write(temp_file, axis_json).map_err(|e| e.to_string())?;
 
     let result = execute_python_script(
-        "geometry_tools.py",
+        "eflood2_backend/processors/geometry_processor.py",
         vec![
             "sections".to_string(),
             temp_file.to_string(),
@@ -366,7 +366,7 @@ async fn extract_hdf_dataset(
     dataset_path: String,
 ) -> Result<PythonResult, String> {
     let result = execute_python_script(
-        "hdf_data_extractor.py",
+        "eflood2_backend/readers/data_extractor.py",
         vec![file_path, "extract".to_string(), dataset_path],
     );
     Ok(result)
@@ -378,7 +378,7 @@ async fn create_time_series_plot(
     dataset_path: String,
 ) -> Result<PythonResult, String> {
     let result = execute_python_script(
-        "hdf_data_extractor.py",
+        "eflood2_backend/readers/data_extractor.py",
         vec![file_path, "plot".to_string(), dataset_path],
     );
     Ok(result)
@@ -390,7 +390,7 @@ async fn create_hydrograph(
     dataset_path: String,
 ) -> Result<PythonResult, String> {
     let result = execute_python_script(
-        "hdf_data_extractor.py",
+        "eflood2_backend/readers/data_extractor.py",
         vec![file_path, "hydrograph".to_string(), dataset_path],
     );
     Ok(result)
@@ -421,7 +421,7 @@ async fn export_hdf_to_csv(
         Some(path) => {
             let path_str = path.to_string();
             let result = execute_python_script(
-                "hdf_data_extractor.py",
+                "eflood2_backend/readers/data_extractor.py",
                 vec![file_path, "export_csv".to_string(), dataset_path, path_str],
             );
             Ok(result)
@@ -462,7 +462,7 @@ async fn export_hdf_to_json(
         Some(path) => {
             let path_str = path.to_string();
             let result = execute_python_script(
-                "hdf_data_extractor.py",
+                "eflood2_backend/readers/data_extractor.py",
                 vec![file_path, "export_json".to_string(), dataset_path, path_str],
             );
             Ok(result)
@@ -543,7 +543,7 @@ async fn process_pyhmt2d(
         }
     }
 
-    let result = execute_python_script("HECRAS-HDF/hecras_processor.py", args);
+    let result = execute_python_script("eflood2_backend/integrations/hecras_hdf/hecras_processor.py", args);
     Ok(result)
 }
 
@@ -664,7 +664,7 @@ async fn get_vtk_export_info(
 #[tauri::command]
 async fn extract_boundary_conditions(hdf_file_path: String) -> Result<PythonResult, String> {
     let result = execute_python_script(
-        "enhanced_boundary_conditions_reader.py",
+        "eflood2_backend/readers/boundary_reader.py",
         vec![hdf_file_path],
     );
     Ok(result)
@@ -690,7 +690,7 @@ async fn export_hydrograph_data(
         args.push(bc);
     }
 
-    let result = execute_python_script("hydrograph_exporter.py", args);
+    let result = execute_python_script("eflood2_backend/exporters/hydrograph_exporter.py", args);
     Ok(result)
 }
 
@@ -757,6 +757,23 @@ async fn get_time_series_data(
             mesh_name,
             variable,
         ],
+    );
+    Ok(result)
+}
+
+// Comando para análisis completo de HDF usando el backend commander
+#[tauri::command]
+async fn analyze_hdf_complete(
+    hdf_file_path: String,
+) -> Result<PythonResult, String> {
+    if let Err(error) = validate_file_exists(&hdf_file_path) {
+        return Ok(create_error_result(&error));
+    }
+
+    // Ejecutar el análisis completo optimizado para frontend
+    let result = execute_python_script(
+        "eflood2_backend/scripts/hdf_complete_analysis.py",
+        vec![hdf_file_path],
     );
     Ok(result)
 }
@@ -901,6 +918,7 @@ pub fn run() {
             get_manning_values_enhanced,
             export_vtk_enhanced,
             get_time_series_data,
+            analyze_hdf_complete,
             create_profile_py_hmt2_d,
             export_to_vtk_py_hmt2_d,
             get_vtk_export_info,
