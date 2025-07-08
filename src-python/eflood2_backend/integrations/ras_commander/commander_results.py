@@ -232,6 +232,175 @@ class CommanderResultsProcessor:
 
     @ras_commander_required
     @handle_ras_exceptions
+    def get_manning_values_analysis(self) -> Dict[str, Any]:
+        """
+        Extrae y analiza valores de Manning del archivo HDF.
+
+        Returns:
+            Dict con análisis de valores de Manning
+        """
+        if not self.validation_result["success"]:
+            return self.validation_result
+
+        try:
+            # Usar el lector de Manning existente como fallback
+            from ...readers.manning_reader import ManningReader
+
+            manning_reader = ManningReader(self.hdf_file_path)
+            manning_result = manning_reader.extract_manning_values()
+
+            if manning_result.get("success", False):
+                manning_data = manning_result.get("manning_data", {})
+
+                # Extraer valores base y de calibración
+                table_data = manning_data.get("table_data", [])
+                base_values = []
+                calibration_values = []
+
+                for row in table_data:
+                    if len(row) >= 3:
+                        try:
+                            manning_value = float(row[2])
+                            # Clasificar como base o calibración basado en el valor
+                            if manning_value <= 0.05:  # Valores típicos de calibración
+                                calibration_values.append(manning_value)
+                            else:
+                                base_values.append(manning_value)
+                        except (ValueError, IndexError):
+                            continue
+
+                logger.info(f"Valores de Manning extraídos: {len(base_values)} base, {len(calibration_values)} calibración")
+
+                return create_result_dict(
+                    success=True,
+                    data={
+                        "total_manning_zones": manning_data.get("total_zones", 0),
+                        "base_manning_values": base_values,
+                        "calibration_manning_values": calibration_values,
+                        "table_data": table_data,
+                        "formatted_table": manning_data.get("formatted_table", ""),
+                        "analysis_timestamp": datetime.now().isoformat(),
+                    },
+                    message=f"Análisis de Manning completado: {len(base_values + calibration_values)} valores",
+                )
+            else:
+                return create_result_dict(
+                    success=False,
+                    error=f"Error extrayendo valores de Manning: {manning_result.get('error', 'Error desconocido')}",
+                )
+
+        except Exception as e:
+            logger.error(f"Error en análisis de Manning: {str(e)}")
+            return create_result_dict(
+                success=False,
+                error=f"Error en análisis de Manning: {str(e)}",
+            )
+
+    @ras_commander_required
+    @handle_ras_exceptions
+    def get_hydrograph_data(self) -> Dict[str, Any]:
+        """
+        Extrae datos de hidrogramas del archivo HDF.
+
+        Returns:
+            Dict con datos de hidrogramas
+        """
+        if not self.validation_result["success"]:
+            return self.validation_result
+
+        try:
+            # Obtener lista de mallas disponibles
+            mesh_data = HdfMesh.get_mesh_areas(self.hdf_file_path)
+
+            if mesh_data is None or (hasattr(mesh_data, '__len__') and len(mesh_data) == 0):
+                return create_result_dict(
+                    success=False,
+                    error="No se encontraron mallas en el archivo HDF",
+                )
+
+            # Usar la primera malla disponible
+            if isinstance(mesh_data, list):
+                mesh_name = mesh_data[0]
+            elif isinstance(mesh_data, dict):
+                mesh_name = list(mesh_data.keys())[0]
+            elif hasattr(mesh_data, 'iloc') and len(mesh_data) > 0:
+                # Es un DataFrame, extraer el nombre de la primera fila
+                mesh_name = mesh_data.iloc[0]['mesh_name'] if 'mesh_name' in mesh_data.columns else str(mesh_data.iloc[0, 0])
+            else:
+                mesh_name = str(mesh_data)
+
+            logger.info(f"Intentando extraer hidrograma para malla: {mesh_name}")
+
+            # Obtener datos de series temporales
+            timeseries_data = HdfResultsMesh.get_mesh_timeseries(
+                self.hdf_file_path, mesh_name, "Water Surface"
+            )
+
+            if timeseries_data is None or (hasattr(timeseries_data, 'empty') and timeseries_data.empty):
+                return create_result_dict(
+                    success=False,
+                    error=f"No se encontraron datos de series temporales para {mesh_name}",
+                )
+
+            # Procesar datos de hidrograma
+            time_series = []
+            flow_data = []
+
+            # Manejar diferentes tipos de datos (DataFrame, DataArray, etc.)
+            if hasattr(timeseries_data, 'to_dataframe'):
+                # Es un xarray DataArray, convertir a DataFrame
+                if not hasattr(timeseries_data, 'name') or timeseries_data.name is None:
+                    timeseries_data.name = 'water_surface'
+                df = timeseries_data.to_dataframe()
+                if hasattr(df, 'index'):
+                    time_series = df.index.tolist()
+                numeric_cols = df.select_dtypes(include=[np.number]).columns
+                if len(numeric_cols) > 0:
+                    flow_data = df[numeric_cols[0]].tolist()
+            elif hasattr(timeseries_data, 'index'):
+                # Es un DataFrame de pandas
+                time_series = timeseries_data.index.tolist()
+                numeric_cols = timeseries_data.select_dtypes(include=[np.number]).columns
+                if len(numeric_cols) > 0:
+                    flow_data = timeseries_data[numeric_cols[0]].tolist()
+            elif hasattr(timeseries_data, 'values'):
+                # Es un array numpy o similar
+                flow_data = timeseries_data.values.flatten().tolist()
+                time_series = list(range(len(flow_data)))
+
+            logger.info(f"Hidrograma extraído: {len(time_series)} puntos temporales, {len(flow_data)} datos de flujo")
+
+            # Obtener información de columnas de manera segura
+            columns_info = []
+            if hasattr(timeseries_data, 'columns'):
+                columns_info = list(timeseries_data.columns)
+            elif hasattr(timeseries_data, 'name') and timeseries_data.name:
+                columns_info = [timeseries_data.name]
+            elif hasattr(timeseries_data, 'dims'):
+                columns_info = list(timeseries_data.dims)
+
+            return create_result_dict(
+                success=True,
+                data={
+                    "mesh_name": mesh_name,
+                    "time_series": time_series,
+                    "flow_data": flow_data,
+                    "data_shape": timeseries_data.shape if hasattr(timeseries_data, 'shape') else len(flow_data),
+                    "columns": columns_info,
+                    "analysis_timestamp": datetime.now().isoformat(),
+                },
+                message=f"Hidrograma extraído exitosamente: {len(time_series)} puntos",
+            )
+
+        except Exception as e:
+            logger.error(f"Error extrayendo hidrogramas: {str(e)}")
+            return create_result_dict(
+                success=False,
+                error=f"Error extrayendo hidrogramas: {str(e)}",
+            )
+
+    @ras_commander_required
+    @handle_ras_exceptions
     def export_results_summary(self, output_path: str) -> Dict[str, Any]:
         """
         Exporta un resumen completo de resultados a archivo.
