@@ -677,3 +677,29 @@ html {
     display: none;
   }
 }
+
+/* ===========================================
+   SCROLLBAR PERSONALIZADO
+   =========================================== */
+
+/* Webkit browsers */
+::-webkit-scrollbar {
+  width: 10px;
+  background: #131414; /* mismo color que el fondo de la app */
+}
+::-webkit-scrollbar-thumb {
+  background: #232525; /* color del pulgar del scrollbar */
+  border-radius: 8px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #353737;
+}
+::-webkit-scrollbar-corner {
+  background: #131414;
+}
+
+/* Firefox */
+html {
+  scrollbar-color: #232525 #131414;
+  scrollbar-width: thin;
+}

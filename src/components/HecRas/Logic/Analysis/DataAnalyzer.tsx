@@ -32,6 +32,7 @@ import { Button } from '@/components/ui/Button';
 import { DotFlow, DotFlowProps } from '@/components/ui/dot-flow';
 import { BoundaryConditionsViewer } from './BoundaryConditionsViewer';
 import { SimpleManningTable } from './SimpleManningTable';
+import CompleteDataViewer from './CompleteDataViewer';
 
 interface DataAnalyzerProps {
   state: HecRasState;
@@ -263,23 +264,34 @@ export const DataAnalyzer: React.FC<DataAnalyzerProps> = ({
         filePath: state.selectedHDFFile,
       });
 
-      // Paso 2: Leer estructura del archivo
-      setAnalysisStep('Leyendo estructura del archivo...');
+      // Paso 2: Análisis completo con backend commander
+      setAnalysisStep('Ejecutando análisis completo con RAS Commander...');
       setAnalysisProgress(15);
+
+      console.log('🚀 Iniciando análisis completo de:', state.selectedHDFFile);
+      const completeAnalysis = await invoke('analyze_hdf_complete', {
+        hdfFilePath: state.selectedHDFFile,
+      });
+
+      console.log('📊 Resultado del análisis completo:', completeAnalysis);
+
+      // Paso 3: Leer estructura del archivo
+      setAnalysisStep('Leyendo estructura del archivo...');
+      setAnalysisProgress(25);
 
       const fileStructure = await invoke('read_hdf_file_structure', {
         filePath: state.selectedHDFFile,
       });
 
-      // Paso 2: Obtener metadatos detallados
+      // Paso 4: Obtener metadatos detallados
       setAnalysisStep('Extrayendo metadatos detallados...');
-      setAnalysisProgress(30);
+      setAnalysisProgress(35);
 
       const detailedMetadata = await invoke('get_detailed_hdf_metadata', {
         filePath: state.selectedHDFFile,
       });
 
-      // Paso 3: Procesar datos HEC-RAS con pyHMT2D
+      // Paso 5: Procesar datos HEC-RAS con pyHMT2D
       setAnalysisStep('Procesando datos con pyHMT2D...');
       setAnalysisProgress(50);
 
@@ -288,7 +300,7 @@ export const DataAnalyzer: React.FC<DataAnalyzerProps> = ({
         terrainFilePath: state.selectedTerrainFile,
       });
 
-      // Paso 4: Extraer datasets hidráulicos
+      // Paso 6: Extraer datasets hidráulicos
       setAnalysisStep('Extrayendo datasets hidráulicos...');
       setAnalysisProgress(65);
 
@@ -296,28 +308,28 @@ export const DataAnalyzer: React.FC<DataAnalyzerProps> = ({
         filePath: state.selectedHDFFile,
       });
 
-      // Paso 5: Extraer condiciones de contorno reales
+      // Paso 7: Extraer condiciones de contorno reales
       setAnalysisStep('Extrayendo condiciones de contorno...');
-      setAnalysisProgress(70);
+      setAnalysisProgress(75);
 
       const boundaryConditions = await invoke('extract_boundary_conditions', {
         hdfFilePath: state.selectedHDFFile,
       });
 
-      // Paso 6: Extraer valores de Manning calibrados
-      setAnalysisStep('Extrayendo valores de Manning calibrados...');
-      setAnalysisProgress(80);
+      // Paso 8: Extraer valores de Manning con RAS Commander
+      setAnalysisStep('Extrayendo valores de Manning con RAS Commander...');
+      setAnalysisProgress(85);
 
-      console.log('🌿 Extracting Manning values from:', state.selectedHDFFile);
-      const manningValues = await invoke('extract_manning_values', {
+      console.log('🌿 Extracting Manning values with commander from:', state.selectedHDFFile);
+      const manningValues = await invoke('get_manning_values_enhanced', {
         hdfFilePath: state.selectedHDFFile,
         terrainFilePath: state.selectedTerrainFile,
       });
       console.log('🌿 Manning extraction result:', manningValues);
 
-      // Paso 4: Generar hidrograma desde condiciones de contorno
+      // Paso 9: Generar hidrograma desde condiciones de contorno
       setAnalysisStep('Generando hidrograma...');
-      setAnalysisProgress(90);
+      setAnalysisProgress(95);
 
       const hydrographData = await invoke('create_hydrograph_py_hmt2_d', {
         hdfFilePath: state.selectedHDFFile,
@@ -329,13 +341,14 @@ export const DataAnalyzer: React.FC<DataAnalyzerProps> = ({
       setAnalysisStep('Finalizando análisis...');
       setAnalysisProgress(100);
 
-      // Actualizar estado con resultados reales
+      // Actualizar estado con resultados reales incluyendo datos de RAS Commander
       updateState({
         hdfData: fileStructure,
         hydrographData: hydrographData,
         fileMetadata: fileInfo,
         boundaryConditions: boundaryConditions,
         manningValues: manningValues,
+        meshInfo: completeAnalysis, // Agregar información de mesh del análisis completo
         isAnalyzing: false,
       });
 
@@ -345,7 +358,8 @@ export const DataAnalyzer: React.FC<DataAnalyzerProps> = ({
         hydraulicDatasets,
         boundaryConditions,
         detailedMetadata,
-        manningValues
+        manningValues,
+        completeAnalysis // Pasar el análisis completo
       );
 
       // Actualizar estado global con los resultados del análisis
@@ -389,7 +403,8 @@ export const DataAnalyzer: React.FC<DataAnalyzerProps> = ({
     _hydraulicDatasets: any,
     boundaryConditions: any,
     detailedMetadata?: any,
-    _manningValues?: any
+    manningValues?: any,
+    completeAnalysis?: any
   ) => {
     try {
       // Parsear datos de estructura del archivo
@@ -404,13 +419,46 @@ export const DataAnalyzer: React.FC<DataAnalyzerProps> = ({
       //     ? JSON.parse(hydraulicDatasets.data)
       //     : {};
 
-      // Usar metadatos detallados si están disponibles
+      // Usar datos del análisis completo de RAS Commander si están disponibles
       let totalDatasets = Object.keys(structureData).length;
       let timeSteps = 0;
       let cellCount = 0;
       let flowAreas = 0;
+      let manningZones = 0;
 
+      // Priorizar datos del análisis completo de RAS Commander
+      if (completeAnalysis && completeAnalysis.success && completeAnalysis.data) {
+        try {
+          const analysisData = typeof completeAnalysis.data === 'string'
+            ? JSON.parse(completeAnalysis.data)
+            : completeAnalysis.data;
+
+          // Extraer información de mesh
+          if (analysisData.geometry_analysis) {
+            flowAreas = analysisData.geometry_analysis.total_areas || 0;
+            cellCount = analysisData.geometry_analysis.mesh_areas?.length || 0;
+          }
+
+          // Extraer información de Manning
+          if (manningValues && manningValues.success) {
+            manningZones = manningValues.zones_found ||
+                          manningValues.data?.total_manning_zones || 0;
+          }
+
+          console.log('🎯 Using RAS Commander analysis data:', {
+            flowAreas,
+            cellCount,
+            manningZones,
+            analysisData
+          });
+        } catch (error) {
+          console.warn('Error parsing complete analysis:', error);
+        }
+      }
+
+      // Fallback a metadatos detallados si no hay datos de RAS Commander
       if (
+        (flowAreas === 0 || cellCount === 0) &&
         detailedMetadata &&
         detailedMetadata.success &&
         detailedMetadata.data
@@ -418,9 +466,9 @@ export const DataAnalyzer: React.FC<DataAnalyzerProps> = ({
         try {
           const metadata = JSON.parse(detailedMetadata.data);
           totalDatasets = metadata.total_datasets || totalDatasets;
-          timeSteps = metadata.time_steps || 0;
-          cellCount = metadata.cell_count || 0;
-          flowAreas = metadata.flow_areas || 0;
+          timeSteps = metadata.time_steps || timeSteps;
+          cellCount = cellCount || metadata.cell_count || 0;
+          flowAreas = flowAreas || metadata.flow_areas || 0;
         } catch (error) {
           console.warn('Error parsing detailed metadata:', error);
         }
@@ -488,6 +536,7 @@ export const DataAnalyzer: React.FC<DataAnalyzerProps> = ({
         flowAreas: flowAreas,
         boundaryConditions: boundaryConditionsCount,
         cellCount: cellCount,
+        manningZones: manningZones, // Agregar zonas de Manning
       };
     } catch (error) {
       console.error(
@@ -501,6 +550,7 @@ export const DataAnalyzer: React.FC<DataAnalyzerProps> = ({
         flowAreas: 0,
         boundaryConditions: 0,
         cellCount: 0,
+        manningZones: 0,
       };
     }
   };
@@ -833,20 +883,19 @@ export const DataAnalyzer: React.FC<DataAnalyzerProps> = ({
         </motion.div>
       )}
 
-      {/* Visualizadores de datos después del análisis */}
+      {/* Visualizador completo de datos después del análisis */}
       {state.hdfData && !state.isAnalyzing && (
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           className='space-y-8'
         >
-          {/* Visualizador de Condiciones de Contorno */}
-          <div>
-            <BoundaryConditionsViewer state={state} />
-          </div>
+          {/* Visualizador Completo de Datos */}
+          <CompleteDataViewer state={state} />
 
-          {/* Tabla Simple de Valores de Manning */}
-          <div>
+          {/* Visualizadores individuales (opcionales) */}
+          <div className='grid grid-cols-1 lg:grid-cols-2 gap-6'>
+            <BoundaryConditionsViewer state={state} />
             <SimpleManningTable state={state} />
           </div>
         </motion.div>

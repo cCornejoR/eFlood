@@ -94,10 +94,20 @@ export const ManningAnalysisSection: React.FC<ManningAnalysisSectionProps> = ({
   };
 
   // 📊 Datos reales de Manning del estado
-  const manningZones = state.manningValues?.zones || [];
+  // El backend devuelve datos en existing_method.manning_data.manning_zones
+  const manningData = state.manningValues?.existing_method?.manning_data;
+  const manningZones: ManningZone[] = manningData?.manning_zones ? Object.values(manningData.manning_zones) as ManningZone[] : [];
+
+  // Debug logging para verificar la estructura de datos
+  console.log('🌿 ManningAnalysisSection Debug:', {
+    manningValues: state.manningValues,
+    manningData,
+    manningZones,
+    totalZones: manningData?.total_zones,
+  });
 
   return (
-    <div className='flex-1 overflow-auto p-6 pb-24 space-y-6'>
+    <div className='h-full p-6 pb-8 pt-6 space-y-6'>
       {/* 📋 Header de la sección */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}

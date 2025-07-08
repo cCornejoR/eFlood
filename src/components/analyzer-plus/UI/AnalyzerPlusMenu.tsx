@@ -134,7 +134,7 @@ export const AnalyzerPlusMenu: React.FC<AnalyzerPlusMenuProps> = ({
   onNavigateHome,
 }) => {
   return (
-    <div className='flex justify-center w-full px-4 py-2'>
+    <div className='sticky top-0 z-50 flex justify-center w-full px-4 py-2 bg-[#131414]/95 backdrop-blur-sm border-b border-white/5'>
       <motion.nav
         className='p-1.5 sm:p-2 rounded-xl sm:rounded-2xl bg-gradient-to-b from-background/80 to-background/40 backdrop-blur-lg border border-[#3a3a3c] shadow-lg relative overflow-hidden inline-flex'
         initial='initial'

@@ -119,7 +119,7 @@ export const ExportManagerSection: React.FC<ExportManagerSectionProps> = ({
   };
 
   return (
-    <div className='flex-1 overflow-auto p-6 pb-24 space-y-6'>
+    <div className='h-full p-6 pb-8 pt-6 space-y-6'>
       {/* 📋 Header de la sección */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}

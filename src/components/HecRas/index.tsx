@@ -32,6 +32,7 @@ export interface HecRasState {
   hydrographData: any;
   boundaryConditions: any; // Agregar condiciones de contorno reales
   manningValues: any; // Agregar valores de Manning calibrados
+  meshInfo: any; // Agregar información de malla
   analysisSubTab: 'load' | 'analyze' | 'hydrograph' | 'export'; // Agregar estado del sub-tab
   analysisResults: {
     totalDatasets: number;
@@ -39,6 +40,7 @@ export interface HecRasState {
     flowAreas: number;
     boundaryConditions: number;
     cellCount: number;
+    manningZones: number;
   } | null; // Agregar resultados del análisis al estado global
 }
 
@@ -72,6 +74,7 @@ export const HecRas: React.FC<HecRasProps> = ({
     hydrographData: null,
     boundaryConditions: null, // Inicializar condiciones de contorno
     manningValues: null, // Inicializar valores de Manning
+    meshInfo: null, // Inicializar información de malla
     analysisSubTab: 'load', // Inicializar el sub-tab
     analysisResults: null, // Inicializar resultados del análisis
   });
